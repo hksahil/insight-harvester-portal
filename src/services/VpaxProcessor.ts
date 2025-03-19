@@ -20,17 +20,36 @@ export interface TableData {
 export interface ColumnData {
   TableName: string;
   ColumnName: string;
+  FullColumnName?: string;
   DataType: string;
+  ColumnType?: string;
   IsHidden: boolean;
-  Format?: string;
+  Encoding?: string;
+  DisplayFolder?: string;
+  Description?: string;
+  FormatString?: string;
+  IsAvailableInMDX?: boolean;
+  IsKey?: boolean;
+  IsUnique?: boolean;
+  IsRowNumber?: boolean;
+  DictionarySize?: number;
+  DataSize?: number;
+  TotalSize?: number;
+  IsReferenced?: boolean;
+  IsNullable?: boolean;
+  ColumnExpression?: string;
   [key: string]: any;
 }
 
 export interface MeasureData {
   MeasureName: string;
   TableName: string;
-  DataType: string;
+  FullMeasureName?: string;
   MeasureExpression?: string;
+  DisplayFolder?: string;
+  Description?: string;
+  DataType: string;
+  FormatString?: string;
   [key: string]: any;
 }
 
@@ -41,8 +60,21 @@ export interface ExpressionData {
 
 export interface Relationship {
   FromTableName: string;
+  FromFullColumnName?: string;
+  FromCardinalityType?: string;
   ToTableName: string;
-  cardinality: string;
+  ToFullColumnName?: string;
+  ToCardinalityType?: string;
+  JoinOnDateBehavior?: string;
+  CrossFilteringBehavior?: string;
+  RelationshipType?: string;
+  IsActive?: boolean;
+  SecurityFilteringBehavior?: string;
+  UsedSizeFrom?: number;
+  UsedSize?: number;
+  MissingKeys?: number;
+  InvalidRows?: number;
+  cardinality?: string;
   FromColumn?: string;
   ToColumn?: string;
   [key: string]: any;
@@ -257,24 +289,56 @@ function processDaxVpaView(data: any): { daxTableData: Record<string, any>; colu
   const columnData: ColumnData[] = (data.Columns || []).map((column: any) => ({
     TableName: column.TableName || "Unknown",
     ColumnName: column.ColumnName || "Unknown",
+    FullColumnName: column.FullColumnName || `${column.TableName || "Unknown"}[${column.ColumnName || "Unknown"}]`,
     DataType: column.DataType || "Unknown",
+    ColumnType: column.ColumnType || "Unknown",
     IsHidden: column.IsHidden || false,
-    Format: column.Format || "None"
+    Encoding: column.Encoding || "Unknown",
+    DisplayFolder: column.DisplayFolder || "",
+    Description: column.Description || "",
+    FormatString: column.FormatString || "",
+    IsAvailableInMDX: column.IsAvailableInMDX || false,
+    IsKey: column.IsKey || false,
+    IsUnique: column.IsUnique || false,
+    IsRowNumber: column.IsRowNumber || false,
+    DictionarySize: column.DictionarySize || 0,
+    DataSize: column.DataSize || 0,
+    TotalSize: column.TotalSize || 0,
+    IsReferenced: column.IsReferenced || false,
+    IsNullable: column.IsNullable || false,
+    ColumnExpression: column.ColumnExpression || ""
   }));
   
   const measureData: MeasureData[] = (data.Measures || []).map((measure: any) => ({
     MeasureName: measure.MeasureName || "Unknown",
     TableName: measure.TableName || "Unknown",
+    FullMeasureName: measure.FullMeasureName || `${measure.TableName || "Unknown"}[${measure.MeasureName || "Unknown"}]`,
+    MeasureExpression: measure.MeasureExpression || "",
+    DisplayFolder: measure.DisplayFolder || "",
+    Description: measure.Description || "",
     DataType: measure.DataType || "Unknown",
-    MeasureExpression: measure.MeasureExpression || ""
+    FormatString: measure.FormatString || ""
   }));
   
   const relationships: Relationship[] = (data.Relationships || []).map((rel: any) => ({
     FromTableName: rel.FromTableName || "Unknown",
+    FromFullColumnName: rel.FromFullColumnName || "",
+    FromCardinalityType: rel.FromCardinalityType || "Unknown",
     ToTableName: rel.ToTableName || "Unknown",
+    ToFullColumnName: rel.ToFullColumnName || "",
+    ToCardinalityType: rel.ToCardinalityType || "Unknown",
+    JoinOnDateBehavior: rel.JoinOnDateBehavior || "Unknown",
+    CrossFilteringBehavior: rel.CrossFilteringBehavior || "Unknown",
+    RelationshipType: rel.RelationshipType || "Unknown",
+    IsActive: rel.IsActive || false,
+    SecurityFilteringBehavior: rel.SecurityFilteringBehavior || "Unknown",
+    UsedSizeFrom: rel.UsedSizeFrom || 0,
+    UsedSize: rel.UsedSize || 0,
+    MissingKeys: rel.MissingKeys || 0,
+    InvalidRows: rel.InvalidRows || 0,
     cardinality: rel.cardinality || "Unknown",
-    FromColumn: rel.FromColumn || "Unknown",
-    ToColumn: rel.ToColumn || "Unknown"
+    FromColumn: rel.FromColumn || rel.FromFullColumnName?.split('[')[1]?.replace(']', '') || "Unknown",
+    ToColumn: rel.ToColumn || rel.ToFullColumnName?.split('[')[1]?.replace(']', '') || "Unknown"
   }));
   
   return { daxTableData, columnData, measureData, relationships };

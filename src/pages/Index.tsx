@@ -7,6 +7,7 @@ import ModelMetadataCard from "@/components/ModelMetadataCard";
 import RelationshipVisualizer from "@/components/RelationshipVisualizer";
 import RelationshipFlowVisualizer from "@/components/RelationshipFlowVisualizer";
 import DataTab from "@/components/DataTab";
+import RelationshipsTab from "@/components/RelationshipsTab";
 import ExpressionDisplay from "@/components/ExpressionDisplay";
 import AskGPT from "@/components/AskGPT";
 import { toast } from 'sonner';
@@ -52,6 +53,11 @@ const Index = () => {
         content: <RelationshipFlowVisualizer relationships={processedData.relationships} />,
       },
       {
+        id: 'relationships',
+        label: 'Relationships',
+        content: <RelationshipsTab relationships={processedData.relationships} />,
+      },
+      {
         id: 'tables-metadata',
         label: 'Tables',
         content: <DataTab data={processedData.tableData} title="Tables Metadata" filterColumns={["Mode", "Is Hidden"]} />,
@@ -59,12 +65,23 @@ const Index = () => {
       {
         id: 'columns-metadata',
         label: 'Columns',
-        content: <DataTab data={processedData.columnData} title="Columns Metadata" filterColumns={["TableName", "DataType", "IsHidden"]} />,
+        content: <DataTab 
+          data={processedData.columnData} 
+          title="Columns Metadata" 
+          filterColumns={["TableName", "DataType", "IsHidden"]} 
+          enableColumnSelection={true}
+        />,
       },
       {
         id: 'measures-metadata',
         label: 'Measures',
-        content: <DataTab data={processedData.measureData} title="Measures Metadata" filterColumns={["TableName", "DataType"]} searchColumn="MeasureExpression" />,
+        content: <DataTab 
+          data={processedData.measureData} 
+          title="Measures Metadata" 
+          filterColumns={["TableName", "DataType"]} 
+          searchColumn="MeasureExpression"
+          enableColumnSelection={true}
+        />,
       },
       {
         id: 'expressions',

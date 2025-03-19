@@ -1,6 +1,9 @@
 
-import React, { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, Filter, X } from 'lucide-react';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface DataItem {
   [key: string]: any;
@@ -11,22 +14,39 @@ interface DataTabProps {
   title: string;
   filterColumns?: string[];
   searchColumn?: string;
+  enableColumnSelection?: boolean;
 }
 
 const DataTab: React.FC<DataTabProps> = ({ 
   data, 
   title, 
   filterColumns = [], 
-  searchColumn 
+  searchColumn,
+  enableColumnSelection = false
 }) => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeColumns, setActiveColumns] = useState<string[]>([]);
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
+  
+  // Get all available columns
+  const allColumns = useMemo(() => {
+    if (data.length === 0) return [];
+    return Object.keys(data[0]);
+  }, [data]);
+  
+  // Set active columns on first render
+  useMemo(() => {
+    if (activeColumns.length === 0 && data.length > 0) {
+      setActiveColumns(Object.keys(data[0]));
+    }
+  }, [data, activeColumns.length]);
 
   // Create a filtered version of the data
   const filteredData = data.filter(item => {
     // Apply filters
     for (const [key, value] of Object.entries(filters)) {
-      if (value !== "All" && item[key] !== value) {
+      if (value !== "All" && value !== "" && item[key] !== value) {
         return false;
       }
     }
@@ -54,13 +74,34 @@ const DataTab: React.FC<DataTabProps> = ({
     setSearchQuery("");
   };
 
+  const toggleColumn = (column: string) => {
+    if (activeColumns.includes(column)) {
+      setActiveColumns(activeColumns.filter(col => col !== column));
+    } else {
+      setActiveColumns([...activeColumns, column]);
+    }
+  };
+
   return (
     <div className="animate-fade-in space-y-4 p-2">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-medium">{title}</h2>
-        <button onClick={resetFilters} className="text-sm text-primary hover:underline">
-          Reset filters
-        </button>
+        <div className="flex gap-2">
+          {enableColumnSelection && (
+            <button 
+              onClick={() => setShowColumnSelector(!showColumnSelector)}
+              className="text-sm bg-muted px-2 py-1 rounded hover:bg-muted/80 transition-colors"
+            >
+              {showColumnSelector ? "Hide Columns" : "Show Columns"}
+            </button>
+          )}
+          <button 
+            onClick={resetFilters} 
+            className="text-sm text-primary hover:underline"
+          >
+            Reset filters
+          </button>
+        </div>
       </div>
       
       <div className="flex flex-wrap gap-4 items-center pb-4">
@@ -101,37 +142,57 @@ const DataTab: React.FC<DataTabProps> = ({
         )}
       </div>
       
+      {/* Column selector */}
+      {showColumnSelector && (
+        <div className="bg-muted/30 p-4 rounded-md mb-4 border border-border">
+          <div className="font-medium mb-2">Select Columns to Display</div>
+          <div className="flex flex-wrap gap-2">
+            {allColumns.map(column => (
+              <div key={column} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`col-${column}`}
+                  checked={activeColumns.includes(column)}
+                  onChange={() => toggleColumn(column)}
+                  className="mr-1"
+                />
+                <Label htmlFor={`col-${column}`} className="text-sm">{column}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
       <div className="border border-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <tr>
-                {data.length > 0 && Object.keys(data[0]).map((key) => (
-                  <th key={key} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {data.length > 0 && activeColumns.map((key) => (
+                  <TableHead key={key} className="whitespace-nowrap">
                     {key}
-                  </th>
+                  </TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredData.map((item, index) => (
-                <tr key={index} className="hover:bg-muted/30 transition-colors">
-                  {Object.entries(item).map(([key, value]) => (
-                    <td key={key} className="px-4 py-3 text-sm whitespace-nowrap">
-                      {value?.toString() || "-"}
-                    </td>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredData.length > 0 ? filteredData.map((item, index) => (
+                <TableRow key={index}>
+                  {activeColumns.map((key) => (
+                    <TableCell key={key} className="whitespace-nowrap">
+                      {item[key]?.toString() || "-"}
+                    </TableCell>
                   ))}
-                </tr>
-              ))}
-              {filteredData.length === 0 && (
-                <tr>
-                  <td colSpan={Object.keys(data[0] || {}).length} className="px-4 py-8 text-center text-muted-foreground">
+                </TableRow>
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={activeColumns.length} className="text-center py-6 text-muted-foreground">
                     No data found
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
