@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CalendarDays, Database, Table, FileBox } from 'lucide-react';
+import { CalendarDays, Database, Table, FileBox, Layers, Grid, BarChart3 } from 'lucide-react';
 
 interface ModelMetadataProps {
   metadata: {
@@ -18,6 +18,12 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
         return <CalendarDays className="h-5 w-5 text-primary" />;
       case 'Number of Tables':
         return <Table className="h-5 w-5 text-primary" />;
+      case 'Number of Partitions':
+        return <Layers className="h-5 w-5 text-primary" />;
+      case 'Total Columns':
+        return <Grid className="h-5 w-5 text-primary" />;
+      case 'Total Measures':
+        return <BarChart3 className="h-5 w-5 text-primary" />;
       default:
         return <FileBox className="h-5 w-5 text-primary" />;
     }

@@ -12,10 +12,10 @@ const NavigationBar: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="flex items-center justify-center rounded-full w-8 h-8 bg-secondary text-secondary-foreground transition-all hover:bg-secondary/80">
+          <button className="flex items-center justify-center rounded-full w-8 h-8 bg-primary/10 text-primary transition-all hover:bg-primary/20">
             <BarChart className="h-4 w-4" />
           </button>
-          <button className="flex items-center justify-center rounded-full w-8 h-8 bg-secondary text-secondary-foreground transition-all hover:bg-secondary/80">
+          <button className="flex items-center justify-center rounded-full w-8 h-8 bg-primary/10 text-primary transition-all hover:bg-primary/20">
             <RefreshCw className="h-4 w-4" />
           </button>
         </div>
