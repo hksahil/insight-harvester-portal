@@ -5,6 +5,7 @@ import FileUploader from "@/components/FileUploader";
 import TabsContainer from "@/components/TabsContainer";
 import ModelMetadataCard from "@/components/ModelMetadataCard";
 import RelationshipVisualizer from "@/components/RelationshipVisualizer";
+import RelationshipFlowVisualizer from "@/components/RelationshipFlowVisualizer";
 import DataTab from "@/components/DataTab";
 import ExpressionDisplay from "@/components/ExpressionDisplay";
 import AskGPT from "@/components/AskGPT";
@@ -44,6 +45,11 @@ const Index = () => {
             <RelationshipVisualizer relationships={processedData.relationships} />
           </div>
         ),
+      },
+      {
+        id: 'relationship-flow',
+        label: 'Relationship Visualizer',
+        content: <RelationshipFlowVisualizer relationships={processedData.relationships} />,
       },
       {
         id: 'tables-metadata',
