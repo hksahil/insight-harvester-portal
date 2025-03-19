@@ -99,7 +99,10 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     const modelBimContent = await modelBimFile.async('string');
     let modelBimData;
     try {
-      modelBimData = JSON.parse(modelBimContent);
+      // Remove BOM character if present
+      const cleanedContent = modelBimContent.replace(/^\uFEFF/, '');
+      modelBimData = JSON.parse(cleanedContent);
+      console.log('Model data parsed successfully');
     } catch (e) {
       console.error('Error parsing model data:', e);
       throw new Error('Failed to parse model data. The file might not be in the expected format.');
@@ -148,11 +151,14 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       };
     }
     
-    // Extract and parse DaxVpaView.json file or alternative
+    // Extract and parse DaxVpaView.json file or alternative, also handling BOM
     const daxVpaViewContent = await daxVpaViewFile.async('string');
     let daxVpaViewData;
     try {
-      daxVpaViewData = JSON.parse(daxVpaViewContent);
+      // Remove BOM character if present
+      const cleanedDaxContent = daxVpaViewContent.replace(/^\uFEFF/, '');
+      daxVpaViewData = JSON.parse(cleanedDaxContent);
+      console.log('DAX data parsed successfully');
     } catch (e) {
       console.error('Error parsing DAX data:', e);
       daxVpaViewData = { Tables: [], Columns: [], Measures: [], Relationships: [] };
