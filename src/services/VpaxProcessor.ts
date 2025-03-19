@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 
@@ -63,21 +62,101 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     const zip = new JSZip();
     const zipData = await zip.loadAsync(file);
     
-    // Extract and parse model.bim file
-    const modelBimFile = zipData.file('model.bim');
-    if (!modelBimFile) {
-      throw new Error('model.bim file not found in the VPAX package');
-    }
-    const modelBimContent = await modelBimFile.async('string');
-    const modelBimData = JSON.parse(modelBimContent);
+    // First, list all files in the ZIP to debug
+    const fileNames = Object.keys(zipData.files);
+    console.log('Files in VPAX package:', fileNames);
     
-    // Extract and parse DaxVpaView.json file
-    const daxVpaViewFile = zipData.file('DaxVpaView.json');
-    if (!daxVpaViewFile) {
-      throw new Error('DaxVpaView.json file not found in the VPAX package');
+    // Look for model.bim or similar files with BIM data
+    let modelBimFile = zipData.file('model.bim');
+    
+    // If model.bim not found, try looking for it in subdirectories or with alternative names
+    if (!modelBimFile) {
+      // Look for any .bim file
+      const bimFiles = fileNames.filter(name => name.endsWith('.bim'));
+      if (bimFiles.length > 0) {
+        modelBimFile = zipData.file(bimFiles[0]);
+        console.log(`Found alternative BIM file: ${bimFiles[0]}`);
+      } else {
+        // Look for files that might contain model data
+        const possibleModelFiles = fileNames.filter(name => 
+          name.toLowerCase().includes('model') || 
+          name.toLowerCase().includes('meta') || 
+          name.toLowerCase().includes('schema')
+        );
+        
+        if (possibleModelFiles.length > 0) {
+          modelBimFile = zipData.file(possibleModelFiles[0]);
+          console.log(`Using alternative model file: ${possibleModelFiles[0]}`);
+        }
+      }
     }
+    
+    if (!modelBimFile) {
+      throw new Error('No model.bim or similar file found in the VPAX package. Files found: ' + fileNames.join(', '));
+    }
+    
+    // Extract and parse model.bim file or alternative
+    const modelBimContent = await modelBimFile.async('string');
+    let modelBimData;
+    try {
+      modelBimData = JSON.parse(modelBimContent);
+    } catch (e) {
+      console.error('Error parsing model data:', e);
+      throw new Error('Failed to parse model data. The file might not be in the expected format.');
+    }
+    
+    // Look for DaxVpaView.json or similar
+    let daxVpaViewFile = zipData.file('DaxVpaView.json');
+    
+    // If not found, try alternatives
+    if (!daxVpaViewFile) {
+      const jsonFiles = fileNames.filter(name => 
+        name.endsWith('.json') && 
+        (name.toLowerCase().includes('dax') || 
+         name.toLowerCase().includes('view') || 
+         name.toLowerCase().includes('vpa'))
+      );
+      
+      if (jsonFiles.length > 0) {
+        daxVpaViewFile = zipData.file(jsonFiles[0]);
+        console.log(`Found alternative DAX file: ${jsonFiles[0]}`);
+      } else {
+        // Look for any JSON file if no specific DAX files found
+        const anyJsonFiles = fileNames.filter(name => name.endsWith('.json'));
+        if (anyJsonFiles.length > 0) {
+          daxVpaViewFile = zipData.file(anyJsonFiles[0]);
+          console.log(`Using generic JSON file: ${anyJsonFiles[0]}`);
+        }
+      }
+    }
+    
+    if (!daxVpaViewFile) {
+      // If no DAX file found, create dummy data to allow some functionality
+      console.warn('No DaxVpaView.json or similar file found. Using default values.');
+      
+      // Process model.bim data with defaults for DAX data
+      const { modelInfo, tableData, expressionData } = processModelBim(modelBimData);
+      
+      // Create minimal default data
+      return {
+        modelInfo,
+        tableData,
+        columnData: [],
+        measureData: [],
+        expressionData,
+        relationships: []
+      };
+    }
+    
+    // Extract and parse DaxVpaView.json file or alternative
     const daxVpaViewContent = await daxVpaViewFile.async('string');
-    const daxVpaViewData = JSON.parse(daxVpaViewContent);
+    let daxVpaViewData;
+    try {
+      daxVpaViewData = JSON.parse(daxVpaViewContent);
+    } catch (e) {
+      console.error('Error parsing DAX data:', e);
+      daxVpaViewData = { Tables: [], Columns: [], Measures: [], Relationships: [] };
+    }
     
     // Process model.bim data
     const { modelInfo, tableData, expressionData } = processModelBim(modelBimData);
@@ -104,21 +183,22 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
 }
 
 function processModelBim(data: any): { modelInfo: ModelInfo; tableData: TableData[]; expressionData: ExpressionData[] } {
-  const tables = data.model?.tables || [];
+  // Handle different possible formats of the model data
+  const tables = data.model?.tables || data.tables || data.Tables || [];
   const { numPartitions, maxRowCount, totalTableSize, tableData, expressionData } = calculateMetadata(tables);
   
   const modelInfo: ModelInfo = {
     Attribute: ["Model Name", "Date Modified", "Total Size of Model", "Storage Format", "Number of Tables", "Number of Partitions", "Max Row Count of Biggest Table", "Total Columns", "Total Measures"],
     Value: [
-      data.name || "Unknown",
-      data.lastUpdate || "Unknown",
-      data.model?.estimatedSize || "Not Available",
-      data.model?.defaultPowerBIDataSourceVersion || "Unknown",
+      data.name || data.Name || "Unknown",
+      data.lastUpdate || data.LastUpdate || "Unknown",
+      data.model?.estimatedSize || data.estimatedSize || "Not Available",
+      data.model?.defaultPowerBIDataSourceVersion || data.defaultPowerBIDataSourceVersion || "Unknown",
       tables.length,
       numPartitions,
       maxRowCount,
-      tables.reduce((sum: number, table: any) => sum + (table.columns?.length || 0), 0),
-      tables.reduce((sum: number, table: any) => sum + (table.measures?.length || 0), 0)
+      tables.reduce((sum: number, table: any) => sum + (table.columns?.length || table.Columns?.length || 0), 0),
+      tables.reduce((sum: number, table: any) => sum + (table.measures?.length || table.Measures?.length || 0), 0)
     ]
   };
   
