@@ -94,22 +94,17 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     const zip = new JSZip();
     const zipData = await zip.loadAsync(file);
     
-    // First, list all files in the ZIP to debug
     const fileNames = Object.keys(zipData.files);
     console.log('Files in VPAX package:', fileNames);
     
-    // Look for model.bim or similar files with BIM data
     let modelBimFile = zipData.file('model.bim');
     
-    // If model.bim not found, try looking for it in subdirectories or with alternative names
     if (!modelBimFile) {
-      // Look for any .bim file
       const bimFiles = fileNames.filter(name => name.endsWith('.bim'));
       if (bimFiles.length > 0) {
         modelBimFile = zipData.file(bimFiles[0]);
         console.log(`Found alternative BIM file: ${bimFiles[0]}`);
       } else {
-        // Look for files that might contain model data
         const possibleModelFiles = fileNames.filter(name => 
           name.toLowerCase().includes('model') || 
           name.toLowerCase().includes('meta') || 
@@ -127,11 +122,9 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       throw new Error('No model.bim or similar file found in the VPAX package. Files found: ' + fileNames.join(', '));
     }
     
-    // Extract and parse model.bim file or alternative
     const modelBimContent = await modelBimFile.async('string');
     let modelBimData;
     try {
-      // Remove BOM character if present
       const cleanedContent = modelBimContent.replace(/^\uFEFF/, '');
       modelBimData = JSON.parse(cleanedContent);
       console.log('Model data parsed successfully');
@@ -140,10 +133,8 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       throw new Error('Failed to parse model data. The file might not be in the expected format.');
     }
     
-    // Look for DaxVpaView.json or similar
     let daxVpaViewFile = zipData.file('DaxVpaView.json');
     
-    // If not found, try alternatives
     if (!daxVpaViewFile) {
       const jsonFiles = fileNames.filter(name => 
         name.endsWith('.json') && 
@@ -156,7 +147,6 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
         daxVpaViewFile = zipData.file(jsonFiles[0]);
         console.log(`Found alternative DAX file: ${jsonFiles[0]}`);
       } else {
-        // Look for any JSON file if no specific DAX files found
         const anyJsonFiles = fileNames.filter(name => name.endsWith('.json'));
         if (anyJsonFiles.length > 0) {
           daxVpaViewFile = zipData.file(anyJsonFiles[0]);
@@ -166,13 +156,10 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     }
     
     if (!daxVpaViewFile) {
-      // If no DAX file found, create dummy data to allow some functionality
       console.warn('No DaxVpaView.json or similar file found. Using default values.');
       
-      // Process model.bim data with defaults for DAX data
       const { modelInfo, tableData, expressionData } = processModelBim(modelBimData);
       
-      // Create minimal default data
       return {
         modelInfo,
         tableData,
@@ -183,11 +170,9 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       };
     }
     
-    // Extract and parse DaxVpaView.json file or alternative, also handling BOM
     const daxVpaViewContent = await daxVpaViewFile.async('string');
     let daxVpaViewData;
     try {
-      // Remove BOM character if present
       const cleanedDaxContent = daxVpaViewContent.replace(/^\uFEFF/, '');
       daxVpaViewData = JSON.parse(cleanedDaxContent);
       console.log('DAX data parsed successfully');
@@ -196,13 +181,10 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       daxVpaViewData = { Tables: [], Columns: [], Measures: [], Relationships: [] };
     }
     
-    // Process model.bim data
     const { modelInfo, tableData, expressionData } = processModelBim(modelBimData);
     
-    // Process DaxVpaView.json data
     const { daxTableData, columnData, measureData, relationships } = processDaxVpaView(daxVpaViewData);
     
-    // Merge metadata
     const mergedTableData = mergeMetadata(tableData, daxTableData);
     
     return {
@@ -221,7 +203,6 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
 }
 
 function processModelBim(data: any): { modelInfo: ModelInfo; tableData: TableData[]; expressionData: ExpressionData[] } {
-  // Handle different possible formats of the model data
   const tables = data.model?.tables || data.tables || data.Tables || [];
   const { numPartitions, maxRowCount, totalTableSize, tableData, expressionData } = calculateMetadata(tables);
   
@@ -320,26 +301,34 @@ function processDaxVpaView(data: any): { daxTableData: Record<string, any>; colu
     FormatString: measure.FormatString || ""
   }));
   
-  const relationships: Relationship[] = (data.Relationships || []).map((rel: any) => ({
-    FromTableName: rel.FromTableName || "Unknown",
-    FromFullColumnName: rel.FromFullColumnName || "",
-    FromCardinalityType: rel.FromCardinalityType || "Unknown",
-    ToTableName: rel.ToTableName || "Unknown",
-    ToFullColumnName: rel.ToFullColumnName || "",
-    ToCardinalityType: rel.ToCardinalityType || "Unknown",
-    JoinOnDateBehavior: rel.JoinOnDateBehavior || "Unknown",
-    CrossFilteringBehavior: rel.CrossFilteringBehavior || "Unknown",
-    RelationshipType: rel.RelationshipType || "Unknown",
-    IsActive: rel.IsActive || false,
-    SecurityFilteringBehavior: rel.SecurityFilteringBehavior || "Unknown",
-    UsedSizeFrom: rel.UsedSizeFrom || 0,
-    UsedSize: rel.UsedSize || 0,
-    MissingKeys: rel.MissingKeys || 0,
-    InvalidRows: rel.InvalidRows || 0,
-    cardinality: rel.cardinality || "Unknown",
-    FromColumn: rel.FromColumn || rel.FromFullColumnName?.split('[')[1]?.replace(']', '') || "Unknown",
-    ToColumn: rel.ToColumn || rel.ToFullColumnName?.split('[')[1]?.replace(']', '') || "Unknown"
-  }));
+  const relationships: Relationship[] = (data.Relationships || []).map((rel: any) => {
+    const fromCardinality = mapCardinalityToAcronym(rel.FromCardinalityType);
+    const toCardinality = mapCardinalityToAcronym(rel.ToCardinalityType);
+    const crossFiltering = mapCardinalityToAcronym(rel.CrossFilteringBehavior);
+    
+    const combinedCardinality = `${fromCardinality}-${toCardinality}-${crossFiltering}`;
+    
+    return {
+      FromTableName: rel.FromTableName || "Unknown",
+      FromFullColumnName: rel.FromFullColumnName || "",
+      FromCardinalityType: rel.FromCardinalityType || "Unknown",
+      ToTableName: rel.ToTableName || "Unknown",
+      ToFullColumnName: rel.ToFullColumnName || "",
+      ToCardinalityType: rel.ToCardinalityType || "Unknown",
+      JoinOnDateBehavior: rel.JoinOnDateBehavior || "Unknown",
+      CrossFilteringBehavior: rel.CrossFilteringBehavior || "Unknown",
+      RelationshipType: rel.RelationshipType || "Unknown",
+      IsActive: rel.IsActive || false,
+      SecurityFilteringBehavior: rel.SecurityFilteringBehavior || "Unknown",
+      UsedSizeFrom: rel.UsedSizeFrom || 0,
+      UsedSize: rel.UsedSize || 0,
+      MissingKeys: rel.MissingKeys || 0,
+      InvalidRows: rel.InvalidRows || 0,
+      cardinality: combinedCardinality,
+      FromColumn: rel.FromColumn || rel.FromFullColumnName?.split('[')[1]?.replace(']', '') || "Unknown",
+      ToColumn: rel.ToColumn || rel.ToFullColumnName?.split('[')[1]?.replace(']', '') || "Unknown"
+    };
+  });
   
   return { daxTableData, columnData, measureData, relationships };
 }
@@ -353,4 +342,21 @@ function mergeMetadata(tableData: TableData[], daxTableData: Record<string, any>
       "DAX Table Size": daxInfo.TableSize || "N/A"
     };
   });
+}
+
+function mapCardinalityToAcronym(cardinalityType: string | undefined): string {
+  if (!cardinalityType) return "?";
+  
+  switch (cardinalityType.toLowerCase()) {
+    case "many":
+      return "M";
+    case "one":
+      return "1";
+    case "onedirection":
+    case "one direction":
+    case "single":
+      return "S";
+    default:
+      return cardinalityType.charAt(0).toUpperCase();
+  }
 }

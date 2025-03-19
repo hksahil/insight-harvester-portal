@@ -20,8 +20,7 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
   
   // Get unique cardinality types
   const cardinalityTypes = Array.from(new Set([
-    ...relationships.map(rel => rel.FromCardinalityType),
-    ...relationships.map(rel => rel.ToCardinalityType)
+    ...relationships.map(rel => rel.cardinality)
   ])).filter(Boolean).sort();
   
   // Filter relationships based on selected filters
@@ -35,7 +34,7 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
     
     // Apply cardinality filter
     if (cardinalityFilter && cardinalityFilter !== "All") {
-      if (rel.FromCardinalityType !== cardinalityFilter && rel.ToCardinalityType !== cardinalityFilter) {
+      if (rel.cardinality !== cardinalityFilter) {
         return false;
       }
     }
@@ -109,6 +108,7 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
                 <TableHead>ToTableName</TableHead>
                 <TableHead>ToFullColumnName</TableHead>
                 <TableHead>ToCardinalityType</TableHead>
+                <TableHead>Cardinality</TableHead>
                 <TableHead>JoinOnDateBehavior</TableHead>
                 <TableHead>CrossFilteringBehavior</TableHead>
                 <TableHead>RelationshipType</TableHead>
@@ -129,6 +129,7 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
                   <TableCell>{rel.ToTableName || '-'}</TableCell>
                   <TableCell>{rel.ToFullColumnName || '-'}</TableCell>
                   <TableCell>{rel.ToCardinalityType || '-'}</TableCell>
+                  <TableCell className="font-medium text-primary">{rel.cardinality || '-'}</TableCell>
                   <TableCell>{rel.JoinOnDateBehavior || '-'}</TableCell>
                   <TableCell>{rel.CrossFilteringBehavior || '-'}</TableCell>
                   <TableCell>{rel.RelationshipType || '-'}</TableCell>
@@ -141,7 +142,7 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={15} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={16} className="text-center py-6 text-muted-foreground">
                     No relationships found
                   </TableCell>
                 </TableRow>

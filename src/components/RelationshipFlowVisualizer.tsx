@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo } from 'react';
 import {
   ReactFlow,
@@ -125,6 +124,7 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
           height: 15,
           color: '#707070',
         },
+        label: rel.cardinality,
         data: {
           fromTable: rel.FromTableName,
           toTable: rel.ToTableName,
