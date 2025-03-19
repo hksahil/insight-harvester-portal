@@ -1,14 +1,7 @@
 
 import React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-
-interface Relationship {
-  FromTableName: string;
-  ToTableName: string;
-  cardinality: string;
-  FromColumn?: string;
-  ToColumn?: string;
-}
+import { Relationship } from '@/services/VpaxProcessor';
 
 interface RelationshipVisualizerProps {
   relationships: Relationship[];

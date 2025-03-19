@@ -2,25 +2,7 @@
 import React, { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-
-interface Relationship {
-  FromTableName: string;
-  FromFullColumnName: string;
-  FromCardinalityType: string;
-  ToTableName: string;
-  ToFullColumnName: string;
-  ToCardinalityType: string;
-  JoinOnDateBehavior: string;
-  CrossFilteringBehavior: string;
-  RelationshipType: string;
-  IsActive: boolean;
-  SecurityFilteringBehavior: string;
-  UsedSizeFrom: number;
-  UsedSize: number;
-  MissingKeys: number;
-  InvalidRows: number;
-  [key: string]: any;
-}
+import { Relationship } from '@/services/VpaxProcessor';
 
 interface RelationshipsTabProps {
   relationships: Relationship[];
