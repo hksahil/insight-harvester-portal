@@ -10,6 +10,13 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import UseCaseHelper from './UseCaseHelper';
 
+// Add the necessary type augmentation for jsPDF
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
+
 interface DocumentationTabProps {
   data: ProcessedData;
 }
@@ -122,7 +129,7 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
       data.modelInfo.Value[index]?.toString() || 'N/A'
     ]);
     
-    // @ts-ignore - jspdf-autotable typings
+    // Use autoTable with correct typing
     doc.autoTable({
       startY: 55,
       head: [['Attribute', 'Value']],
@@ -133,7 +140,6 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
     });
     
     // Get the final Y position after the table
-    // @ts-ignore - jspdf-autotable typings
     let finalY = (doc as any).lastAutoTable.finalY || 60;
     
     // Add tables summary
@@ -150,7 +156,7 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         tableHeaders.map(header => row[header]?.toString() || 'N/A')
       );
       
-      // @ts-ignore - jspdf-autotable typings
+      // Use autoTable with correct typing
       doc.autoTable({
         startY: finalY + 5,
         head: [tableHeaders],
@@ -160,7 +166,6 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         margin: { top: 20, right: 20, bottom: 20, left: 20 }
       });
       
-      // @ts-ignore - jspdf-autotable typings
       finalY = (doc as any).lastAutoTable.finalY || finalY;
     }
     
@@ -182,7 +187,7 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         rel.cardinality || 'N/A'
       ]);
       
-      // @ts-ignore - jspdf-autotable typings
+      // Use autoTable with correct typing
       doc.autoTable({
         startY: 25,
         head: [['From Table', 'From Column', '', 'To Table', 'To Column', 'Cardinality']],
@@ -192,7 +197,6 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         margin: { top: 20, right: 20, bottom: 20, left: 20 }
       });
       
-      // @ts-ignore - jspdf-autotable typings
       finalY = (doc as any).lastAutoTable.finalY || 60;
     }
     
