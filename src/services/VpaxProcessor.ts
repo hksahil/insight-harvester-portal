@@ -14,8 +14,6 @@ export interface TableData {
   "Table Size": number;
   "% of Total Size": number;
   "Is Hidden": boolean;
-  "Latest Partition Modified"?: string;
-  "Latest Partition Refreshed"?: string;
   [key: string]: any;
 }
 
@@ -114,12 +112,12 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       }
     }
     
-    const modelBimFile = zipData.file('model.bim');
+    let modelBimFileObj = zipData.file('model.bim');
     
-    if (!modelBimFile) {
+    if (!modelBimFileObj) {
       const bimFiles = fileNames.filter(name => name.endsWith('.bim'));
       if (bimFiles.length > 0) {
-        modelBimFile = zipData.file(bimFiles[0]);
+        modelBimFileObj = zipData.file(bimFiles[0]);
         console.log(`Found alternative BIM file: ${bimFiles[0]}`);
       } else {
         const possibleModelFiles = fileNames.filter(name => 
@@ -129,17 +127,17 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
         );
         
         if (possibleModelFiles.length > 0) {
-          modelBimFile = zipData.file(possibleModelFiles[0]);
+          modelBimFileObj = zipData.file(possibleModelFiles[0]);
           console.log(`Using alternative model file: ${possibleModelFiles[0]}`);
         }
       }
     }
     
-    if (!modelBimFile) {
+    if (!modelBimFileObj) {
       throw new Error('No model.bim or similar file found in the VPAX package. Files found: ' + fileNames.join(', '));
     }
     
-    const modelBimContent = await modelBimFile.async('string');
+    const modelBimContent = await modelBimFileObj.async('string');
     let modelBimData;
     try {
       const cleanedContent = modelBimContent.replace(/^\uFEFF/, '');
@@ -150,9 +148,9 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       throw new Error('Failed to parse model data. The file might not be in the expected format.');
     }
     
-    let daxVpaViewFile = zipData.file('DaxVpaView.json');
+    let daxVpaViewFileObj = zipData.file('DaxVpaView.json');
     
-    if (!daxVpaViewFile) {
+    if (!daxVpaViewFileObj) {
       const jsonFiles = fileNames.filter(name => 
         name.endsWith('.json') && 
         (name.toLowerCase().includes('dax') || 
@@ -161,18 +159,18 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       );
       
       if (jsonFiles.length > 0) {
-        daxVpaViewFile = zipData.file(jsonFiles[0]);
+        daxVpaViewFileObj = zipData.file(jsonFiles[0]);
         console.log(`Found alternative DAX file: ${jsonFiles[0]}`);
       } else {
         const anyJsonFiles = fileNames.filter(name => name.endsWith('.json'));
         if (anyJsonFiles.length > 0) {
-          daxVpaViewFile = zipData.file(anyJsonFiles[0]);
+          daxVpaViewFileObj = zipData.file(anyJsonFiles[0]);
           console.log(`Using generic JSON file: ${anyJsonFiles[0]}`);
         }
       }
     }
     
-    if (!daxVpaViewFile) {
+    if (!daxVpaViewFileObj) {
       console.warn('No DaxVpaView.json or similar file found. Using default values.');
       
       const { modelInfo, tableData, expressionData } = processModelBim(modelBimData, modelName);
@@ -187,7 +185,7 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       };
     }
     
-    const daxVpaViewContent = await daxVpaViewFile.async('string');
+    const daxVpaViewContent = await daxVpaViewFileObj.async('string');
     let daxVpaViewData;
     try {
       const cleanedDaxContent = daxVpaViewContent.replace(/^\uFEFF/, '');
@@ -247,7 +245,7 @@ function processModelBim(data: any, extractedModelName: string): { modelInfo: Mo
       data.model?.estimatedSize || data.estimatedSize || "Not Available",
       tables.length,
       numPartitions,
-      maxRowCount,
+      maxRowCount === 0 ? "Not Available" : maxRowCount,
       tables.reduce((sum: number, table: any) => sum + (table.columns?.length || table.Columns?.length || 0), 0),
       tables.reduce((sum: number, table: any) => sum + (table.measures?.length || table.Measures?.length || 0), 0)
     ]
