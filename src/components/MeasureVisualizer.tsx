@@ -13,13 +13,23 @@ import {
   Connection,
   Handle,
   Position,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowUpRight, Code, Database, Filter, Search } from 'lucide-react';
+import { ArrowUpRight, Code, Database, Eye, EyeOff, Filter, Search } from 'lucide-react';
 import { MeasureData, ColumnData } from '@/services/VpaxProcessor';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import UseCaseHelper from './UseCaseHelper';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import dagre from 'dagre';
 
 interface MeasureVisualizerProps {
   measureData: MeasureData[];
@@ -90,11 +100,58 @@ const nodeTypes = {
   column: ColumnNode,
 };
 
+// Setup the dagre graph
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+// Helper function to layout the graph using dagre
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+  const nodeWidth = 250;
+  const nodeHeight = 120;
+  
+  dagreGraph.setGraph({ rankdir: direction });
+  
+  // Clear the graph before adding nodes
+  dagreGraph.nodes().forEach(n => dagreGraph.removeNode(n));
+  
+  // Add nodes to the graph
+  nodes.forEach(node => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+  
+  // Add edges to the graph
+  edges.forEach(edge => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+  
+  // Calculate the layout using dagre
+  dagre.layout(dagreGraph);
+  
+  // Get the positions from dagre
+  const layoutedNodes = nodes.map(node => {
+    const dagreNode = dagreGraph.node(node.id);
+    
+    // Set the new position from dagre
+    return {
+      ...node,
+      position: {
+        x: dagreNode.x - nodeWidth / 2,
+        y: dagreNode.y - nodeHeight / 2,
+      },
+    };
+  });
+  
+  return { nodes: layoutedNodes, edges };
+};
+
 const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, columnData }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTable, setSelectedTable] = useState<string>('All');
+  const [hideDisconnectedColumns, setHideDisconnectedColumns] = useState(false);
+  const [layoutDirection, setLayoutDirection] = useState('TB');
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const reactFlowInstance = useReactFlow();
 
   // Extract table names for filtering
   const tables = React.useMemo(() => {
@@ -173,6 +230,7 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
   // Generate nodes and edges based on measures and columns
   const generateGraph = useCallback(() => {
     console.log("Generating graph with search term:", searchTerm, "and selected table:", selectedTable);
+    console.log("Hide disconnected columns:", hideDisconnectedColumns);
     
     const filteredMeasures = measureData.filter(measure => {
       const matchesSearch = searchTerm === '' || 
@@ -257,19 +315,24 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       const columnId = `column-${column.TableName}-${column.ColumnName}`;
       const isReferenced = referencedColumnIds.has(columnId);
       
-      // Include the column if it matches search/table filter or if it's referenced by a measure
-      return (matchesSearch && matchesTable) || isReferenced;
+      // Hide disconnected columns if the option is selected
+      if (hideDisconnectedColumns && !isReferenced) {
+        return false;
+      }
+      
+      // Include the column if it matches search/table filter
+      return matchesSearch && matchesTable;
     });
 
     console.log("Final filtered columns:", filteredColumns.length);
     
     // Create nodes for measures with unique IDs
-    const measureNodes: Node[] = filteredMeasures.map((measure, index) => {
+    const measureNodes: Node[] = filteredMeasures.map((measure) => {
       const id = `measure-${measure.TableName}-${measure.MeasureName}`;
       return {
         id,
         type: 'measure',
-        position: { x: 100 + (index % 3) * 320, y: 100 + Math.floor(index / 3) * 220 },
+        position: { x: 0, y: 0 }, // Initial position, will be updated by dagre
         data: {
           id,
           label: measure.MeasureName,
@@ -281,12 +344,12 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     });
 
     // Create nodes for columns with unique IDs
-    const columnNodes: Node[] = filteredColumns.map((column, index) => {
+    const columnNodes: Node[] = filteredColumns.map((column) => {
       const id = `column-${column.TableName}-${column.ColumnName}`;
       return {
         id,
         type: 'column',
-        position: { x: 100 + (index % 3) * 320, y: 500 + Math.floor(index / 3) * 150 },
+        position: { x: 0, y: 0 }, // Initial position, will be updated by dagre
         data: {
           id,
           label: column.ColumnName,
@@ -297,9 +360,6 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       };
     });
 
-    const newNodes = [...measureNodes, ...columnNodes];
-    console.log("Total nodes created:", newNodes.length);
-    
     // Create edges for column-measure dependencies
     const columnEdges: Edge[] = measureToColumnConnections.map(({measureId, columnId}, index) => {
       return {
@@ -313,8 +373,6 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
         style: { stroke: '#000000', strokeWidth: 2 }
       };
     });
-
-    console.log("Column edges created:", columnEdges.length);
     
     // Create edges for measure-measure dependencies
     const measureEdges: Edge[] = measureToMeasureConnections.map(({sourceMeasureId, targetMeasureId}, index) => {
@@ -330,11 +388,44 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       };
     });
 
+    // Combine all nodes and edges
+    const newNodes = [...measureNodes, ...columnNodes];
+    const newEdges = [...columnEdges, ...measureEdges];
+    
+    // Apply layout optimization
+    const { nodes: layoutedNodes } = getLayoutedElements(
+      newNodes,
+      newEdges,
+      layoutDirection
+    );
+    
+    console.log("Total nodes created:", layoutedNodes.length);
+    console.log("Column edges created:", columnEdges.length);
     console.log("Measure edges created:", measureEdges.length);
     
-    setNodes(newNodes);
-    setEdges([...columnEdges, ...measureEdges]);
-  }, [measureData, columnData, searchTerm, selectedTable, extractColumnReferences, findColumnByName, isMeasureReferenced, setNodes, setEdges]);
+    setNodes(layoutedNodes);
+    setEdges(newEdges);
+    
+    // Fit the view after the graph is generated
+    setTimeout(() => {
+      if (reactFlowInstance) {
+        reactFlowInstance.fitView({ padding: 0.2 });
+      }
+    }, 100);
+  }, [
+    measureData, 
+    columnData, 
+    searchTerm, 
+    selectedTable, 
+    hideDisconnectedColumns,
+    layoutDirection,
+    extractColumnReferences, 
+    findColumnByName, 
+    isMeasureReferenced, 
+    setNodes, 
+    setEdges,
+    reactFlowInstance
+  ]);
 
   // Handle connections between nodes
   const onConnect = useCallback(
@@ -351,6 +442,12 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
   useEffect(() => {
     generateGraph();
   }, [generateGraph]);
+
+  // Function to re-layout the graph with a new direction
+  const onChangeLayoutDirection = (newDirection: string) => {
+    setLayoutDirection(newDirection);
+    generateGraph();
+  };
 
   return (
     <div className="animate-fade-in space-y-6 p-2">
@@ -371,17 +468,56 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
         </div>
         
         <div className="w-full sm:w-auto">
-          <select
+          <Select
             value={selectedTable}
-            onChange={(e) => setSelectedTable(e.target.value)}
-            className="h-10 w-full min-w-[150px] rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            onValueChange={setSelectedTable}
           >
-            {tables.map((table) => (
-              <option key={table} value={table}>
-                {table}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select a table" />
+            </SelectTrigger>
+            <SelectContent>
+              {tables.map((table) => (
+                <SelectItem key={table} value={table}>
+                  {table}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="w-full sm:w-auto">
+          <Select
+            value={layoutDirection}
+            onValueChange={onChangeLayoutDirection}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select layout direction" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="TB">Top to Bottom</SelectItem>
+              <SelectItem value="BT">Bottom to Top</SelectItem>
+              <SelectItem value="LR">Left to Right</SelectItem>
+              <SelectItem value="RL">Right to Left</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="hideDisconnected" 
+            checked={hideDisconnectedColumns}
+            onCheckedChange={(checked) => {
+              if (typeof checked === 'boolean') {
+                setHideDisconnectedColumns(checked);
+              }
+            }}
+          />
+          <label
+            htmlFor="hideDisconnected"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Hide disconnected columns
+          </label>
         </div>
         
         <Button 
@@ -407,7 +543,16 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
             attributionPosition="bottom-right"
           >
             <Controls />
-            <MiniMap />
+            <MiniMap 
+              nodeStrokeColor={(n) => {
+                if (n.type === 'measure') return '#7c3aed';
+                return '#10b981';
+              }}
+              nodeColor={(n) => {
+                if (n.type === 'measure') return '#ede9fe';
+                return '#d1fae5';
+              }}
+            />
             <Background color="#aaa" gap={16} />
           </ReactFlow>
         ) : (
@@ -432,6 +577,16 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-black"></div>
           <span className="text-sm">Relationships</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {hideDisconnectedColumns ? (
+            <EyeOff className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          )}
+          <span className="text-sm">
+            {hideDisconnectedColumns ? 'Showing only connected columns' : 'Showing all columns'}
+          </span>
         </div>
       </div>
     </div>
