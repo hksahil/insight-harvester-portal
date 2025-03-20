@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -11,6 +10,7 @@ import RelationshipsTab from "@/components/RelationshipsTab";
 import ExpressionDisplay from "@/components/ExpressionDisplay";
 import AskGPT from "@/components/AskGPT";
 import DocumentationTab from "@/components/DocumentationTab";
+import MeasureVisualizer from "@/components/MeasureVisualizer";
 import Footer from "@/components/Footer";
 import SampleData from "@/components/SampleData";
 import UseCaseHelper from "@/components/UseCaseHelper";
@@ -41,7 +41,6 @@ const Index = () => {
     setIsDataProcessing(true);
     
     try {
-      // This is just a mock sample data
       const sampleData: ProcessedData = {
         modelInfo: {
           Attribute: [
@@ -213,6 +212,19 @@ const Index = () => {
               filterColumns={["TableName", "DataType"]} 
               searchColumn="MeasureExpression"
               enableColumnSelection={true}
+            />
+          </div>
+        ),
+      },
+      {
+        id: 'measure-visualizer',
+        label: 'Measure Visualizer',
+        content: (
+          <div className="space-y-6">
+            <UseCaseHelper type="measures" />
+            <MeasureVisualizer 
+              measureData={processedData.measureData}
+              columnData={processedData.columnData}
             />
           </div>
         ),
