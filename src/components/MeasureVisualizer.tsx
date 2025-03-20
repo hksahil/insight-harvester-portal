@@ -11,6 +11,8 @@ import {
   Node,
   Edge,
   Connection,
+  Handle,
+  Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { ArrowUpRight, Code, Database, Filter, Search } from 'lucide-react';
@@ -27,6 +29,12 @@ interface MeasureVisualizerProps {
 // Custom node for measures
 const MeasureNode = ({ data }: { data: any }) => (
   <div className="p-3 rounded-lg border border-primary/50 bg-primary/5 w-full max-w-xs">
+    <Handle
+      type="target"
+      position={Position.Left}
+      className="w-3 h-3 bg-black rounded-full"
+      id={`measure-target-${data.id}`}
+    />
     <div className="flex items-center gap-2 font-medium text-sm mb-2">
       <ArrowUpRight className="h-4 w-4 text-primary" />
       <span>{data.label}</span>
@@ -39,12 +47,24 @@ const MeasureNode = ({ data }: { data: any }) => (
     <div className="text-xs text-muted-foreground mt-2">
       Table: {data.tableName}
     </div>
+    <Handle
+      type="source"
+      position={Position.Right}
+      className="w-3 h-3 bg-black rounded-full"
+      id={`measure-source-${data.id}`}
+    />
   </div>
 );
 
 // Custom node for columns
 const ColumnNode = ({ data }: { data: any }) => (
   <div className="p-3 rounded-lg border border-green-500/50 bg-green-500/5 w-full max-w-xs">
+    <Handle
+      type="target"
+      position={Position.Left}
+      className="w-3 h-3 bg-black rounded-full"
+      id={`column-target-${data.id}`}
+    />
     <div className="flex items-center gap-2 font-medium text-sm">
       <Database className="h-4 w-4 text-green-600" />
       <span>{data.label}</span>
@@ -55,6 +75,12 @@ const ColumnNode = ({ data }: { data: any }) => (
     <div className="text-xs text-muted-foreground">
       Type: {data.dataType}
     </div>
+    <Handle
+      type="source"
+      position={Position.Right}
+      className="w-3 h-3 bg-black rounded-full"
+      id={`column-source-${data.id}`}
+    />
   </div>
 );
 
@@ -86,17 +112,17 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     return Array.from(allTables);
   }, [measureData, columnData]);
 
-  // Extract column references from a measure expression
-  // This is a much more direct approach focusing on square bracket extraction
+  // Improved function to extract column references from a measure expression
   const extractColumnReferences = useCallback((expression: string): string[] => {
     if (!expression) return [];
     
-    // Pattern: Look for anything within square brackets [...]
+    // Pattern: specifically look for Table[Column] patterns
     const columnRefs: string[] = [];
     const regex = /\[(.*?)\]/g;
     let match;
     
     while ((match = regex.exec(expression)) !== null) {
+      // Get whatever is inside the brackets
       const columnName = match[1].trim();
       if (columnName) {
         columnRefs.push(columnName);
@@ -107,21 +133,19 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     return columnRefs;
   }, []);
 
-  // Helper function to find a column by name (checking both FullColumnName and ColumnName)
-  const findColumnByName = useCallback((columnName: string) => {
-    // Try to find an exact match first
+  // Improved helper function to find a column by name with exact matching
+  const findColumnByName = useCallback((columnName: string, tableName?: string) => {
+    // First try exact column name match within the table
     let column = columnData.find(col => 
-      col.ColumnName === columnName || 
-      col.FullColumnName === columnName ||
-      col.FullColumnName === `[${columnName}]` ||
-      col.FullColumnName?.includes(`[${columnName}]`)
+      col.ColumnName === columnName && 
+      (!tableName || col.TableName === tableName)
     );
     
     // If not found, try more flexible matching
     if (!column) {
       column = columnData.find(col => 
-        columnName.includes(col.ColumnName) || 
-        (col.FullColumnName && columnName.includes(col.FullColumnName))
+        col.ColumnName === columnName ||
+        col.FullColumnName === `[${columnName}]`
       );
     }
     
@@ -162,27 +186,34 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
 
     console.log("Filtered measures:", filteredMeasures.length);
     
-    // Find all columns referenced by our filtered measures
-    const referencedColumns = new Map<string, Set<string>>();
+    // Find all referenced columns
+    const referencedColumnIds = new Set<string>();
     
+    // Track all measure-column relationships
+    const measureToColumnConnections: {measureId: string, columnId: string}[] = [];
+    
+    // Process all measures to extract column references
     filteredMeasures.forEach(measure => {
       if (!measure.MeasureExpression) return;
       
       // Extract column references from the measure expression
       const columnRefs = extractColumnReferences(measure.MeasureExpression);
+      console.log(`Measure ${measure.MeasureName} references columns:`, columnRefs);
       
-      // For each column reference, find the matching column and add to the map
+      // For each column reference, find the matching column and create a connection
       columnRefs.forEach(columnRef => {
-        const column = findColumnByName(columnRef);
+        // First try to find the column in the same table as the measure
+        const column = findColumnByName(columnRef, measure.TableName) || 
+                       findColumnByName(columnRef);
+        
         if (column) {
           const measureId = `measure-${measure.TableName}-${measure.MeasureName}`;
           const columnId = `column-${column.TableName}-${column.ColumnName}`;
           
-          if (!referencedColumns.has(columnId)) {
-            referencedColumns.set(columnId, new Set());
-          }
+          // Add to our tracking collections
+          referencedColumnIds.add(columnId);
+          measureToColumnConnections.push({measureId, columnId});
           
-          referencedColumns.get(columnId)?.add(measureId);
           console.log(`Found reference: Column ${columnRef} (${columnId}) is used by measure ${measure.MeasureName} (${measureId})`);
         } else {
           console.log(`Could not find column for reference: ${columnRef}`);
@@ -190,76 +221,8 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       });
     });
     
-    console.log("Referenced columns map size:", referencedColumns.size);
-    
-    // Filter columns based on search, table selection, and whether they're referenced
-    const filteredColumns = columnData.filter(column => {
-      const matchesSearch = searchTerm === '' || 
-        column.ColumnName.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesTable = selectedTable === 'All' || column.TableName === selectedTable;
-      
-      const columnId = `column-${column.TableName}-${column.ColumnName}`;
-      const isReferenced = referencedColumns.has(columnId);
-      
-      // Include the column if it matches search/table filter or if it's referenced by a measure
-      return (matchesSearch && matchesTable) || isReferenced;
-    });
-
-    console.log("Final filtered columns:", filteredColumns.length);
-    
-    // Create nodes for measures
-    const measureNodes: Node[] = filteredMeasures.map((measure, index) => ({
-      id: `measure-${measure.TableName}-${measure.MeasureName}`,
-      type: 'measure',
-      position: { x: 100 + (index % 3) * 320, y: 100 + Math.floor(index / 3) * 220 },
-      data: {
-        label: measure.MeasureName,
-        tableName: measure.TableName,
-        expression: measure.MeasureExpression,
-        fullName: measure.FullMeasureName || `${measure.TableName}[${measure.MeasureName}]`
-      }
-    }));
-
-    // Create nodes for columns
-    const columnNodes: Node[] = filteredColumns.map((column, index) => ({
-      id: `column-${column.TableName}-${column.ColumnName}`,
-      type: 'column',
-      position: { x: 100 + (index % 3) * 320, y: 500 + Math.floor(index / 3) * 150 },
-      data: {
-        label: column.ColumnName,
-        tableName: column.TableName,
-        dataType: column.DataType,
-        fullName: column.FullColumnName || `${column.TableName}[${column.ColumnName}]`
-      }
-    }));
-
-    const newNodes = [...measureNodes, ...columnNodes];
-    console.log("Total nodes created:", newNodes.length);
-    
-    // Create edges for column-measure dependencies
-    const columnEdges: Edge[] = [];
-    
-    // Use our map of column-to-measure references to create edges
-    referencedColumns.forEach((measureIds, columnId) => {
-      measureIds.forEach(measureId => {
-        const edgeId = `edge-${columnId}-to-${measureId}`;
-        console.log(`Creating edge: ${edgeId}`);
-        
-        columnEdges.push({
-          id: edgeId,
-          source: columnId,
-          target: measureId,
-          animated: false,
-          style: { stroke: '#000000' } // Black color for edges
-        });
-      });
-    });
-
-    console.log("Column edges created:", columnEdges.length);
-    
-    // Create edges for measure-measure dependencies
-    const measureEdges: Edge[] = [];
+    // Process measures to see if they reference other measures
+    const measureToMeasureConnections: {sourceMeasureId: string, targetMeasureId: string}[] = [];
     
     filteredMeasures.forEach(sourceMeasure => {
       filteredMeasures.forEach(targetMeasure => {
@@ -269,18 +232,102 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
         if (targetMeasure.MeasureExpression && 
             isMeasureReferenced(sourceMeasure, targetMeasure.MeasureExpression)) {
           
-          const edgeId = `edge-measure-${sourceMeasure.TableName}-${sourceMeasure.MeasureName}-to-${targetMeasure.TableName}-${targetMeasure.MeasureName}`;
-          console.log(`Creating measure-measure edge: ${edgeId}`);
+          const sourceMeasureId = `measure-${sourceMeasure.TableName}-${sourceMeasure.MeasureName}`;
+          const targetMeasureId = `measure-${targetMeasure.TableName}-${targetMeasure.MeasureName}`;
           
-          measureEdges.push({
-            id: edgeId,
-            source: `measure-${sourceMeasure.TableName}-${sourceMeasure.MeasureName}`,
-            target: `measure-${targetMeasure.TableName}-${targetMeasure.MeasureName}`,
-            animated: true,
-            style: { stroke: '#000000' } // Black color for edges
+          measureToMeasureConnections.push({
+            sourceMeasureId,
+            targetMeasureId
           });
         }
       });
+    });
+    
+    console.log("Referenced column IDs:", Array.from(referencedColumnIds));
+    console.log("Measure-to-Column connections:", measureToColumnConnections);
+    console.log("Measure-to-Measure connections:", measureToMeasureConnections);
+    
+    // Filter columns based on search, table selection, and whether they're referenced
+    const filteredColumns = columnData.filter(column => {
+      const matchesSearch = searchTerm === '' || 
+        column.ColumnName.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesTable = selectedTable === 'All' || column.TableName === selectedTable;
+      
+      const columnId = `column-${column.TableName}-${column.ColumnName}`;
+      const isReferenced = referencedColumnIds.has(columnId);
+      
+      // Include the column if it matches search/table filter or if it's referenced by a measure
+      return (matchesSearch && matchesTable) || isReferenced;
+    });
+
+    console.log("Final filtered columns:", filteredColumns.length);
+    
+    // Create nodes for measures with unique IDs
+    const measureNodes: Node[] = filteredMeasures.map((measure, index) => {
+      const id = `measure-${measure.TableName}-${measure.MeasureName}`;
+      return {
+        id,
+        type: 'measure',
+        position: { x: 100 + (index % 3) * 320, y: 100 + Math.floor(index / 3) * 220 },
+        data: {
+          id,
+          label: measure.MeasureName,
+          tableName: measure.TableName,
+          expression: measure.MeasureExpression,
+          fullName: measure.FullMeasureName || `${measure.TableName}[${measure.MeasureName}]`
+        }
+      };
+    });
+
+    // Create nodes for columns with unique IDs
+    const columnNodes: Node[] = filteredColumns.map((column, index) => {
+      const id = `column-${column.TableName}-${column.ColumnName}`;
+      return {
+        id,
+        type: 'column',
+        position: { x: 100 + (index % 3) * 320, y: 500 + Math.floor(index / 3) * 150 },
+        data: {
+          id,
+          label: column.ColumnName,
+          tableName: column.TableName,
+          dataType: column.DataType,
+          fullName: column.FullColumnName || `${column.TableName}[${column.ColumnName}]`
+        }
+      };
+    });
+
+    const newNodes = [...measureNodes, ...columnNodes];
+    console.log("Total nodes created:", newNodes.length);
+    
+    // Create edges for column-measure dependencies
+    const columnEdges: Edge[] = measureToColumnConnections.map(({measureId, columnId}, index) => {
+      return {
+        id: `edge-${columnId}-to-${measureId}-${index}`,
+        source: columnId,
+        sourceHandle: `column-source-${columnId}`,
+        target: measureId,
+        targetHandle: `measure-target-${measureId}`,
+        animated: false,
+        type: 'smoothstep',
+        style: { stroke: '#000000', strokeWidth: 2 }
+      };
+    });
+
+    console.log("Column edges created:", columnEdges.length);
+    
+    // Create edges for measure-measure dependencies
+    const measureEdges: Edge[] = measureToMeasureConnections.map(({sourceMeasureId, targetMeasureId}, index) => {
+      return {
+        id: `edge-${sourceMeasureId}-to-${targetMeasureId}-${index}`,
+        source: sourceMeasureId,
+        sourceHandle: `measure-source-${sourceMeasureId}`,
+        target: targetMeasureId,
+        targetHandle: `measure-target-${targetMeasureId}`,
+        animated: true,
+        type: 'smoothstep',
+        style: { stroke: '#000000', strokeWidth: 2 }
+      };
     });
 
     console.log("Measure edges created:", measureEdges.length);
@@ -291,7 +338,12 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
 
   // Handle connections between nodes
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => setEdges((eds) => addEdge({
+      ...params,
+      type: 'smoothstep',
+      animated: false,
+      style: { stroke: '#000000', strokeWidth: 2 }
+    }, eds)),
     [setEdges]
   );
 
