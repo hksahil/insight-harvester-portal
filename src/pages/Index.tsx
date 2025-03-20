@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -11,6 +12,7 @@ import ExpressionDisplay from "@/components/ExpressionDisplay";
 import AskGPT from "@/components/AskGPT";
 import DocumentationTab from "@/components/DocumentationTab";
 import MeasureVisualizer from "@/components/MeasureVisualizer";
+import BestPracticesAnalyzer from "@/components/BestPracticesAnalyzer";
 import Footer from "@/components/Footer";
 import SampleData from "@/components/SampleData";
 import UseCaseHelper from "@/components/UseCaseHelper";
@@ -226,6 +228,15 @@ const Index = () => {
               measureData={processedData.measureData}
               columnData={processedData.columnData}
             />
+          </div>
+        ),
+      },
+      {
+        id: 'best-practices',
+        label: 'Best Practices',
+        content: (
+          <div className="space-y-6">
+            <BestPracticesAnalyzer data={processedData} />
           </div>
         ),
       },
