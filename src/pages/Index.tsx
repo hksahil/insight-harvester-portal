@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -16,7 +17,7 @@ import SampleData from "@/components/SampleData";
 import UseCaseHelper from "@/components/UseCaseHelper";
 import { toast } from 'sonner';
 import { processVpaxFile, ProcessedData } from '@/services/VpaxProcessor';
-import { DatabaseZap, LineChart, FileCode, BarChart3, FileText } from 'lucide-react';
+import { DatabaseZap, LineChart, FileCode, BarChart3, FileText, Brain } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const Index = () => {
@@ -333,32 +334,40 @@ const Index = () => {
               </Card>
             </div>
             
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all bg-card/50 backdrop-blur-sm">
-                <div className="flex items-start space-x-4">
+                <div className="flex flex-col items-center text-center space-y-4">
                   <div className="p-3 bg-primary/10 rounded-full">
-                    <BarChart3 className="h-6 w-6 text-primary" />
+                    <BarChart3 className="h-8 w-8 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Powerful Visualizations</h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Interactive visualizations to help you understand the relationships and structure of your data model.
-                    </p>
-                  </div>
+                  <h3 className="text-xl font-semibold">Visualizations</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Interactive visualizations to help you understand the relationships and structure of your data model.
+                  </p>
                 </div>
               </Card>
               
               <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all bg-card/50 backdrop-blur-sm">
-                <div className="flex items-start space-x-4">
+                <div className="flex flex-col items-center text-center space-y-4">
                   <div className="p-3 bg-primary/10 rounded-full">
-                    <FileText className="h-6 w-6 text-primary" />
+                    <FileText className="h-8 w-8 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Documentation Export</h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Generate comprehensive documentation of your Power BI model for sharing and reference.
-                    </p>
+                  <h3 className="text-xl font-semibold">Documentation</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Generate comprehensive documentation of your Power BI model for sharing and reference.
+                  </p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <Brain className="h-8 w-8 text-primary" />
                   </div>
+                  <h3 className="text-xl font-semibold">Ask GPT</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Use AI to ask questions about your Power BI model and get intelligent insights and answers.
+                  </p>
                 </div>
               </Card>
             </div>
