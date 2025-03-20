@@ -1,30 +1,25 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { Check, X, AlertTriangle, FileText, BarChart3, 
-         BadgeCheck, Layers, Info, Database, 
-         ArrowUpDown, Shield } from "lucide-react";
+import { Check, X, AlertTriangle, FileText, BarChart3, BadgeCheck, Layers, Info, Database, ArrowUpDown, Shield } from "lucide-react";
 import { analyzeModel, AnalysisResult, CategoryResult, RuleCategory } from "@/services/BestPracticesAnalyzer";
 import { ProcessedData } from "@/services/VpaxProcessor";
 import { Checkbox } from "@/components/ui/checkbox";
-
 interface BestPracticesAnalyzerProps {
   data: ProcessedData;
 }
-
-const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) => {
+const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
+  data
+}) => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<RuleCategory | 'overview'>('overview');
   const [expandedRules, setExpandedRules] = useState<Set<string>>(new Set());
-  
   const runAnalysis = () => {
     const result = analyzeModel(data);
     setAnalysisResult(result);
   };
-  
   const toggleRuleExpansion = (ruleId: string) => {
     const newExpandedRules = new Set(expandedRules);
     if (newExpandedRules.has(ruleId)) {
@@ -34,7 +29,6 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
     }
     setExpandedRules(newExpandedRules);
   };
-  
   const getCategoryIcon = (category: RuleCategory) => {
     switch (category) {
       case 'maintenance':
@@ -57,10 +51,8 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
         return <Info className="h-4 w-4" />;
     }
   };
-  
   if (!analysisResult) {
-    return (
-      <div className="space-y-4">
+    return <div className="space-y-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -74,20 +66,13 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-  
-  const categoryCards = analysisResult.categories.map(category => (
-    <Card key={category.category} className="relative overflow-hidden">
+  const categoryCards = analysisResult.categories.map(category => <Card key={category.category} className="relative overflow-hidden">
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
-            {category.failedRules > 0 ? (
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-            ) : (
-              <Check className="h-5 w-5 text-green-500" />
-            )}
+            {category.failedRules > 0 ? <AlertTriangle className="h-5 w-5 text-amber-500" /> : <Check className="h-5 w-5 text-green-500" />}
             <h3 className="text-lg font-medium">{category.displayName}</h3>
           </div>
           
@@ -96,10 +81,9 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
           </div>
           
           <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-green-500" 
-              style={{ width: `${(category.passedRules / category.totalRules) * 100}%` }}
-            />
+            <div className="h-full bg-green-500" style={{
+            width: `${category.passedRules / category.totalRules * 100}%`
+          }} />
           </div>
           
           <div className="flex justify-between text-sm">
@@ -108,47 +92,26 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
           </div>
         </div>
       </CardContent>
-    </Card>
-  ));
-  
-  const renderOverview = () => (
-    <div className="space-y-6">
+    </Card>);
+  const renderOverview = () => <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categoryCards}
       </div>
-    </div>
-  );
-  
-  const renderCategoryDetails = (category: CategoryResult) => (
-    <div className="space-y-4">
+    </div>;
+  const renderCategoryDetails = (category: CategoryResult) => <div className="space-y-4">
       <div className="flex flex-col space-y-2">
         {category.rules.map(rule => {
-          const result = category.results[rule.id];
-          const isExpanded = expandedRules.has(rule.id);
-          
-          return (
-            <Collapsible 
-              key={rule.id} 
-              open={isExpanded}
-              className="border rounded-md overflow-hidden"
-            >
-              <CollapsibleTrigger 
-                onClick={() => toggleRuleExpansion(rule.id)}
-                className="flex items-center justify-between w-full px-4 py-3 hover:bg-muted/50 transition-colors text-left"
-              >
+        const result = category.results[rule.id];
+        const isExpanded = expandedRules.has(rule.id);
+        return <Collapsible key={rule.id} open={isExpanded} className="border rounded-md overflow-hidden">
+              <CollapsibleTrigger onClick={() => toggleRuleExpansion(rule.id)} className="flex items-center justify-between w-full px-4 py-3 hover:bg-muted/50 transition-colors text-left">
                 <div className="flex items-center space-x-3">
-                  {result.passed ? (
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  ) : (
-                    <X className="h-5 w-5 text-destructive flex-shrink-0" />
-                  )}
+                  {result.passed ? <Check className="h-5 w-5 text-green-500 flex-shrink-0" /> : <X className="h-5 w-5 text-destructive flex-shrink-0" />}
                   <div>
                     <div className="font-medium">
-                      {rule.name} {result.affectedObjects && result.affectedObjects.length > 0 && 
-                        <span className="text-muted-foreground text-sm">
+                      {rule.name} {result.affectedObjects && result.affectedObjects.length > 0 && <span className="text-muted-foreground text-sm">
                           ({result.affectedObjects.length} {result.affectedObjects.length === 1 ? 'object' : 'objects'})
-                        </span>
-                      }
+                        </span>}
                     </div>
                     <div className="text-sm text-muted-foreground">{rule.description}</div>
                   </div>
@@ -160,32 +123,24 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
                 </div>
               </CollapsibleTrigger>
               
-              {result.affectedObjects && result.affectedObjects.length > 0 && (
-                <CollapsibleContent className="px-4 py-3 border-t bg-muted/30">
+              {result.affectedObjects && result.affectedObjects.length > 0 && <CollapsibleContent className="px-4 py-3 border-t bg-muted/30">
                   <div className="space-y-2">
                     <div className="font-medium text-sm">Affected Objects:</div>
                     <div className="max-h-48 overflow-y-auto">
                       <ul className="space-y-1 text-sm">
-                        {result.affectedObjects.map((obj, i) => (
-                          <li key={i} className="flex items-center space-x-2">
+                        {result.affectedObjects.map((obj, i) => <li key={i} className="flex items-center space-x-2">
                             <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                             <span>{obj}</span>
-                          </li>
-                        ))}
+                          </li>)}
                       </ul>
                     </div>
                   </div>
-                </CollapsibleContent>
-              )}
-            </Collapsible>
-          );
-        })}
+                </CollapsibleContent>}
+            </Collapsible>;
+      })}
       </div>
-    </div>
-  );
-  
-  return (
-    <div className="space-y-6 animate-fade-in">
+    </div>;
+  return <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Best Practices</h2>
         <div className="flex items-center space-x-3">
@@ -207,34 +162,21 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
         </div>
       </div>
       
-      <Tabs 
-        defaultValue="overview" 
-        onValueChange={(value) => setSelectedCategory(value as RuleCategory | 'overview')}
-        className="space-y-4"
-      >
+      <Tabs defaultValue="overview" onValueChange={value => setSelectedCategory(value as RuleCategory | 'overview')} className="space-y-4">
         <div className="flex overflow-x-auto pb-2 no-scrollbar">
           <TabsList className="bg-transparent h-auto p-0 space-x-2">
-            <TabsTrigger 
-              value="overview"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-9 flex items-center"
-            >
+            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-9 flex items-center">
               <Info className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
             
-            {analysisResult.categories.map(category => (
-              <TabsTrigger 
-                key={category.category}
-                value={category.category} 
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-9 flex items-center"
-              >
+            {analysisResult.categories.map(category => <TabsTrigger key={category.category} value={category.category} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-9 flex items-center">
                 {getCategoryIcon(category.category)}
                 <span className="ml-2">{category.displayName}</span>
-                <span className="ml-2 text-xs bg-muted rounded-full px-2 py-1">
+                <span className="ml-2 text-xs bg-muted rounded-full px-2 py-1 text-gray-600">
                   {category.passedRules}/{category.totalRules}
                 </span>
-              </TabsTrigger>
-            ))}
+              </TabsTrigger>)}
           </TabsList>
         </div>
         
@@ -242,11 +184,9 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
           {renderOverview()}
         </TabsContent>
         
-        {analysisResult.categories.map(category => (
-          <TabsContent key={category.category} value={category.category} className="mt-6">
+        {analysisResult.categories.map(category => <TabsContent key={category.category} value={category.category} className="mt-6">
             {renderCategoryDetails(category)}
-          </TabsContent>
-        ))}
+          </TabsContent>)}
       </Tabs>
       
       <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border">
@@ -260,12 +200,10 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({ data }) =
             Score = (Rules Passed / Total Rules) × 100%
           </div>
           <div className="mt-2 font-medium">
-            Your score: {Math.round((analysisResult.passedRules / analysisResult.totalRules) * 100)}%
+            Your score: {Math.round(analysisResult.passedRules / analysisResult.totalRules * 100)}%
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default BestPracticesAnalyzer;
