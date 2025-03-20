@@ -104,110 +104,120 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
     const fileName = `${modelName}_Documentation_${timestamp}.pdf`;
     
-    // Create a new PDF document (A4 size)
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-    
-    // Add title
-    doc.setFontSize(20);
-    doc.text('Power BI Model Documentation', 20, 20);
-    
-    // Add model name and timestamp
-    doc.setFontSize(12);
-    doc.text(`Model: ${data.modelInfo.Value[0]?.toString() || 'Unknown'}`, 20, 30);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 37);
-    
-    // Add model info table
-    doc.setFontSize(16);
-    doc.text('Model Information', 20, 50);
-    
-    const modelInfoRows = data.modelInfo.Attribute.map((attr, index) => [
-      attr, 
-      data.modelInfo.Value[index]?.toString() || 'N/A'
-    ]);
-    
-    // Use autoTable with correct typing
-    doc.autoTable({
-      startY: 55,
-      head: [['Attribute', 'Value']],
-      body: modelInfoRows,
-      theme: 'grid',
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-      margin: { top: 20, right: 20, bottom: 20, left: 20 }
-    });
-    
-    // Get the final Y position after the table
-    let finalY = (doc as any).lastAutoTable.finalY || 60;
-    
-    // Add tables summary
-    if (data.tableData.length > 0) {
-      finalY += 15;
-      doc.setFontSize(16);
-      doc.text('Tables Summary', 20, finalY);
-      
-      // Get table headers
-      const tableHeaders = Object.keys(data.tableData[0]).slice(0, 5); // Limit columns for readability
-      
-      // Get table rows (limit to first 10 rows for PDF readability)
-      const tableRows = data.tableData.slice(0, 10).map(row => 
-        tableHeaders.map(header => row[header]?.toString() || 'N/A')
-      );
-      
-      // Use autoTable with correct typing
-      doc.autoTable({
-        startY: finalY + 5,
-        head: [tableHeaders],
-        body: tableRows,
-        theme: 'grid',
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        margin: { top: 20, right: 20, bottom: 20, left: 20 }
+    try {
+      // Create a new PDF document (A4 size)
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
       });
       
-      finalY = (doc as any).lastAutoTable.finalY || finalY;
-    }
-    
-    // Add new page for relationships
-    doc.addPage();
-    
-    // Add relationship summary
-    if (data.relationships.length > 0) {
-      doc.setFontSize(16);
-      doc.text('Relationships Summary', 20, 20);
+      // Add title
+      doc.setFontSize(20);
+      doc.text('Power BI Model Documentation', 20, 20);
       
-      // Simplified relationship representation for PDF
-      const relationshipRows = data.relationships.slice(0, 10).map(rel => [
-        rel.FromTableName,
-        rel.FromColumn || 'N/A',
-        '→',
-        rel.ToTableName,
-        rel.ToColumn || 'N/A',
-        rel.cardinality || 'N/A'
+      // Add model name and timestamp
+      doc.setFontSize(12);
+      doc.text(`Model: ${data.modelInfo.Value[0]?.toString() || 'Unknown'}`, 20, 30);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 37);
+      
+      // Add model info table
+      doc.setFontSize(16);
+      doc.text('Model Information', 20, 50);
+      
+      const modelInfoRows = data.modelInfo.Attribute.map((attr, index) => [
+        attr, 
+        data.modelInfo.Value[index]?.toString() || 'N/A'
       ]);
       
+      // Explicitly check if autoTable exists
+      if (typeof doc.autoTable !== 'function') {
+        throw new Error('autoTable is not available. Make sure jspdf-autotable is properly loaded.');
+      }
+      
       // Use autoTable with correct typing
       doc.autoTable({
-        startY: 25,
-        head: [['From Table', 'From Column', '', 'To Table', 'To Column', 'Cardinality']],
-        body: relationshipRows,
+        startY: 55,
+        head: [['Attribute', 'Value']],
+        body: modelInfoRows,
         theme: 'grid',
         headStyles: { fillColor: [41, 128, 185], textColor: 255 },
         margin: { top: 20, right: 20, bottom: 20, left: 20 }
       });
       
-      finalY = (doc as any).lastAutoTable.finalY || 60;
+      // Get the final Y position after the table
+      let finalY = (doc as any).lastAutoTable?.finalY || 60;
+      
+      // Add tables summary
+      if (data.tableData.length > 0) {
+        finalY += 15;
+        doc.setFontSize(16);
+        doc.text('Tables Summary', 20, finalY);
+        
+        // Get table headers
+        const tableHeaders = Object.keys(data.tableData[0]).slice(0, 5); // Limit columns for readability
+        
+        // Get table rows (limit to first 10 rows for PDF readability)
+        const tableRows = data.tableData.slice(0, 10).map(row => 
+          tableHeaders.map(header => row[header]?.toString() || 'N/A')
+        );
+        
+        // Use autoTable with correct typing
+        doc.autoTable({
+          startY: finalY + 5,
+          head: [tableHeaders],
+          body: tableRows,
+          theme: 'grid',
+          headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+          margin: { top: 20, right: 20, bottom: 20, left: 20 }
+        });
+        
+        finalY = (doc as any).lastAutoTable?.finalY || finalY;
+      }
+      
+      // Add new page for relationships
+      doc.addPage();
+      
+      // Add relationship summary
+      if (data.relationships.length > 0) {
+        doc.setFontSize(16);
+        doc.text('Relationships Summary', 20, 20);
+        
+        // Simplified relationship representation for PDF
+        const relationshipRows = data.relationships.slice(0, 10).map(rel => [
+          rel.FromTableName,
+          rel.FromColumn || 'N/A',
+          '→',
+          rel.ToTableName,
+          rel.ToColumn || 'N/A',
+          rel.cardinality || 'N/A'
+        ]);
+        
+        // Use autoTable with correct typing
+        doc.autoTable({
+          startY: 25,
+          head: [['From Table', 'From Column', '', 'To Table', 'To Column', 'Cardinality']],
+          body: relationshipRows,
+          theme: 'grid',
+          headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+          margin: { top: 20, right: 20, bottom: 20, left: 20 }
+        });
+        
+        finalY = (doc as any).lastAutoTable?.finalY || 60;
+      }
+      
+      // Add footnote
+      const footerY = 280; // Near bottom of A4 page
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Generated by Power BI Assistant', 20, footerY);
+      
+      // Save the PDF
+      doc.save(fileName);
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      throw error;
     }
-    
-    // Add footnote
-    const footerY = 280; // Near bottom of A4 page
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Generated by Power BI Assistant', 20, footerY);
-    
-    // Save the PDF
-    doc.save(fileName);
   };
 
   return (
