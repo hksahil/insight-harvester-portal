@@ -92,13 +92,29 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     
     // Create different patterns for how the column might be referenced
     const patterns = [
-      `${column.TableName}[${column.ColumnName}]`, // Table[Column]
-      `[${column.ColumnName}]`, // [Column]
+      // Table name is optional as it might be a current table context in DAX
+      `${column.TableName}[${column.ColumnName}]`, // Full reference: Table[Column]
+      `[${column.ColumnName}]`, // Short reference: [Column]
+      column.ColumnName, // Plain name reference (less reliable, might have false positives)
       column.FullColumnName // If available, use the full column name
     ].filter(Boolean); // Remove empty patterns
     
     // Check if any of the patterns are in the expression
-    return patterns.some(pattern => expression.includes(pattern));
+    return patterns.some(pattern => {
+      if (!pattern) return false;
+      
+      // Handle special cases where pattern might be a substring of another column
+      // Use word boundaries or brackets to ensure correct matching
+      if (pattern === column.ColumnName) {
+        // For plain name, check if it's surrounded by appropriate characters
+        // This is a basic check and might need refinement
+        const regex = new RegExp(`[\\s\\(\\)\\+\\-\\*\\/,]${pattern}[\\s\\(\\)\\+\\-\\*\\/,]|\\[${pattern}\\]|^${pattern}[\\s\\(\\)\\+\\-\\*\\/,]|[\\s\\(\\)\\+\\-\\*\\/,]${pattern}$`, 'i');
+        return regex.test(expression);
+      }
+      
+      // For bracketed references, just check for inclusion
+      return expression.includes(pattern);
+    });
   }, []);
 
   // Helper function to check if a measure is referenced in another measure's expression
@@ -107,13 +123,16 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     
     // Create different patterns for how the measure might be referenced
     const patterns = [
-      `${measure.TableName}[${measure.MeasureName}]`, // Table[Measure]
-      `[${measure.MeasureName}]`, // [Measure]
+      `${measure.TableName}[${measure.MeasureName}]`, // Full reference: Table[Measure]
+      `[${measure.MeasureName}]`, // Short reference: [Measure]
       measure.FullMeasureName // If available, use the full measure name
     ].filter(Boolean); // Remove empty patterns
     
     // Check if any of the patterns are in the expression
-    return patterns.some(pattern => expression.includes(pattern));
+    return patterns.some(pattern => {
+      if (!pattern) return false;
+      return expression.includes(pattern);
+    });
   }, []);
 
   // Generate nodes and edges based on measures and columns
@@ -132,25 +151,36 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
 
     console.log("Filtered measures:", filteredMeasures.length);
     
-    // Filter columns based on search, table selection, and referenced columns
+    // Find all columns that might be referenced by our filtered measures
+    const referencedColumns = new Set<string>();
+    
+    filteredMeasures.forEach(measure => {
+      if (!measure.MeasureExpression) return;
+      
+      columnData.forEach(column => {
+        if (isColumnReferenced(column, measure.MeasureExpression)) {
+          const columnId = `${column.TableName}-${column.ColumnName}`;
+          referencedColumns.add(columnId);
+        }
+      });
+    });
+    
+    console.log("Referenced columns count:", referencedColumns.size);
+    
+    // Filter columns based on search, table selection, and whether they're referenced
     const filteredColumns = columnData.filter(column => {
       const matchesSearch = searchTerm === '' || 
         column.ColumnName.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesTable = selectedTable === 'All' || column.TableName === selectedTable;
       
-      // Include the column if it's explicitly searched for or if no search term and it matches table filter
-      const includeBasedOnSearch = matchesSearch && matchesTable;
+      const isReferenced = referencedColumns.has(`${column.TableName}-${column.ColumnName}`);
       
-      // Also include if it's referenced by any filtered measure
-      const isReferencedByAnyMeasure = filteredMeasures.some(measure => 
-        isColumnReferenced(column, measure.MeasureExpression)
-      );
-      
-      return includeBasedOnSearch || (matchesTable && isReferencedByAnyMeasure);
+      // Include the column if it matches search/table filter or if it's referenced by a measure
+      return (matchesSearch && matchesTable) || isReferenced;
     });
 
-    console.log("Filtered columns:", filteredColumns.length);
+    console.log("Final filtered columns:", filteredColumns.length);
     
     // Create nodes for measures
     const measureNodes: Node[] = filteredMeasures.map((measure, index) => ({
