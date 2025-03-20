@@ -87,19 +87,39 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
   }, [measureData, columnData]);
 
   // Helper function to check if a column is referenced in an expression
-  const isColumnReferenced = useCallback((columnFullName: string, expression?: string): boolean => {
+  const isColumnReferenced = useCallback((column: ColumnData, expression?: string): boolean => {
     if (!expression) return false;
-    return expression.includes(columnFullName);
+    
+    // Create different patterns for how the column might be referenced
+    const patterns = [
+      `${column.TableName}[${column.ColumnName}]`, // Table[Column]
+      `[${column.ColumnName}]`, // [Column]
+      column.FullColumnName // If available, use the full column name
+    ].filter(Boolean); // Remove empty patterns
+    
+    // Check if any of the patterns are in the expression
+    return patterns.some(pattern => expression.includes(pattern));
   }, []);
 
   // Helper function to check if a measure is referenced in another measure's expression
-  const isMeasureReferenced = useCallback((measureFullName: string, expression?: string): boolean => {
+  const isMeasureReferenced = useCallback((measure: MeasureData, expression?: string): boolean => {
     if (!expression) return false;
-    return expression.includes(measureFullName);
+    
+    // Create different patterns for how the measure might be referenced
+    const patterns = [
+      `${measure.TableName}[${measure.MeasureName}]`, // Table[Measure]
+      `[${measure.MeasureName}]`, // [Measure]
+      measure.FullMeasureName // If available, use the full measure name
+    ].filter(Boolean); // Remove empty patterns
+    
+    // Check if any of the patterns are in the expression
+    return patterns.some(pattern => expression.includes(pattern));
   }, []);
 
   // Generate nodes and edges based on measures and columns
   const generateGraph = useCallback(() => {
+    console.log("Generating graph with search term:", searchTerm, "and selected table:", selectedTable);
+    
     const filteredMeasures = measureData.filter(measure => {
       const matchesSearch = searchTerm === '' || 
         measure.MeasureName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,33 +130,28 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       return matchesSearch && matchesTable;
     });
 
-    // Create a set of columns that are referenced by the filtered measures
-    const referencedColumnNames = new Set<string>();
-    filteredMeasures.forEach(measure => {
-      if (!measure.MeasureExpression) return;
-      
-      columnData.forEach(column => {
-        const columnFullName = `${column.TableName}[${column.ColumnName}]`;
-        if (isColumnReferenced(columnFullName, measure.MeasureExpression)) {
-          referencedColumnNames.add(columnFullName);
-        }
-      });
-    });
-
-    // Filter columns based on search, table selection, and if they're referenced
+    console.log("Filtered measures:", filteredMeasures.length);
+    
+    // Filter columns based on search, table selection, and referenced columns
     const filteredColumns = columnData.filter(column => {
-      const columnFullName = `${column.TableName}[${column.ColumnName}]`;
       const matchesSearch = searchTerm === '' || 
         column.ColumnName.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesTable = selectedTable === 'All' || column.TableName === selectedTable;
       
-      // Include the column if it's referenced by any filtered measure or if we're not filtering by search
-      const isReferenced = referencedColumnNames.has(columnFullName) || searchTerm === '';
+      // Include the column if it's explicitly searched for or if no search term and it matches table filter
+      const includeBasedOnSearch = matchesSearch && matchesTable;
       
-      return matchesSearch && matchesTable && isReferenced;
+      // Also include if it's referenced by any filtered measure
+      const isReferencedByAnyMeasure = filteredMeasures.some(measure => 
+        isColumnReferenced(column, measure.MeasureExpression)
+      );
+      
+      return includeBasedOnSearch || (matchesTable && isReferencedByAnyMeasure);
     });
 
+    console.log("Filtered columns:", filteredColumns.length);
+    
     // Create nodes for measures
     const measureNodes: Node[] = filteredMeasures.map((measure, index) => ({
       id: `measure-${measure.TableName}-${measure.MeasureName}`,
@@ -164,18 +179,22 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     }));
 
     const newNodes = [...measureNodes, ...columnNodes];
+    console.log("Total nodes created:", newNodes.length);
     
     // Create edges for measure-column dependencies
     const columnEdges: Edge[] = [];
     
+    // Check each measure against each column to find dependencies
     filteredMeasures.forEach(measure => {
       if (!measure.MeasureExpression) return;
       
       filteredColumns.forEach(column => {
-        const columnFullName = `${column.TableName}[${column.ColumnName}]`;
-        if (isColumnReferenced(columnFullName, measure.MeasureExpression)) {
+        if (isColumnReferenced(column, measure.MeasureExpression)) {
+          const edgeId = `edge-${column.TableName}-${column.ColumnName}-to-${measure.TableName}-${measure.MeasureName}`;
+          console.log(`Creating edge: ${edgeId}`);
+          
           columnEdges.push({
-            id: `edge-${column.TableName}-${column.ColumnName}-to-${measure.TableName}-${measure.MeasureName}`,
+            id: edgeId,
             source: `column-${column.TableName}-${column.ColumnName}`,
             target: `measure-${measure.TableName}-${measure.MeasureName}`,
             animated: false,
@@ -185,6 +204,8 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       });
     });
 
+    console.log("Column edges created:", columnEdges.length);
+    
     // Create edges for measure-measure dependencies
     const measureEdges: Edge[] = [];
     
@@ -193,13 +214,14 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
         // Skip self-references
         if (sourceMeasure.MeasureName === targetMeasure.MeasureName) return;
         
-        const measureFullName = sourceMeasure.FullMeasureName || 
-                               `${sourceMeasure.TableName}[${sourceMeasure.MeasureName}]`;
-        
         if (targetMeasure.MeasureExpression && 
-            isMeasureReferenced(measureFullName, targetMeasure.MeasureExpression)) {
+            isMeasureReferenced(sourceMeasure, targetMeasure.MeasureExpression)) {
+          
+          const edgeId = `edge-${sourceMeasure.TableName}-${sourceMeasure.MeasureName}-to-${targetMeasure.TableName}-${targetMeasure.MeasureName}`;
+          console.log(`Creating measure-measure edge: ${edgeId}`);
+          
           measureEdges.push({
-            id: `edge-${sourceMeasure.TableName}-${sourceMeasure.MeasureName}-to-${targetMeasure.TableName}-${targetMeasure.MeasureName}`,
+            id: edgeId,
             source: `measure-${sourceMeasure.TableName}-${sourceMeasure.MeasureName}`,
             target: `measure-${targetMeasure.TableName}-${targetMeasure.MeasureName}`,
             animated: true,
@@ -209,6 +231,8 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       });
     });
 
+    console.log("Measure edges created:", measureEdges.length);
+    
     setNodes(newNodes);
     setEdges([...columnEdges, ...measureEdges]);
   }, [measureData, columnData, searchTerm, selectedTable, isColumnReferenced, isMeasureReferenced, setNodes, setEdges]);
