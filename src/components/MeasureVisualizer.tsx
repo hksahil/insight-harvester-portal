@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import dagre from 'dagre';
+import * as dagre from 'dagre';
 
 interface MeasureVisualizerProps {
   measureData: MeasureData[];
