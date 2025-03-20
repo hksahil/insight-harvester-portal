@@ -198,7 +198,7 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
             source: `column-${column.TableName}-${column.ColumnName}`,
             target: `measure-${measure.TableName}-${measure.MeasureName}`,
             animated: false,
-            style: { stroke: '#22c55e' }
+            style: { stroke: '#000000e6' } // Updated to black color
           });
         }
       });
@@ -225,7 +225,7 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
             source: `measure-${sourceMeasure.TableName}-${sourceMeasure.MeasureName}`,
             target: `measure-${targetMeasure.TableName}-${targetMeasure.MeasureName}`,
             animated: true,
-            style: { stroke: '#6366f1' }
+            style: { stroke: '#000000e6' } // Updated to black color
           });
         }
       });
@@ -326,7 +326,7 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
           <span className="text-sm">Columns</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-muted"></div>
+          <div className="w-3 h-3 rounded-sm bg-black"></div>
           <span className="text-sm">Relationships</span>
         </div>
       </div>
