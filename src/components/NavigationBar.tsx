@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Home, Info, HelpCircle, Calendar, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 const NavigationBar: React.FC = () => {

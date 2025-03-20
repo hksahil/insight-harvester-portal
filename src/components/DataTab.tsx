@@ -5,6 +5,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface DataItem {
   [key: string]: any;
@@ -25,10 +26,11 @@ const DataTab: React.FC<DataTabProps> = ({
   searchColumn,
   enableColumnSelection = false
 }) => {
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [activeColumns, setActiveColumns] = useState<string[]>([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
+  const [openFilterDropdowns, setOpenFilterDropdowns] = useState<Record<string, boolean>>({});
   
   // Get all available columns
   const allColumns = useMemo(() => {
@@ -71,12 +73,21 @@ const DataTab: React.FC<DataTabProps> = ({
     return filters;
   }, [data]);
 
+  // Get unique values for each filter column
+  const filterOptions: Record<string, string[]> = {};
+  filterColumns.forEach(column => {
+    const uniqueValues = Array.from(new Set(data.map(item => item[column]))).filter(Boolean);
+    filterOptions[column] = uniqueValues as string[];
+  });
+
   // Create a filtered version of the data
   const filteredData = data.filter(item => {
     // Apply filters
-    for (const [key, value] of Object.entries(filters)) {
-      if (value !== "All" && value !== "" && item[key] !== value) {
-        return false;
+    for (const [key, values] of Object.entries(filters)) {
+      if (values && values.length > 0) {
+        if (!values.includes(item[key]?.toString())) {
+          return false;
+        }
       }
     }
     
@@ -91,13 +102,6 @@ const DataTab: React.FC<DataTabProps> = ({
     return true;
   });
 
-  // Get unique values for each filter column
-  const filterOptions: Record<string, string[]> = {};
-  filterColumns.forEach(column => {
-    const uniqueValues = Array.from(new Set(data.map(item => item[column]))).filter(Boolean);
-    filterOptions[column] = uniqueValues as string[];
-  });
-
   const resetFilters = () => {
     setFilters({});
     setSearchQuery("");
@@ -109,6 +113,31 @@ const DataTab: React.FC<DataTabProps> = ({
     } else {
       setActiveColumns([...activeColumns, column]);
     }
+  };
+
+  const toggleFilter = (column: string, value: string) => {
+    const currentValues = filters[column] || [];
+    
+    if (currentValues.includes(value)) {
+      // Remove value if already selected
+      setFilters({
+        ...filters,
+        [column]: currentValues.filter(v => v !== value)
+      });
+    } else {
+      // Add value if not already selected
+      setFilters({
+        ...filters,
+        [column]: [...currentValues, value]
+      });
+    }
+  };
+
+  const toggleFilterDropdown = (column: string) => {
+    setOpenFilterDropdowns({
+      ...openFilterDropdowns,
+      [column]: !openFilterDropdowns[column]
+    });
   };
 
   // Check if we should show the size note
@@ -170,45 +199,91 @@ const DataTab: React.FC<DataTabProps> = ({
           </div>
         )}
         
-        {/* Standard Filters */}
+        {/* Multi-select Filters */}
         {filterColumns.length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
             <Filter className="h-4 w-4 text-muted-foreground" />
             {filterColumns.map((column) => (
-              <select
-                key={column}
-                value={filters[column] || "All"}
-                onChange={(e) => setFilters({...filters, [column]: e.target.value})}
-                className="bg-background border border-input rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-              >
-                <option value="All">All {column}</option>
-                {filterOptions[column]?.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
+              <div key={column} className="relative">
+                <button
+                  onClick={() => toggleFilterDropdown(column)}
+                  className="bg-background border border-input rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all flex items-center justify-between gap-2"
+                >
+                  <span>{column}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {filters[column]?.length ? `(${filters[column].length})` : '(All)'}
+                  </span>
+                </button>
+                
+                {openFilterDropdowns[column] && (
+                  <div className="absolute z-50 mt-1 w-64 max-h-60 overflow-y-auto bg-background border border-input rounded-md shadow-lg">
+                    <div className="p-2 border-b border-border">
+                      <Label className="text-xs font-medium text-muted-foreground">Select {column}</Label>
+                    </div>
+                    <div className="p-2 space-y-1">
+                      {filterOptions[column]?.map((value) => (
+                        <div key={value} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`${column}-${value}`} 
+                            checked={filters[column]?.includes(value) || false}
+                            onCheckedChange={() => toggleFilter(column, value)}
+                          />
+                          <Label 
+                            htmlFor={`${column}-${value}`}
+                            className="text-sm cursor-pointer"
+                          >
+                            {value}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
         
-        {/* Additional Filters */}
+        {/* Additional Multi-select Filters */}
         {Object.keys(availableFilters).length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
             {Object.entries(availableFilters).map(([column, values]) => (
-              <select
-                key={column}
-                value={filters[column] || "All"}
-                onChange={(e) => setFilters({...filters, [column]: e.target.value})}
-                className="bg-background border border-input rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-              >
-                <option value="All">All {column}</option>
-                {values.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
+              <div key={column} className="relative">
+                <button
+                  onClick={() => toggleFilterDropdown(column)}
+                  className="bg-background border border-input rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all flex items-center justify-between gap-2"
+                >
+                  <span>{column}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {filters[column]?.length ? `(${filters[column].length})` : '(All)'}
+                  </span>
+                </button>
+                
+                {openFilterDropdowns[column] && (
+                  <div className="absolute z-50 mt-1 w-64 max-h-60 overflow-y-auto bg-background border border-input rounded-md shadow-lg">
+                    <div className="p-2 border-b border-border">
+                      <Label className="text-xs font-medium text-muted-foreground">Select {column}</Label>
+                    </div>
+                    <div className="p-2 space-y-1">
+                      {values.map((value) => (
+                        <div key={value} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`${column}-${value}`} 
+                            checked={filters[column]?.includes(value) || false}
+                            onCheckedChange={() => toggleFilter(column, value)}
+                          />
+                          <Label 
+                            htmlFor={`${column}-${value}`}
+                            className="text-sm cursor-pointer"
+                          >
+                            {value}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}

@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
 import TabsContainer from "@/components/TabsContainer";
 import ModelMetadataCard from "@/components/ModelMetadataCard";
-import RelationshipVisualizer from "@/components/RelationshipVisualizer";
 import RelationshipFlowVisualizer from "@/components/RelationshipFlowVisualizer";
 import DataTab from "@/components/DataTab";
 import RelationshipsTab from "@/components/RelationshipsTab";
@@ -148,7 +146,6 @@ const Index = () => {
           <div className="space-y-6">
             <UseCaseHelper type="model-metadata" />
             <ModelMetadataCard metadata={processedData.modelInfo} />
-            <RelationshipVisualizer relationships={processedData.relationships} />
           </div>
         ),
       },
@@ -228,7 +225,6 @@ const Index = () => {
         label: 'Measure Visualizer',
         content: (
           <div className="space-y-6">
-            {/* UseCaseHelper removed as requested */}
             <MeasureVisualizer 
               measureData={processedData.measureData}
               columnData={processedData.columnData}
@@ -260,7 +256,6 @@ const Index = () => {
         label: 'Documentation',
         content: (
           <div className="space-y-6">
-            {/* UseCaseHelper removed as requested */}
             <DocumentationTab data={processedData} />
           </div>
         ),
