@@ -7,6 +7,7 @@ import { ProcessedData } from '@/services/VpaxProcessor';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
+// Import the autotable plugin directly
 import 'jspdf-autotable';
 import UseCaseHelper from './UseCaseHelper';
 
@@ -112,6 +113,12 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         format: 'a4'
       });
       
+      // Verify the autoTable method exists
+      if (typeof doc.autoTable !== 'function') {
+        console.error('autoTable method not found on jsPDF instance', doc);
+        throw new Error('autoTable is not available. Make sure jspdf-autotable is properly loaded.');
+      }
+      
       // Add title
       doc.setFontSize(20);
       doc.text('Power BI Model Documentation', 20, 20);
@@ -129,11 +136,6 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         attr, 
         data.modelInfo.Value[index]?.toString() || 'N/A'
       ]);
-      
-      // Explicitly check if autoTable exists
-      if (typeof doc.autoTable !== 'function') {
-        throw new Error('autoTable is not available. Make sure jspdf-autotable is properly loaded.');
-      }
       
       // Use autoTable with correct typing
       doc.autoTable({
