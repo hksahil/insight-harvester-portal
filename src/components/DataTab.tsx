@@ -1,9 +1,10 @@
 
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Info } from 'lucide-react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface DataItem {
   [key: string]: any;
@@ -32,15 +33,43 @@ const DataTab: React.FC<DataTabProps> = ({
   // Get all available columns
   const allColumns = useMemo(() => {
     if (data.length === 0) return [];
-    return Object.keys(data[0]);
+    // Remove Lineage Tag from columns
+    return Object.keys(data[0]).filter(col => col !== "Lineage Tag");
   }, [data]);
   
   // Set active columns on first render
   useMemo(() => {
     if (activeColumns.length === 0 && data.length > 0) {
-      setActiveColumns(Object.keys(data[0]));
+      // Initialize with all columns except Lineage Tag
+      setActiveColumns(Object.keys(data[0]).filter(col => col !== "Lineage Tag"));
     }
   }, [data, activeColumns.length]);
+
+  // Get additional filters based on data
+  const availableFilters = useMemo(() => {
+    if (data.length === 0) return {};
+    
+    const filters: Record<string, string[]> = {};
+    
+    // Add Table Name filter for tables, columns, and measures metadata
+    if (data[0].hasOwnProperty('TableName')) {
+      const tableNames = Array.from(new Set(data.map(item => item.TableName))).filter(Boolean).sort();
+      filters['TableName'] = tableNames as string[];
+    }
+    
+    if (data[0].hasOwnProperty('Table Name')) {
+      const tableNames = Array.from(new Set(data.map(item => item['Table Name']))).filter(Boolean).sort();
+      filters['Table Name'] = tableNames as string[];
+    }
+    
+    // Add Column Name filter for columns metadata
+    if (data[0].hasOwnProperty('ColumnName')) {
+      const columnNames = Array.from(new Set(data.map(item => item.ColumnName))).filter(Boolean).sort();
+      filters['ColumnName'] = columnNames as string[];
+    }
+    
+    return filters;
+  }, [data]);
 
   // Create a filtered version of the data
   const filteredData = data.filter(item => {
@@ -82,10 +111,32 @@ const DataTab: React.FC<DataTabProps> = ({
     }
   };
 
+  // Check if we should show the size note
+  const shouldShowSizeNote = useMemo(() => {
+    const sizeColumns = ['Table Size', 'Columns Size', 'DAX Table Size', 'DataSize', 'TotalSize', 'DictionarySize', 'UsedSize', 'UsedSizeFrom'];
+    return activeColumns.some(col => sizeColumns.includes(col));
+  }, [activeColumns]);
+
   return (
     <div className="animate-fade-in space-y-4 p-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium">{title}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-medium">{title}</h2>
+          {shouldShowSizeNote && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-help">
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">All sizes are in bytes</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
         <div className="flex gap-2">
           {enableColumnSelection && (
             <button 
@@ -119,7 +170,7 @@ const DataTab: React.FC<DataTabProps> = ({
           </div>
         )}
         
-        {/* Filters */}
+        {/* Standard Filters */}
         {filterColumns.length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
             <Filter className="h-4 w-4 text-muted-foreground" />
@@ -132,6 +183,27 @@ const DataTab: React.FC<DataTabProps> = ({
               >
                 <option value="All">All {column}</option>
                 {filterOptions[column]?.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            ))}
+          </div>
+        )}
+        
+        {/* Additional Filters */}
+        {Object.keys(availableFilters).length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            {Object.entries(availableFilters).map(([column, values]) => (
+              <select
+                key={column}
+                value={filters[column] || "All"}
+                onChange={(e) => setFilters({...filters, [column]: e.target.value})}
+                className="bg-background border border-input rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              >
+                <option value="All">All {column}</option>
+                {values.map((value) => (
                   <option key={value} value={value}>
                     {value}
                   </option>

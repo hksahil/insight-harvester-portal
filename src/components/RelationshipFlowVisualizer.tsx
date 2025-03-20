@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from 'react';
 import {
   ReactFlow,
@@ -99,8 +100,8 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
         },
         position,
         style: {
-          background: isFactTable ? '#FAE8FF' : '#F7FDF3',
-          border: `2px solid ${isFactTable ? '#D946EF' : '#84CC16'}`,
+          background: '#EFF6FF', // All nodes are the same blue-ish color now
+          border: '2px solid #3B82F6',
           borderRadius: '8px',
           padding: '15px',
           width: isFactTable ? 180 : 150,
@@ -179,7 +180,7 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
           <Controls />
           <MiniMap 
             className="bg-white/30 backdrop-blur-sm !bottom-5 !right-5" 
-            nodeColor={(node) => node.data?.isFactTable ? '#D946EF' : '#84CC16'} 
+            nodeColor={() => '#3B82F6'} // All nodes are the same blue color
           />
           <Background color="#E5E7EB" gap={16} />
         </ReactFlow>

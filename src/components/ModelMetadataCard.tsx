@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CalendarDays, Database, Table, FileBox, Layers, Grid, BarChart3 } from 'lucide-react';
+import { CalendarDays, Database, Table, FileBox, Layers, Grid, BarChart3, GitFork } from 'lucide-react';
 
 interface ModelMetadataProps {
   metadata: {
@@ -16,17 +16,31 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
         return <Database className="h-5 w-5 text-primary" />;
       case 'Date Modified':
         return <CalendarDays className="h-5 w-5 text-primary" />;
+      case 'Total Size of Model':
+        return <FileBox className="h-5 w-5 text-primary" />;
       case 'Number of Tables':
         return <Table className="h-5 w-5 text-primary" />;
       case 'Number of Partitions':
         return <Layers className="h-5 w-5 text-primary" />;
+      case 'Max Row Count of Biggest Table':
+        return <Grid className="h-5 w-5 text-primary" />;
       case 'Total Columns':
         return <Grid className="h-5 w-5 text-primary" />;
       case 'Total Measures':
         return <BarChart3 className="h-5 w-5 text-primary" />;
+      case 'Total Relationships':
+        return <GitFork className="h-5 w-5 text-primary" />;
       default:
         return <FileBox className="h-5 w-5 text-primary" />;
     }
+  };
+
+  const formatValue = (value: any, attribute: string) => {
+    // For Max Row Count of Biggest Table, if it's 0, show "Not Available"
+    if (value === 0 && attribute === 'Max Row Count of Biggest Table') {
+      return "Not Available";
+    }
+    return value?.toString() || "N/A";
   };
 
   return (
@@ -42,7 +56,7 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">{attr}</p>
-              <p className="mt-1 text-xl font-semibold">{metadata.Value[index]?.toString() || "N/A"}</p>
+              <p className="mt-1 text-xl font-semibold">{formatValue(metadata.Value[index], attr)}</p>
             </div>
           </div>
         </div>

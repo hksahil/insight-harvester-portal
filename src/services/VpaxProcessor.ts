@@ -14,6 +14,8 @@ export interface TableData {
   "Table Size": number;
   "% of Total Size": number;
   "Is Hidden": boolean;
+  "Latest Partition Modified"?: string;
+  "Latest Partition Refreshed"?: string;
   [key: string]: any;
 }
 
@@ -97,7 +99,22 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     const fileNames = Object.keys(zipData.files);
     console.log('Files in VPAX package:', fileNames);
     
-    let modelBimFile = zipData.file('model.bim');
+    let modelName = "Unknown";
+    const daxModelFile = zipData.file('DaxModel.json');
+    if (daxModelFile) {
+      try {
+        const daxModelContent = await daxModelFile.async('string');
+        const daxModelData = JSON.parse(daxModelContent.replace(/^\uFEFF/, ''));
+        if (daxModelData && daxModelData.ModelName) {
+          modelName = daxModelData.ModelName;
+          console.log('Model name extracted from DaxModel.json:', modelName);
+        }
+      } catch (e) {
+        console.error('Error parsing DaxModel.json:', e);
+      }
+    }
+    
+    const modelBimFile = zipData.file('model.bim');
     
     if (!modelBimFile) {
       const bimFiles = fileNames.filter(name => name.endsWith('.bim'));
@@ -158,7 +175,7 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     if (!daxVpaViewFile) {
       console.warn('No DaxVpaView.json or similar file found. Using default values.');
       
-      const { modelInfo, tableData, expressionData } = processModelBim(modelBimData);
+      const { modelInfo, tableData, expressionData } = processModelBim(modelBimData, modelName);
       
       return {
         modelInfo,
@@ -181,14 +198,21 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       daxVpaViewData = { Tables: [], Columns: [], Measures: [], Relationships: [] };
     }
     
-    const { modelInfo, tableData, expressionData } = processModelBim(modelBimData);
+    const { modelInfo, tableData, expressionData } = processModelBim(modelBimData, modelName);
     
     const { daxTableData, columnData, measureData, relationships } = processDaxVpaView(daxVpaViewData);
     
     const mergedTableData = mergeMetadata(tableData, daxTableData);
     
+    const relationshipsCount = relationships.length;
+    const updatedModelInfo = {
+      ...modelInfo,
+      Attribute: [...modelInfo.Attribute, "Total Relationships"],
+      Value: [...modelInfo.Value, relationshipsCount]
+    };
+    
     return {
-      modelInfo,
+      modelInfo: updatedModelInfo,
       tableData: mergedTableData,
       columnData,
       measureData,
@@ -202,17 +226,25 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
   }
 }
 
-function processModelBim(data: any): { modelInfo: ModelInfo; tableData: TableData[]; expressionData: ExpressionData[] } {
+function processModelBim(data: any, extractedModelName: string): { modelInfo: ModelInfo; tableData: TableData[]; expressionData: ExpressionData[] } {
   const tables = data.model?.tables || data.tables || data.Tables || [];
   const { numPartitions, maxRowCount, totalTableSize, tableData, expressionData } = calculateMetadata(tables);
   
+  const modelName = extractedModelName !== "Unknown" ? 
+                    extractedModelName : 
+                    data.name || 
+                    data.Name || 
+                    data.model?.name || 
+                    data.model?.Name || 
+                    data.model?.database?.name || 
+                    "Unknown";
+  
   const modelInfo: ModelInfo = {
-    Attribute: ["Model Name", "Date Modified", "Total Size of Model", "Storage Format", "Number of Tables", "Number of Partitions", "Max Row Count of Biggest Table", "Total Columns", "Total Measures"],
+    Attribute: ["Model Name", "Date Modified", "Total Size of Model", "Number of Tables", "Number of Partitions", "Max Row Count of Biggest Table", "Total Columns", "Total Measures"],
     Value: [
-      data.name || data.Name || "Unknown",
-      data.lastUpdate || data.LastUpdate || "Unknown",
+      modelName,
+      data.lastUpdate || data.LastUpdate || data.model?.lastUpdate || "Unknown",
       data.model?.estimatedSize || data.estimatedSize || "Not Available",
-      data.model?.defaultPowerBIDataSourceVersion || data.defaultPowerBIDataSourceVersion || "Unknown",
       tables.length,
       numPartitions,
       maxRowCount,
@@ -239,6 +271,16 @@ function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount:
     
     const expression = partitions.length > 0 && partitions[0].source ? partitions[0].source.expression || "" : "";
     
+    const modifiedTime = partitions.length > 0 ? 
+                         partitions[0].modifiedTime || 
+                         partitions[0].refreshedTime || 
+                         "Unknown" : "Unknown";
+    
+    const refreshedTime = partitions.length > 0 ? 
+                         partitions[0].refreshedTime || 
+                         partitions[0].modifiedTime || 
+                         "Unknown" : "Unknown";
+    
     tableData.push({
       "Table Name": table.name || "Unknown",
       "Mode": partitions.length > 0 ? partitions[0].mode || "Unknown" : "Unknown",
@@ -247,9 +289,8 @@ function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount:
       "Table Size": table.estimatedSize || 0,
       "% of Total Size": totalTableSize > 0 ? Math.round((table.estimatedSize || 0) / totalTableSize * 100 * 100) / 100 : 0,
       "Is Hidden": table.isHidden || false,
-      "Latest Partition Modified": partitions.length > 0 ? Math.max(...partitions.map((p: any) => p.modifiedTime || "Unknown")) : "Unknown",
-      "Latest Partition Refreshed": partitions.length > 0 ? Math.max(...partitions.map((p: any) => p.refreshedTime || "Unknown")) : "Unknown",
-      "Lineage Tag": table.lineageTag || "Unknown"
+      "Latest Partition Modified": modifiedTime,
+      "Latest Partition Refreshed": refreshedTime
     });
     
     expressionData.push({
