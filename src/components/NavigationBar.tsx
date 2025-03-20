@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Home, Info, HelpCircle, Calendar, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
@@ -12,12 +12,6 @@ const NavigationBar: React.FC = () => {
   const [faqDialogOpen, setFaqDialogOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
   const [isHomePage, setIsHomePage] = useState(true);
-
-  useEffect(() => {
-    // Check if we're on the home page and no file is uploaded
-    const isHome = location.pathname === '/' && !document.querySelector('.animate-fade-in.mt-12');
-    setIsHomePage(isHome);
-  }, [location.pathname]);
 
   const goToHome = () => {
     navigate('/');
@@ -32,17 +26,15 @@ const NavigationBar: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-3">
-          {!isHomePage && (
-            <Button 
-              onClick={goToHome}
-              variant="ghost"
-              className="flex items-center gap-2"
-              title="Go back to homepage"
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </Button>
-          )}
+          <Button 
+            onClick={goToHome}
+            variant="ghost"
+            className="flex items-center gap-2"
+            title="Go back to homepage"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </Button>
           
           <Button 
             onClick={() => setInfoDialogOpen(true)}

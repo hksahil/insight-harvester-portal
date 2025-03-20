@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -16,6 +17,8 @@ import SampleData from "@/components/SampleData";
 import UseCaseHelper from "@/components/UseCaseHelper";
 import { toast } from 'sonner';
 import { processVpaxFile, ProcessedData } from '@/services/VpaxProcessor';
+import { DatabaseZap, LineChart, FileCode, BarChart3, FileText, BookOpen } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 const Index = () => {
   const [isFileUploaded, setIsFileUploaded] = useState(false);
@@ -273,19 +276,94 @@ const Index = () => {
       <NavigationBar />
       
       <main className="container mx-auto pt-24 px-4 sm:px-6">
-        <div className="animate-fade-in max-w-3xl mx-auto text-center space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
-            Power BI Assistant
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Upload your Power BI .vpax files to analyze model structure, relationships, and query data
-          </p>
-        </div>
-        
         {!isFileUploaded ? (
           <div>
+            <div className="animate-fade-in max-w-3xl mx-auto text-center space-y-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-foreground/20 blur-3xl opacity-70 -z-10 rounded-full"></div>
+                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+                  Power BI Assistant
+                </h1>
+              </div>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Upload your Power BI .vpax files to analyze model structure, relationships, and query data
+              </p>
+            </div>
+            
             <FileUploader onFileUpload={handleFileUpload} />
-            <SampleData onLoadSample={loadSampleData} />
+            
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <DatabaseZap className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Model Analysis</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Analyze your Power BI model structure including tables, columns, measures, and relationships.
+                  </p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <LineChart className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Best Practices</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Evaluate your model against industry best practices and get recommendations for improvements.
+                  </p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <FileCode className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">DAX Analysis</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Review DAX expressions, measure dependencies, and identify optimization opportunities.
+                  </p>
+                </div>
+              </Card>
+            </div>
+            
+            <div className="mt-12 text-center">
+              <h2 className="text-2xl font-semibold mb-6">No VPAX file ready? Try our sample data</h2>
+              <SampleData onLoadSample={loadSampleData} />
+            </div>
+            
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all bg-card/50 backdrop-blur-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Powerful Visualizations</h3>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Interactive visualizations to help you understand the relationships and structure of your data model.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all bg-card/50 backdrop-blur-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <FileText className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Documentation Export</h3>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Generate comprehensive documentation of your Power BI model for sharing and reference.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
         ) : (
           <div className="mt-12 animate-fade-in">
