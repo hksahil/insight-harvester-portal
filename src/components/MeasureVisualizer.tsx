@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   ReactFlow,
@@ -14,6 +13,7 @@ import {
   Handle,
   Position,
   useReactFlow,
+  ReactFlowProvider
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { ArrowUpRight, Code, Database, Eye, EyeOff, Filter, Search } from 'lucide-react';
@@ -144,7 +144,8 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
   return { nodes: layoutedNodes, edges };
 };
 
-const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, columnData }) => {
+// The inner component that uses ReactFlow hooks
+const MeasureVisualizerInner: React.FC<MeasureVisualizerProps> = ({ measureData, columnData }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTable, setSelectedTable] = useState<string>('All');
   const [hideDisconnectedColumns, setHideDisconnectedColumns] = useState(false);
@@ -173,13 +174,11 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
   const extractColumnReferences = useCallback((expression: string): string[] => {
     if (!expression) return [];
     
-    // Pattern: specifically look for Table[Column] patterns
     const columnRefs: string[] = [];
     const regex = /\[(.*?)\]/g;
     let match;
     
     while ((match = regex.exec(expression)) !== null) {
-      // Get whatever is inside the brackets
       const columnName = match[1].trim();
       if (columnName) {
         columnRefs.push(columnName);
@@ -192,13 +191,11 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
 
   // Improved helper function to find a column by name with exact matching
   const findColumnByName = useCallback((columnName: string, tableName?: string) => {
-    // First try exact column name match within the table
     let column = columnData.find(col => 
       col.ColumnName === columnName && 
       (!tableName || col.TableName === tableName)
     );
     
-    // If not found, try more flexible matching
     if (!column) {
       column = columnData.find(col => 
         col.ColumnName === columnName ||
@@ -213,14 +210,12 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
   const isMeasureReferenced = useCallback((measure: MeasureData, expression?: string): boolean => {
     if (!expression) return false;
     
-    // Create different patterns for how the measure might be referenced
     const patterns = [
-      `${measure.TableName}[${measure.MeasureName}]`, // Full reference: Table[Measure]
-      `[${measure.MeasureName}]`, // Short reference: [Measure]
-      measure.FullMeasureName // If available, use the full measure name
-    ].filter(Boolean); // Remove empty patterns
+      `${measure.TableName}[${measure.MeasureName}]`,
+      `[${measure.MeasureName}]`,
+      measure.FullMeasureName
+    ].filter(Boolean);
     
-    // Check if any of the patterns are in the expression
     return patterns.some(pattern => {
       if (!pattern) return false;
       return expression.includes(pattern);
@@ -244,23 +239,17 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
 
     console.log("Filtered measures:", filteredMeasures.length);
     
-    // Find all referenced columns
     const referencedColumnIds = new Set<string>();
     
-    // Track all measure-column relationships
     const measureToColumnConnections: {measureId: string, columnId: string}[] = [];
     
-    // Process all measures to extract column references
     filteredMeasures.forEach(measure => {
       if (!measure.MeasureExpression) return;
       
-      // Extract column references from the measure expression
       const columnRefs = extractColumnReferences(measure.MeasureExpression);
       console.log(`Measure ${measure.MeasureName} references columns:`, columnRefs);
       
-      // For each column reference, find the matching column and create a connection
       columnRefs.forEach(columnRef => {
-        // First try to find the column in the same table as the measure
         const column = findColumnByName(columnRef, measure.TableName) || 
                        findColumnByName(columnRef);
         
@@ -268,7 +257,6 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
           const measureId = `measure-${measure.TableName}-${measure.MeasureName}`;
           const columnId = `column-${column.TableName}-${column.ColumnName}`;
           
-          // Add to our tracking collections
           referencedColumnIds.add(columnId);
           measureToColumnConnections.push({measureId, columnId});
           
@@ -279,12 +267,10 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       });
     });
     
-    // Process measures to see if they reference other measures
     const measureToMeasureConnections: {sourceMeasureId: string, targetMeasureId: string}[] = [];
     
     filteredMeasures.forEach(sourceMeasure => {
       filteredMeasures.forEach(targetMeasure => {
-        // Skip self-references
         if (sourceMeasure.MeasureName === targetMeasure.MeasureName) return;
         
         if (targetMeasure.MeasureExpression && 
@@ -305,7 +291,6 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     console.log("Measure-to-Column connections:", measureToColumnConnections);
     console.log("Measure-to-Measure connections:", measureToMeasureConnections);
     
-    // Filter columns based on search, table selection, and whether they're referenced
     const filteredColumns = columnData.filter(column => {
       const matchesSearch = searchTerm === '' || 
         column.ColumnName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -315,24 +300,21 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       const columnId = `column-${column.TableName}-${column.ColumnName}`;
       const isReferenced = referencedColumnIds.has(columnId);
       
-      // Hide disconnected columns if the option is selected
       if (hideDisconnectedColumns && !isReferenced) {
         return false;
       }
       
-      // Include the column if it matches search/table filter
       return matchesSearch && matchesTable;
     });
 
     console.log("Final filtered columns:", filteredColumns.length);
     
-    // Create nodes for measures with unique IDs
     const measureNodes: Node[] = filteredMeasures.map((measure) => {
       const id = `measure-${measure.TableName}-${measure.MeasureName}`;
       return {
         id,
         type: 'measure',
-        position: { x: 0, y: 0 }, // Initial position, will be updated by dagre
+        position: { x: 0, y: 0 },
         data: {
           id,
           label: measure.MeasureName,
@@ -343,13 +325,12 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       };
     });
 
-    // Create nodes for columns with unique IDs
     const columnNodes: Node[] = filteredColumns.map((column) => {
       const id = `column-${column.TableName}-${column.ColumnName}`;
       return {
         id,
         type: 'column',
-        position: { x: 0, y: 0 }, // Initial position, will be updated by dagre
+        position: { x: 0, y: 0 },
         data: {
           id,
           label: column.ColumnName,
@@ -360,7 +341,6 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       };
     });
 
-    // Create edges for column-measure dependencies
     const columnEdges: Edge[] = measureToColumnConnections.map(({measureId, columnId}, index) => {
       return {
         id: `edge-${columnId}-to-${measureId}-${index}`,
@@ -374,7 +354,6 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       };
     });
     
-    // Create edges for measure-measure dependencies
     const measureEdges: Edge[] = measureToMeasureConnections.map(({sourceMeasureId, targetMeasureId}, index) => {
       return {
         id: `edge-${sourceMeasureId}-to-${targetMeasureId}-${index}`,
@@ -388,11 +367,9 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
       };
     });
 
-    // Combine all nodes and edges
     const newNodes = [...measureNodes, ...columnNodes];
     const newEdges = [...columnEdges, ...measureEdges];
     
-    // Apply layout optimization
     const { nodes: layoutedNodes } = getLayoutedElements(
       newNodes,
       newEdges,
@@ -406,7 +383,6 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
     setNodes(layoutedNodes);
     setEdges(newEdges);
     
-    // Fit the view after the graph is generated
     setTimeout(() => {
       if (reactFlowInstance) {
         reactFlowInstance.fitView({ padding: 0.2 });
@@ -590,6 +566,15 @@ const MeasureVisualizer: React.FC<MeasureVisualizerProps> = ({ measureData, colu
         </div>
       </div>
     </div>
+  );
+};
+
+// The main wrapper component that provides ReactFlowProvider
+const MeasureVisualizer: React.FC<MeasureVisualizerProps> = (props) => {
+  return (
+    <ReactFlowProvider>
+      <MeasureVisualizerInner {...props} />
+    </ReactFlowProvider>
   );
 };
 
