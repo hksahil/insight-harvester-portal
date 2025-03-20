@@ -158,6 +158,11 @@ const Index = () => {
         content: (
           <div className="space-y-6">
             <UseCaseHelper type="relationships" />
+            <div className="p-4 bg-muted/30 rounded-lg border border-border mt-2 mb-4">
+              <p className="text-sm text-muted-foreground italic">
+                <strong>Note:</strong> Click on nodes of the ERD diagram to get more information
+              </p>
+            </div>
             <RelationshipFlowVisualizer relationships={processedData.relationships} />
           </div>
         ),
@@ -223,7 +228,7 @@ const Index = () => {
         label: 'Measure Visualizer',
         content: (
           <div className="space-y-6">
-            <UseCaseHelper type="measures" />
+            {/* UseCaseHelper removed as requested */}
             <MeasureVisualizer 
               measureData={processedData.measureData}
               columnData={processedData.columnData}
@@ -253,7 +258,12 @@ const Index = () => {
       {
         id: 'documentation',
         label: 'Documentation',
-        content: <DocumentationTab data={processedData} />,
+        content: (
+          <div className="space-y-6">
+            {/* UseCaseHelper removed as requested */}
+            <DocumentationTab data={processedData} />
+          </div>
+        ),
       },
       {
         id: 'ask-gpt',

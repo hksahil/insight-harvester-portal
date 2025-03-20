@@ -1,14 +1,23 @@
 
-import React, { useState } from 'react';
-import { Database, ArrowLeft, Info, HelpCircle, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Home, Info, HelpCircle, Calendar, X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 const NavigationBar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [faqDialogOpen, setFaqDialogOpen] = useState(false);
+  const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
+  const [isHomePage, setIsHomePage] = useState(true);
+
+  useEffect(() => {
+    // Check if we're on the home page and no file is uploaded
+    const isHome = location.pathname === '/' && !document.querySelector('.animate-fade-in.mt-12');
+    setIsHomePage(isHome);
+  }, [location.pathname]);
 
   const goToHome = () => {
     navigate('/');
@@ -19,32 +28,51 @@ const NavigationBar: React.FC = () => {
     <header className="animate-slide-down glass fixed top-0 left-0 right-0 z-50 border-b border-border/40">
       <div className="container flex items-center justify-between h-16 px-4 sm:px-6">
         <div className="flex items-center space-x-2">
-          <Database className="h-6 w-6 text-primary" />
           <span className="text-xl font-semibold tracking-tight">Power BI Assistant</span>
         </div>
         
-        <div className="flex items-center space-x-4">
-          <button 
-            onClick={goToHome}
-            className="flex items-center justify-center rounded-full w-8 h-8 bg-primary/10 text-primary transition-all hover:bg-primary/20"
-            title="Go back to homepage"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <button 
+        <div className="flex items-center space-x-3">
+          {!isHomePage && (
+            <Button 
+              onClick={goToHome}
+              variant="ghost"
+              className="flex items-center gap-2"
+              title="Go back to homepage"
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Button>
+          )}
+          
+          <Button 
             onClick={() => setInfoDialogOpen(true)}
-            className="flex items-center justify-center rounded-full w-8 h-8 bg-primary/10 text-primary transition-all hover:bg-primary/20"
+            variant="ghost"
+            className="flex items-center gap-2"
             title="Information about the app"
           >
             <Info className="h-4 w-4" />
-          </button>
-          <button 
+            Info
+          </Button>
+          
+          <Button 
             onClick={() => setFaqDialogOpen(true)}
-            className="flex items-center justify-center rounded-full w-8 h-8 bg-primary/10 text-primary transition-all hover:bg-primary/20"
+            variant="ghost"
+            className="flex items-center gap-2"
             title="Frequently asked questions"
           >
             <HelpCircle className="h-4 w-4" />
-          </button>
+            FAQ
+          </Button>
+          
+          <Button 
+            onClick={() => setUpcomingDialogOpen(true)}
+            variant="ghost"
+            className="flex items-center gap-2"
+            title="Upcoming features"
+          >
+            <Calendar className="h-4 w-4" />
+            Upcoming
+          </Button>
         </div>
       </div>
 
@@ -122,6 +150,55 @@ const NavigationBar: React.FC = () => {
               <h3 className="font-semibold">How do I export data for documentation?</h3>
               <p className="text-sm text-muted-foreground">
                 Use the Documentation tab to export data in PDF or Excel format.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upcoming Features Dialog */}
+      <Dialog open={upcomingDialogOpen} onOpenChange={setUpcomingDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Upcoming Features</DialogTitle>
+            <DialogClose className="absolute right-4 top-4 opacity-70 ring-offset-background transition-opacity hover:opacity-100">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            <div>
+              <h3 className="font-semibold">DAX Formula Analyzer</h3>
+              <p className="text-sm text-muted-foreground">
+                Advanced analysis of DAX formulas to identify optimization opportunities and potential issues.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold">Performance Recommendations</h3>
+              <p className="text-sm text-muted-foreground">
+                Smart recommendations to improve the performance of your Power BI model based on industry best practices.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold">Documentation Export Improvements</h3>
+              <p className="text-sm text-muted-foreground">
+                Enhanced documentation export with customizable templates and more export formats.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold">Model Comparison</h3>
+              <p className="text-sm text-muted-foreground">
+                Compare two different versions of your Power BI model to identify changes and potential issues.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold">Advanced Visualization Tools</h3>
+              <p className="text-sm text-muted-foreground">
+                More visualizations to help you understand your data model structure and dependencies.
               </p>
             </div>
           </div>

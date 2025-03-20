@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -7,19 +6,23 @@ import { Check, X, AlertTriangle, FileText, BarChart3, BadgeCheck, Layers, Info,
 import { analyzeModel, AnalysisResult, CategoryResult, RuleCategory } from "@/services/BestPracticesAnalyzer";
 import { ProcessedData } from "@/services/VpaxProcessor";
 import { Checkbox } from "@/components/ui/checkbox";
+
 interface BestPracticesAnalyzerProps {
   data: ProcessedData;
 }
+
 const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
   data
 }) => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<RuleCategory | 'overview'>('overview');
   const [expandedRules, setExpandedRules] = useState<Set<string>>(new Set());
-  const runAnalysis = () => {
+  
+  useEffect(() => {
     const result = analyzeModel(data);
     setAnalysisResult(result);
-  };
+  }, [data]);
+
   const toggleRuleExpansion = (ruleId: string) => {
     const newExpandedRules = new Set(expandedRules);
     if (newExpandedRules.has(ruleId)) {
@@ -29,6 +32,7 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
     }
     setExpandedRules(newExpandedRules);
   };
+
   const getCategoryIcon = (category: RuleCategory) => {
     switch (category) {
       case 'maintenance':
@@ -51,23 +55,13 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
         return <Info className="h-4 w-4" />;
     }
   };
+
   if (!analysisResult) {
-    return <div className="space-y-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <h3 className="text-xl font-medium">Best Practices Analyzer</h3>
-              <p className="text-muted-foreground">
-                Analyze your model against industry best practices to improve performance and maintainability.
-              </p>
-              <Button onClick={runAnalysis} className="mt-4">
-                Run Analysis
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>;
+    return <div className="flex justify-center items-center h-40">
+      <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>;
   }
+
   const categoryCards = analysisResult.categories.map(category => <Card key={category.category} className="relative overflow-hidden">
       <CardContent className="pt-6">
         <div className="space-y-4">
@@ -93,11 +87,13 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
         </div>
       </CardContent>
     </Card>);
+
   const renderOverview = () => <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categoryCards}
       </div>
     </div>;
+
   const renderCategoryDetails = (category: CategoryResult) => <div className="space-y-4">
       <div className="flex flex-col space-y-2">
         {category.rules.map(rule => {
@@ -140,6 +136,7 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
       })}
       </div>
     </div>;
+
   return <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Best Practices</h2>
@@ -158,6 +155,22 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
               <Check className="h-4 w-4 text-green-500" />
               <span>{analysisResult.passedRules} Passed</span>
             </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-4 bg-muted/30 rounded-lg border border-border">
+        <div className="flex items-center space-x-2 mb-2">
+          <Info className="h-5 w-5 text-primary" />
+          <h3 className="font-medium">🧮 Scoring System</h3>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          <p>Each checked item scores 1 point. Your compliance score is calculated as:</p>
+          <div className="mt-1 font-mono bg-muted/50 p-2 rounded">
+            Score = (Rules Passed / Total Rules) × 100%
+          </div>
+          <div className="mt-2 font-medium">
+            Your score: {Math.round(analysisResult.passedRules / analysisResult.totalRules * 100)}%
           </div>
         </div>
       </div>
@@ -188,22 +201,7 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
             {renderCategoryDetails(category)}
           </TabsContent>)}
       </Tabs>
-      
-      <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border">
-        <div className="flex items-center space-x-2 mb-2">
-          <Info className="h-5 w-5 text-primary" />
-          <h3 className="font-medium">🧮 Scoring System</h3>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          <p>Each checked item scores 1 point. Your compliance score is calculated as:</p>
-          <div className="mt-1 font-mono bg-muted/50 p-2 rounded">
-            Score = (Rules Passed / Total Rules) × 100%
-          </div>
-          <div className="mt-2 font-medium">
-            Your score: {Math.round(analysisResult.passedRules / analysisResult.totalRules * 100)}%
-          </div>
-        </div>
-      </div>
     </div>;
 };
+
 export default BestPracticesAnalyzer;

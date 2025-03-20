@@ -1,4 +1,3 @@
-
 import { ProcessedData } from './VpaxProcessor';
 
 export interface Rule {
@@ -282,6 +281,95 @@ const daxRules: Rule[] = [
           ? `${measuresWithIfError.length} measures use IFERROR` 
           : 'No measures use IFERROR',
         affectedObjects: measuresWithIfError
+      };
+    }
+  },
+  {
+    id: 'avoid-ifblank',
+    name: 'Avoid using IFBLANK function',
+    description: 'IFBLANK should be replaced with COALESCE() for better readability and performance',
+    category: 'dax',
+    evaluate: (data: ProcessedData): RuleResult => {
+      const measuresWithIfBlank = data.measureData
+        .filter(measure => {
+          const expression = measure.MeasureExpression || '';
+          return /IFBLANK\s*\(/i.test(expression);
+        })
+        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
+      
+      return {
+        passed: measuresWithIfBlank.length === 0,
+        details: measuresWithIfBlank.length > 0 
+          ? `${measuresWithIfBlank.length} measures use IFBLANK instead of COALESCE` 
+          : 'No measures use IFBLANK',
+        affectedObjects: measuresWithIfBlank
+      };
+    }
+  },
+  {
+    id: 'avoid-all-in-filters',
+    name: 'Avoid using ALL() in filters',
+    description: 'ALL() in filters should be replaced with REMOVEFILTERS() for better readability',
+    category: 'dax',
+    evaluate: (data: ProcessedData): RuleResult => {
+      const measuresWithAllInFilters = data.measureData
+        .filter(measure => {
+          const expression = measure.MeasureExpression || '';
+          return /ALL\s*\(/i.test(expression) && !/ALLEXCEPT\s*\(/i.test(expression);
+        })
+        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
+      
+      return {
+        passed: measuresWithAllInFilters.length === 0,
+        details: measuresWithAllInFilters.length > 0 
+          ? `${measuresWithAllInFilters.length} measures use ALL() instead of REMOVEFILTERS()` 
+          : 'No measures use ALL() in filters',
+        affectedObjects: measuresWithAllInFilters
+      };
+    }
+  },
+  {
+    id: 'avoid-nested-if',
+    name: 'Avoid nested IF conditions in measures',
+    description: 'Nested IF conditions should be replaced with SWITCH() for better readability',
+    category: 'dax',
+    evaluate: (data: ProcessedData): RuleResult => {
+      const measuresWithNestedIf = data.measureData
+        .filter(measure => {
+          const expression = measure.MeasureExpression || '';
+          // Check for patterns like IF(..., IF(... or multiple IF statements
+          return /IF\s*\([^)]*IF\s*\(/i.test(expression);
+        })
+        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
+      
+      return {
+        passed: measuresWithNestedIf.length === 0,
+        details: measuresWithNestedIf.length > 0 
+          ? `${measuresWithNestedIf.length} measures use nested IF conditions` 
+          : 'No measures use nested IF conditions',
+        affectedObjects: measuresWithNestedIf
+      };
+    }
+  },
+  {
+    id: 'avoid-distinctcount',
+    name: 'Avoid using DISTINCTCOUNT function in measures',
+    description: 'DISTINCTCOUNT should be replaced with COUNTROWS(VALUES()) for better performance',
+    category: 'dax',
+    evaluate: (data: ProcessedData): RuleResult => {
+      const measuresWithDistinctCount = data.measureData
+        .filter(measure => {
+          const expression = measure.MeasureExpression || '';
+          return /DISTINCTCOUNT\s*\(/i.test(expression);
+        })
+        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
+      
+      return {
+        passed: measuresWithDistinctCount.length === 0,
+        details: measuresWithDistinctCount.length > 0 
+          ? `${measuresWithDistinctCount.length} measures use DISTINCTCOUNT instead of COUNTROWS(VALUES())` 
+          : 'No measures use DISTINCTCOUNT',
+        affectedObjects: measuresWithDistinctCount
       };
     }
   }
@@ -750,3 +838,4 @@ export function analyzeModel(data: ProcessedData): AnalysisResult {
     failedRules
   };
 }
+
