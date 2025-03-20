@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -17,7 +16,7 @@ import SampleData from "@/components/SampleData";
 import UseCaseHelper from "@/components/UseCaseHelper";
 import { toast } from 'sonner';
 import { processVpaxFile, ProcessedData } from '@/services/VpaxProcessor';
-import { DatabaseZap, LineChart, FileCode, BarChart3, FileText, BookOpen } from 'lucide-react';
+import { DatabaseZap, LineChart, FileCode, BarChart3, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const Index = () => {
@@ -281,7 +280,7 @@ const Index = () => {
             <div className="animate-fade-in max-w-3xl mx-auto text-center space-y-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-foreground/20 blur-3xl opacity-70 -z-10 rounded-full"></div>
-                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-primary">
                   Power BI Assistant
                 </h1>
               </div>
@@ -291,6 +290,10 @@ const Index = () => {
             </div>
             
             <FileUploader onFileUpload={handleFileUpload} />
+            
+            <div className="mt-4 text-center">
+              <SampleData onLoadSample={loadSampleData} />
+            </div>
             
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
@@ -328,11 +331,6 @@ const Index = () => {
                   </p>
                 </div>
               </Card>
-            </div>
-            
-            <div className="mt-12 text-center">
-              <h2 className="text-2xl font-semibold mb-6">No VPAX file ready? Try our sample data</h2>
-              <SampleData onLoadSample={loadSampleData} />
             </div>
             
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
