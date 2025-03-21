@@ -542,6 +542,171 @@ in
       category: 'powerquery',
       submittedBy: 'greg.deckler',
       submittedDate: '2023-12-10'
+    },
+    // Adding the new SQL snippets
+    {
+      id: '11',
+      title: 'Running Total',
+      description: 'SQL query to calculate running total partitioned by customer',
+      code: `SELECT 
+    SalesDate,
+    CustomerID,
+    SUM(SalesAmount) OVER (PARTITION BY CustomerID ORDER BY SalesDate) AS RunningTotal
+FROM Sales`,
+      language: 'sql',
+      category: 'sql',
+      submittedBy: 'sqlmaster',
+      submittedDate: '2024-01-15'
+    },
+    {
+      id: '12',
+      title: 'Year-over-Year (YoY) Growth',
+      description: 'SQL query to calculate year-over-year growth percentage',
+      code: `SELECT 
+    Year,
+    SUM(SalesAmount) AS CurrentYearSales,
+    LAG(SUM(SalesAmount)) OVER (ORDER BY Year) AS PreviousYearSales,
+    (SUM(SalesAmount) - LAG(SUM(SalesAmount)) OVER (ORDER BY Year)) / 
+        NULLIF(LAG(SUM(SalesAmount)) OVER (ORDER BY Year), 0) AS YoYGrowth
+FROM Sales
+GROUP BY Year`,
+      language: 'sql',
+      category: 'sql',
+      submittedBy: 'analyticsguru',
+      submittedDate: '2024-02-20'
+    },
+    {
+      id: '13',
+      title: 'Top N Customers',
+      description: 'SQL query to get top N customers by total sales',
+      code: `SELECT TOP 10 
+    CustomerID,
+    SUM(SalesAmount) AS TotalSales
+FROM Sales
+GROUP BY CustomerID
+ORDER BY TotalSales DESC`,
+      language: 'sql',
+      category: 'sql',
+      submittedBy: 'bizintel',
+      submittedDate: '2024-03-05'
+    },
+    {
+      id: '14',
+      title: 'Pivoting Data',
+      description: 'SQL query for pivoting sales data by year',
+      code: `SELECT 
+    ProductID,
+    SUM(CASE WHEN Year = 2023 THEN SalesAmount ELSE 0 END) AS Sales_2023,
+    SUM(CASE WHEN Year = 2024 THEN SalesAmount ELSE 0 END) AS Sales_2024
+FROM Sales
+GROUP BY ProductID`,
+      language: 'sql',
+      category: 'sql',
+      submittedBy: 'sqlwhiz',
+      submittedDate: '2024-04-10'
+    },
+    // Adding the Python snippets
+    {
+      id: '15',
+      title: 'Refresh PBI via API',
+      description: 'Python script to refresh Power BI dataset using the REST API',
+      code: `import requests
+import json
+
+# Power BI details
+CLIENT_ID = '<your_client_id>'
+CLIENT_SECRET = '<your_client_secret>'
+TENANT_ID = '<your_tenant_id>'
+WORKSPACE_ID = '<your_workspace_id>'
+DATASET_ID = '<your_dataset_id>'
+
+# Get Power BI access token
+def get_access_token():
+    url = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/token"
+    payload = {
+        'grant_type': 'client_credentials',
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'resource': 'https://graph.microsoft.com/'
+    }
+    response = requests.post(url, data=payload)
+    return response.json().get('access_token')
+
+# Trigger dataset refresh
+def refresh_dataset():
+    access_token = get_access_token()
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/datasets/{DATASET_ID}/refreshes"
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
+    response = requests.post(url, headers=headers)
+    if response.status_code == 202:
+        print("Dataset refresh triggered successfully.")
+    else:
+        print(f"Failed to refresh dataset: {response.text}")
+
+refresh_dataset()`,
+      language: 'python',
+      category: 'python',
+      submittedBy: 'pbiautomator',
+      submittedDate: '2024-02-15'
+    },
+    {
+      id: '16',
+      title: 'Moving CSV from Local to Snowflake',
+      description: 'Python script to upload CSV files to Snowflake database',
+      code: `import snowflake.connector
+import pandas as pd
+
+# Snowflake connection details
+SNOWFLAKE_ACCOUNT = '<your_account>.snowflakecomputing.com'
+USER = '<your_username>'
+PASSWORD = '<your_password>'
+WAREHOUSE = '<your_warehouse>'
+DATABASE = '<your_database>'
+SCHEMA = '<your_schema>'
+
+# Establish Snowflake connection
+conn = snowflake.connector.connect(
+    user=USER,
+    password=PASSWORD,
+    account=SNOWFLAKE_ACCOUNT,
+    warehouse=WAREHOUSE,
+    database=DATABASE,
+    schema=SCHEMA
+)
+
+# Function to load DataFrame to Snowflake
+def load_to_snowflake(df, table_name):
+    with conn.cursor() as cur:
+        # Create table if not exists
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            {', '.join([f"{col} STRING" for col in df.columns])}
+        )
+        """
+        cur.execute(create_table_query)
+        
+        # Write DataFrame to Snowflake
+        for index, row in df.iterrows():
+            values = "', '".join(str(val) for val in row.values)
+            insert_query = f"INSERT INTO {table_name} VALUES ('{values}')"
+            cur.execute(insert_query)
+
+# Example CSV file loading
+tables_to_upload = {
+    'sales_table': 'data/sales_data.csv',
+    'customer_table': 'data/customers_data.csv'
+}
+
+for table, file_path in tables_to_upload.items():
+    df = pd.read_csv(file_path)
+    load_to_snowflake(df, table)
+
+print("Data successfully uploaded to Snowflake!")`,
+      language: 'python',
+      category: 'python',
+      submittedBy: 'snowflakedev',
+      submittedDate: '2024-03-20'
     }
   ];
   

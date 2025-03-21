@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -255,7 +254,12 @@ const Index = () => {
       {
         id: 'ask-gpt',
         label: 'Ask GPT',
-        content: <AskGPT />,
+        content: (
+          <AskGPT 
+            tableData={processedData.tableData}
+            columnData={processedData.columnData}
+          />
+        ),
       },
     ];
   };
