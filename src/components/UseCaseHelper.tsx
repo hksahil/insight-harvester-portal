@@ -44,9 +44,8 @@ const UseCaseHelper: React.FC<UseCaseHelperProps> = ({ type }) => {
       'Determine which database or data source is used'
     ],
     'snippets': [
-      'test',
-      'tet2',
-      'sfd2'
+      'Find the most used code snippets here',
+      'Avoid rework'
     ]
   };
 

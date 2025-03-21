@@ -63,7 +63,7 @@ const NavigationBar: React.FC = () => {
             title="Upcoming features"
           >
             <Calendar className="h-4 w-4" />
-            Upcoming
+            Upcoming Features
           </Button>
         </div>
       </div>

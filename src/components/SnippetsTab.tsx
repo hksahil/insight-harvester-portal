@@ -742,7 +742,7 @@ print("Data successfully uploaded to Snowflake!")`,
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" asChild>
-            <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+            <a href="https://forms.gle/MDspaNhXkBgKQKme8" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Submit your snippet
             </a>

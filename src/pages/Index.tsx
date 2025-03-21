@@ -237,7 +237,7 @@ const Index = () => {
       },
       {
         id: 'snippets',
-        label: 'Resuable Snippets',
+        label: 'Reusable Snippets',
         content: (
           <SnippetsTab />
         ),
