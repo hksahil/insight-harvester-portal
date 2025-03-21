@@ -169,7 +169,7 @@ const BestPracticesAnalyzer: React.FC<BestPracticesAnalyzerProps> = ({
           <div className="mt-1 font-mono bg-muted/50 p-2 rounded">
             Score = (Rules Passed / Total Rules) × 100%
           </div>
-          <div className="mt-2 font-medium">
+          <div className="mt-2 font-bold" style={{color:'#0080ff'}}>
             Your score: {Math.round(analysisResult.passedRules / analysisResult.totalRules * 100)}%
           </div>
         </div>

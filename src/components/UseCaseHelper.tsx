@@ -3,7 +3,7 @@ import React from 'react';
 import { Lightbulb } from 'lucide-react';
 
 interface UseCaseHelperProps {
-  type: 'model-metadata' | 'relationships' | 'tables' | 'columns' | 'measures' | 'expressions';
+  type: 'model-metadata' | 'relationships' | 'tables' | 'columns' | 'measures' | 'expressions' | 'snippets';
 }
 
 const UseCaseHelper: React.FC<UseCaseHelperProps> = ({ type }) => {
@@ -42,6 +42,11 @@ const UseCaseHelper: React.FC<UseCaseHelperProps> = ({ type }) => {
       'Identify operations performed in Power Query',
       'Check which queries are parameterized',
       'Determine which database or data source is used'
+    ],
+    'snippets': [
+      'test',
+      'tet2',
+      'sfd2'
     ]
   };
 

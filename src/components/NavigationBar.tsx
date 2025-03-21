@@ -53,7 +53,7 @@ const NavigationBar: React.FC = () => {
             title="Frequently asked questions"
           >
             <HelpCircle className="h-4 w-4" />
-            FAQ
+            What is VPAX
           </Button>
           
           <Button 
@@ -74,7 +74,7 @@ const NavigationBar: React.FC = () => {
           <DialogHeader>
             <DialogTitle>About Power BI Assistant</DialogTitle>
             <DialogClose className="absolute right-4 top-4 opacity-70 ring-offset-background transition-opacity hover:opacity-100">
-              <X className="h-4 w-4" />
+              {/* <X className="h-4 w-4" /> */}
               <span className="sr-only">Close</span>
             </DialogClose>
           </DialogHeader>
@@ -105,7 +105,7 @@ const NavigationBar: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Frequently Asked Questions</DialogTitle>
             <DialogClose className="absolute right-4 top-4 opacity-70 ring-offset-background transition-opacity hover:opacity-100">
-              <X className="h-4 w-4" />
+              {/* <X className="h-4 w-4" /> */}
               <span className="sr-only">Close</span>
             </DialogClose>
           </DialogHeader>
@@ -154,7 +154,7 @@ const NavigationBar: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Upcoming Features</DialogTitle>
             <DialogClose className="absolute right-4 top-4 opacity-70 ring-offset-background transition-opacity hover:opacity-100">
-              <X className="h-4 w-4" />
+              {/* <X className="h-4 w-4" /> */}
               <span className="sr-only">Close</span>
             </DialogClose>
           </DialogHeader>

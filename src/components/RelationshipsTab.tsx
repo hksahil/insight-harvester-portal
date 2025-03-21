@@ -65,11 +65,11 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
   
   return (
     <div className="animate-fade-in space-y-6">
+      <h2 className="text-xl font-medium">Relationships</h2>
       <RelationshipVisualizer relationships={relationships} />
       
       <div className="space-y-4 p-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-medium">Relationships</h2>
           <button 
             onClick={() => {
               setTableFilters([]);

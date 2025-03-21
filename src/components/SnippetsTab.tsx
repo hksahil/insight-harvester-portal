@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CodeDisplay from '@/components/CodeDisplay';
 import { toast } from 'sonner';
+import UseCaseHelper from './UseCaseHelper';
 
 interface SnippetCategory {
   id: string;
@@ -739,7 +740,6 @@ print("Data successfully uploaded to Snowflake!")`,
             />
           </div>
         </div>
-        
         <div className="flex justify-end gap-2">
           <Button variant="outline" asChild>
             <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
@@ -749,6 +749,7 @@ print("Data successfully uploaded to Snowflake!")`,
           </Button>
         </div>
       </div>
+      <UseCaseHelper type="snippets" />
       
       <div className="flex flex-wrap gap-2">
         {categories.map(category => (
@@ -778,9 +779,9 @@ print("Data successfully uploaded to Snowflake!")`,
                   </div>
                   <Badge className="uppercase">{snippet.category === 'tmdl' ? 'TMDL' : snippet.category}</Badge>
                 </div>
-                <div className="text-xs text-muted-foreground">
+                {/* <div className="text-xs text-muted-foreground">
                   Submitted by {snippet.submittedBy} on {snippet.submittedDate}
-                </div>
+                </div> */}
               </div>
               
               <CodeDisplay code={snippet.code} language={snippet.language === 'prompt' ? 'markdown' : snippet.language} />

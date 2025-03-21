@@ -14,11 +14,11 @@ const ModelMetadataWithVisualization: React.FC<ModelMetadataWithVisualizationPro
   return (
     <div className="space-y-6">
       <UseCaseHelper type="model-metadata" />
-      
+      <h3 className="text-xl font-semibold" style={{paddingLeft:'10px'}}>Model Summary</h3>
       <ModelMetadataCard metadata={data.modelInfo} />
       
       <div className="mt-8 space-y-4">
-        <h3 className="text-xl font-semibold">Relationship Visualization</h3>
+        <h3 className="text-xl font-semibold" style={{paddingLeft:'10px'}}>Relationship Visualization</h3>
         <div className="p-4 bg-muted/30 rounded-lg border border-border">
           <p className="text-sm text-muted-foreground italic">
             <strong>Note:</strong> Click on tables or relationship lines in the diagram to get more information

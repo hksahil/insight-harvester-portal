@@ -89,6 +89,19 @@ export interface ProcessedData {
   relationships: Relationship[];
 }
 
+export function gbconverter(number: number|undefined) {
+  if (number===undefined)
+    return undefined;
+  const val_in_gb = number / (1024 * 1024 * 1024);
+  return `${Math.round(val_in_gb * 100) / 100}GB`;
+}
+
+export function dateconverter(date: string|undefined) {
+  if (date===undefined)
+    return undefined;
+  return date.substring(0,10);
+}
+
 export async function processVpaxFile(file: File): Promise<ProcessedData> {
   try {
     const zip = new JSZip();
@@ -174,7 +187,7 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       console.warn('No DaxVpaView.json or similar file found. Using default values.');
       
       const { modelInfo, tableData, expressionData } = processModelBim(modelBimData, modelName);
-      
+      console.log(modelInfo)
       return {
         modelInfo,
         tableData,
@@ -241,8 +254,8 @@ function processModelBim(data: any, extractedModelName: string): { modelInfo: Mo
     Attribute: ["Model Name", "Date Modified", "Total Size of Model", "Number of Tables", "Number of Partitions", "Max Row Count of Biggest Table", "Total Columns", "Total Measures"],
     Value: [
       modelName,
-      data.lastUpdate || data.LastUpdate || data.model?.lastUpdate || "Unknown",
-      data.model?.estimatedSize || data.estimatedSize || "Not Available",
+      dateconverter(data.lastUpdate) || dateconverter(data.LastUpdate) || dateconverter(data.model?.lastUpdate) || "Unknown",
+      gbconverter(data.model?.estimatedSize) || gbconverter(data.estimatedSize) || "Not Available",
       tables.length,
       numPartitions,
       maxRowCount === 0 ? "Not Available" : maxRowCount,

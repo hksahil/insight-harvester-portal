@@ -86,7 +86,7 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
     <div className="animate-fade-in space-y-6 p-2">
       <h2 className="text-xl font-medium">Documentation</h2>
       
-      <UseCaseHelper type="model-metadata" />
+      {/* <UseCaseHelper type="model-metadata" /> */}
       
       <div className="bg-muted/30 rounded-lg p-6 border border-border space-y-6">
         <div className="max-w-xl">

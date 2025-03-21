@@ -52,7 +52,7 @@ const Index = () => {
             "Total Relationships"
           ],
           Value: [
-            "Adventure Works", "2023-06-15", 25600000, 
+            "Adventure Works", "2023-06-15", "1.2 GB", 
             15, 20, 
             1500000, 120, 45, 
             35
@@ -143,7 +143,7 @@ const Index = () => {
     return [
       {
         id: 'model-metadata',
-        label: 'Model Metadata',
+        label: 'Model',
         content: (
           <ModelMetadataWithVisualization data={processedData} />
         ),
@@ -227,7 +227,7 @@ const Index = () => {
       },
       {
         id: 'expressions',
-        label: 'Expressions',
+        label: 'PowerQuery',
         content: (
           <div className="space-y-6">
             <UseCaseHelper type="expressions" />
@@ -237,7 +237,7 @@ const Index = () => {
       },
       {
         id: 'snippets',
-        label: 'Snippets',
+        label: 'Resuable Snippets',
         content: (
           <SnippetsTab />
         ),
@@ -265,7 +265,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen pb-16 bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen pb-16 bg-gradient-to-b from-background to-muted/20" style={{paddingBottom:'0px'}}>
       <NavigationBar />
       
       <main className="container mx-auto pt-24 px-4 sm:px-6">
