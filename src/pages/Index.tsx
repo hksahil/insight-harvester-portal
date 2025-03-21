@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
 import TabsContainer from "@/components/TabsContainer";
-import ModelMetadataCard from "@/components/ModelMetadataCard";
-import RelationshipFlowVisualizer from "@/components/RelationshipFlowVisualizer";
+import ModelMetadataWithVisualization from "@/components/ModelMetadataWithVisualization";
 import DataTab from "@/components/DataTab";
 import RelationshipsTab from "@/components/RelationshipsTab";
 import ExpressionDisplay from "@/components/ExpressionDisplay";
@@ -14,6 +13,7 @@ import MeasureVisualizer from "@/components/MeasureVisualizer";
 import BestPracticesAnalyzer from "@/components/BestPracticesAnalyzer";
 import Footer from "@/components/Footer";
 import SampleData from "@/components/SampleData";
+import SnippetsTab from "@/components/SnippetsTab";
 import UseCaseHelper from "@/components/UseCaseHelper";
 import { toast } from 'sonner';
 import { processVpaxFile, ProcessedData } from '@/services/VpaxProcessor';
@@ -146,25 +146,7 @@ const Index = () => {
         id: 'model-metadata',
         label: 'Model Metadata',
         content: (
-          <div className="space-y-6">
-            <UseCaseHelper type="model-metadata" />
-            <ModelMetadataCard metadata={processedData.modelInfo} />
-          </div>
-        ),
-      },
-      {
-        id: 'relationship-flow',
-        label: 'Relationship Visualizer',
-        content: (
-          <div className="space-y-6">
-            <UseCaseHelper type="relationships" />
-            <div className="p-4 bg-muted/30 rounded-lg border border-border mt-2 mb-4">
-              <p className="text-sm text-muted-foreground italic">
-                <strong>Note:</strong> Click on nodes of the ERD diagram to get more information
-              </p>
-            </div>
-            <RelationshipFlowVisualizer relationships={processedData.relationships} />
-          </div>
+          <ModelMetadataWithVisualization data={processedData} />
         ),
       },
       {
@@ -252,6 +234,13 @@ const Index = () => {
             <UseCaseHelper type="expressions" />
             <ExpressionDisplay expressions={processedData.expressionData} />
           </div>
+        ),
+      },
+      {
+        id: 'snippets',
+        label: 'Snippets',
+        content: (
+          <SnippetsTab />
         ),
       },
       {

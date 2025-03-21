@@ -11,7 +11,6 @@ import {
   Node,
   Edge,
   Connection,
-  MarkerType,
   Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -111,7 +110,7 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
       });
     });
     
-    // Create edges for each relationship
+    // Create edges for each relationship - without arrows
     relationships.forEach((rel, index) => {
       relationshipEdges.push({
         id: `edge-${index}`,
@@ -119,12 +118,7 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
         target: rel.ToTableName,
         animated: false,
         style: { stroke: '#707070', strokeWidth: 2 },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 15,
-          height: 15,
-          color: '#707070',
-        },
+        // Removed markerEnd to remove the arrow
         label: rel.cardinality,
         data: {
           fromTable: rel.FromTableName,
