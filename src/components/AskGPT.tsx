@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Send, Brain, Database } from 'lucide-react';
 import { toast } from 'sonner';
@@ -93,8 +92,14 @@ const AskGPT: React.FC<{
   
   const handleTableSelection = (value: string) => {
     // For multi-select tables
-    const tables = value.split(',');
-    setSelectedTables(tables);
+    setSelectedTables(prev => {
+      // If value is in the array, remove it
+      if (prev.includes(value)) {
+        return prev.filter(table => table !== value);
+      }
+      // Otherwise add it
+      return [...prev, value];
+    });
   };
   
   // Get unique table names from data
@@ -140,23 +145,23 @@ const AskGPT: React.FC<{
               <label className="text-sm font-medium block mb-2">
                 Select Tables
               </label>
-              <Select 
-                onValueChange={handleTableSelection}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select tables..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Tables</SelectLabel>
-                    {uniqueTableNames.map(tableName => (
-                      <SelectItem key={tableName} value={tableName}>
-                        {tableName}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto p-2 bg-background rounded-md border border-input">
+                {uniqueTableNames.map((tableName, idx) => (
+                  <div key={idx} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={`table-${idx}`}
+                      checked={selectedTables.includes(tableName)}
+                      onCheckedChange={() => handleTableSelection(tableName)}
+                    />
+                    <label 
+                      htmlFor={`table-${idx}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {tableName}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
             
             {tableColumns.length > 0 && (
