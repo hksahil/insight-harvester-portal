@@ -79,7 +79,7 @@ const NavigationBar: React.FC = () => {
             </DialogClose>
           </DialogHeader>
           <div className="space-y-4">
-            <p>PowerBI Assistant tool is designed to help Power BI developers understand their model better, 
+            <p className="text-sm text-muted-foreground">PowerBI Assistant tool is designed to help Power BI developers understand their model better, 
               identify optimization opportunities, document their models & leverage AI to create new measures/find insights</p>
             
             <div className="space-y-2">
