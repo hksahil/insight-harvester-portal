@@ -41,9 +41,14 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
       return "Not Available";
     }
     
-    // For Max Row Count, convert to millions
+    // For Max Row Count, convert to millions if it's a number
     if (attribute === 'Max Row Count of Biggest Table' && typeof value === 'number') {
       return `${(value / 1000000).toFixed(2)}M`;
+    }
+    
+    // For Total Size of Model, handle DirectQuery specially
+    if (attribute === 'Total Size of Model' && typeof value === 'string' && value.includes('DirectQuery')) {
+      return value;
     }
     
     return value?.toString() || "N/A";
