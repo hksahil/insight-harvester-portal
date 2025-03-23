@@ -27,20 +27,29 @@ const ModelMetadataWithVisualization: React.FC<ModelMetadataWithVisualizationPro
     // Find index of Total Size of Model attribute
     const totalSizeIndex = modelInfo.Attribute.findIndex(attr => attr === "Total Size of Model");
     if (totalSizeIndex !== -1) {
-      // Calculate total size from the sum of Total Table Size in tableData
-      const totalBytes = data.tableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
-      
-      // Check if the model is DirectQuery based on table mode
+      // Check if this is a DirectQuery model
       const isDirectQuery = data.tableData.some(table => 
         typeof table.Mode === 'string' && 
         table.Mode.toLowerCase().includes('directquery'));
       
-      if (totalBytes > 0) {
+      // Calculate total size from the sum of Total Table Size in tableData
+      let totalSize = 0;
+      let hasValidSize = false;
+      
+      data.tableData.forEach(table => {
+        const tableSize = table["Total Table Size"] || 0;
+        if (tableSize > 0) {
+          hasValidSize = true;
+          totalSize += tableSize;
+        }
+      });
+      
+      if (hasValidSize) {
         // Convert to GB for display
-        const totalGB = totalBytes / (1024 * 1024 * 1024);
+        const totalGB = totalSize / (1024 * 1024 * 1024);
         modelInfo.Value[totalSizeIndex] = `${Math.round(totalGB * 100) / 100}GB`;
       } else if (isDirectQuery) {
-        // Handle DirectQuery models specifically
+        // Handle DirectQuery models with no size data
         modelInfo.Value[totalSizeIndex] = "DirectQuery (Size N/A)";
       } else {
         modelInfo.Value[totalSizeIndex] = "0GB";

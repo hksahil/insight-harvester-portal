@@ -254,15 +254,28 @@ function processModelBim(data: any, extractedModelName: string): { modelInfo: Mo
                     data.model?.database?.name || 
                     "Unknown";
   
+  // Check if the model is DirectQuery
+  const isDirectQuery = tables.some((table: any) => {
+    const partitions = table.partitions || [];
+    return partitions.length > 0 && 
+           partitions[0].mode && 
+           partitions[0].mode.toLowerCase().includes('directquery');
+  });
+  
   // Calculate total model size from tableData
   const totalModelSize = tableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
+  
+  // For DirectQuery models with no size data, use a placeholder instead of 0
+  const totalSizeValue = isDirectQuery && totalModelSize === 0 
+    ? "DirectQuery (Size N/A)" 
+    : gbconverter(totalModelSize) || "Not Available";
   
   const modelInfo: ModelInfo = {
     Attribute: ["Model Name", "Date Modified", "Total Size of Model", "Number of Tables", "Number of Partitions", "Max Row Count of Biggest Table", "Total Columns", "Total Measures"],
     Value: [
       modelName,
       dateconverter(data.lastUpdate) || dateconverter(data.LastUpdate) || dateconverter(data.model?.lastUpdate) || "Unknown",
-      gbconverter(totalModelSize) || "Not Available",
+      totalSizeValue,
       tables.length,
       numPartitions,
       maxRowCount === 0 ? "Not Available" : maxRowCount,
@@ -411,9 +424,25 @@ function mergeMetadata(tableData: TableData[], daxTableData: Record<string, any>
   const totalTableSize = Object.values(daxTableData)
     .reduce((sum: number, table: any) => sum + (table.TableSize || 0), 0);
   
+  const isAllDirectQuery = tableData.every(table => 
+    table.Mode && table.Mode.toLowerCase().includes('directquery')
+  );
+  
   return tableData.map(table => {
     const daxInfo = daxTableData[table["Table Name"]] || {};
-    const tableSize = daxInfo.TableSize || 0;
+    
+    // For DirectQuery tables, ensure we're setting a sensible size
+    // Even if it's 0 in the original data
+    let tableSize = daxInfo.TableSize || 0;
+    
+    // If it's a DirectQuery table with no size info, we'll set a minimum size
+    // just for visual representation in the UI
+    const isDirectQueryTable = table.Mode && table.Mode.toLowerCase().includes('directquery');
+    if (isDirectQueryTable && tableSize === 0 && isAllDirectQuery) {
+      // Assign a nominal size to DirectQuery tables (1MB per table) just for UI representation
+      tableSize = 1 * 1024 * 1024;
+    }
+    
     const columnsSize = daxInfo.ColumnsSize || 0;
     const relationshipsSize = tableSize - columnsSize;
     
