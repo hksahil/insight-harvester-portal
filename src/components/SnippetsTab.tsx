@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Copy, ExternalLink, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import CodeDisplay from '@/components/CodeDisplay';
 import { toast } from 'sonner';
 import UseCaseHelper from './UseCaseHelper';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface SnippetCategory {
   id: string;
@@ -27,6 +30,8 @@ interface Snippet {
 const SnippetsTab: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   
   const categories: SnippetCategory[] = [
     { id: 'all', name: 'All' },
@@ -544,7 +549,6 @@ in
       submittedBy: 'greg.deckler',
       submittedDate: '2023-12-10'
     },
-    // Adding the new SQL snippets
     {
       id: '11',
       title: 'Running Total',
@@ -606,7 +610,6 @@ GROUP BY ProductID`,
       submittedBy: 'sqlwhiz',
       submittedDate: '2024-04-10'
     },
-    // Adding the Python snippets
     {
       id: '15',
       title: 'Refresh PBI via API',
@@ -711,7 +714,6 @@ print("Data successfully uploaded to Snowflake!")`,
     }
   ];
   
-  // Filter snippets based on active category and search query
   const filteredSnippets = snippets.filter(snippet => {
     const matchesCategory = activeCategory === 'all' || snippet.category === activeCategory;
     const matchesSearch = searchQuery === '' || 
@@ -724,6 +726,16 @@ print("Data successfully uploaded to Snowflake!")`,
   
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitted(true);
+  };
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setFormSubmitted(false);
   };
   
   return (
@@ -741,12 +753,76 @@ print("Data successfully uploaded to Snowflake!")`,
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" asChild>
-            <a href="https://forms.gle/MDspaNhXkBgKQKme8" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Submit your snippet
-            </a>
-          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Submit your snippet
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[525px]">
+              {!formSubmitted ? (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Submit a new snippet</DialogTitle>
+                    <DialogDescription>
+                      Share your useful code snippet with the community. Your submission will be reviewed before publishing.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form 
+                    name="snippet-submission" 
+                    method="POST" 
+                    netlify="true"
+                    data-netlify="true"
+                    onSubmit={handleFormSubmit}
+                    className="space-y-4 py-4"
+                  >
+                    <input type="hidden" name="form-name" value="snippet-submission" />
+                    
+                    <div className="grid w-full gap-1.5">
+                      <Label htmlFor="snippet-name">Snippet Name</Label>
+                      <Input 
+                        id="snippet-name" 
+                        name="snippet-name" 
+                        placeholder="Enter a descriptive name for your snippet" 
+                        required 
+                      />
+                    </div>
+                    
+                    <div className="grid w-full gap-1.5">
+                      <Label htmlFor="snippet-description">Snippet Description</Label>
+                      <Textarea 
+                        id="snippet-description" 
+                        name="snippet-description" 
+                        placeholder="Briefly describe what your snippet does and how it's useful" 
+                        required 
+                      />
+                    </div>
+                    
+                    <div className="grid w-full gap-1.5">
+                      <Label htmlFor="submitted-by">Submitted By</Label>
+                      <Input 
+                        id="submitted-by" 
+                        name="submitted-by" 
+                        placeholder="Your name or username" 
+                        required 
+                      />
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button type="submit">Submit Snippet</Button>
+                    </DialogFooter>
+                  </form>
+                </>
+              ) : (
+                <div className="py-6 text-center space-y-4">
+                  <h3 className="text-xl font-medium">Thank you for your submission!</h3>
+                  <p className="text-muted-foreground">Your snippet has been submitted successfully and will be reviewed.</p>
+                  <Button onClick={closeDialog}>Close</Button>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <UseCaseHelper type="snippets" />
