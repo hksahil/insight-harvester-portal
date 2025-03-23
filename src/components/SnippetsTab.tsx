@@ -6,10 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import CodeDisplay from '@/components/CodeDisplay';
 import { toast } from 'sonner';
 import UseCaseHelper from './UseCaseHelper';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface SnippetCategory {
   id: string;
@@ -30,8 +26,6 @@ interface Snippet {
 const SnippetsTab: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [formSubmitted, setFormSubmitted] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
   
   const categories: SnippetCategory[] = [
     { id: 'all', name: 'All' },
@@ -728,33 +722,8 @@ print("Data successfully uploaded to Snowflake!")`,
     setActiveCategory(categoryId);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-    
-    console.log("Form submission data:", Object.fromEntries(formData));
-    
-    fetch("/", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(formData as any).toString()
-    })
-      .then(() => {
-        console.log("Form successfully submitted");
-        setFormSubmitted(true);
-        toast.success("Snippet submitted successfully!");
-      })
-      .catch((error) => {
-        console.error("Form submission error:", error);
-        toast.error("Error submitting snippet. Please try again.");
-      });
-  };
-
-  const closeDialog = () => {
-    setDialogOpen(false);
-    setFormSubmitted(false);
+  const handleSubmitSnippetClick = () => {
+    window.open('https://forms.gle/qoPR26vtPbJCbFM69', '_blank');
   };
   
   return (
@@ -772,112 +741,15 @@ print("Data successfully uploaded to Snowflake!")`,
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Submit your snippet
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[525px]">
-              {!formSubmitted ? (
-                <>
-                  <DialogHeader>
-                    <DialogTitle>Submit a new snippet</DialogTitle>
-                    <DialogDescription>
-                      Share your useful code snippet with the community. Your submission will be reviewed before publishing.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form 
-                    name="snippet-submission"
-                    method="POST"
-                    data-netlify="true"
-                    netlify-honeypot="bot-field"
-                    onSubmit={handleFormSubmit}
-                    className="space-y-4 py-4"
-                  >
-                    <p className="hidden">
-                      <label>
-                        Don't fill this out if you're human: <input name="bot-field" />
-                      </label>
-                    </p>
-                    
-                    <input type="hidden" name="form-name" value="snippet-submission" />
-                    
-                    <div className="grid w-full gap-1.5">
-                      <Label htmlFor="snippet-name">Snippet Name</Label>
-                      <Input 
-                        id="snippet-name" 
-                        name="snippet-name" 
-                        placeholder="Enter a descriptive name for your snippet" 
-                        required 
-                      />
-                    </div>
-                    
-                    <div className="grid w-full gap-1.5">
-                      <Label htmlFor="snippet-description">Snippet Description</Label>
-                      <Textarea 
-                        id="snippet-description" 
-                        name="snippet-description" 
-                        placeholder="Briefly describe what your snippet does and how it's useful" 
-                        required 
-                      />
-                    </div>
-                    
-                    <div className="grid w-full gap-1.5">
-                      <Label htmlFor="snippet-code">Code Snippet</Label>
-                      <Textarea 
-                        id="snippet-code" 
-                        name="snippet-code" 
-                        placeholder="Paste your code snippet here" 
-                        className="font-mono text-sm"
-                        required 
-                        rows={6}
-                      />
-                    </div>
-                    
-                    <div className="grid w-full gap-1.5">
-                      <Label htmlFor="snippet-category">Category</Label>
-                      <select 
-                        id="snippet-category" 
-                        name="snippet-category" 
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
-                        required
-                      >
-                        <option value="">Select a category</option>
-                        <option value="prompt">Prompt</option>
-                        <option value="tmdl">TMDL</option>
-                        <option value="dax">DAX</option>
-                        <option value="sql">SQL</option>
-                        <option value="python">Python</option>
-                        <option value="powerquery">PowerQuery</option>
-                      </select>
-                    </div>
-                    
-                    <div className="grid w-full gap-1.5">
-                      <Label htmlFor="submitted-by">Submitted By</Label>
-                      <Input 
-                        id="submitted-by" 
-                        name="submitted-by" 
-                        placeholder="Your name or username" 
-                        required 
-                      />
-                    </div>
-                    
-                    <DialogFooter>
-                      <Button type="submit">Submit Snippet</Button>
-                    </DialogFooter>
-                  </form>
-                </>
-              ) : (
-                <div className="py-6 text-center space-y-4">
-                  <h3 className="text-xl font-medium">Thank you for your submission!</h3>
-                  <p className="text-muted-foreground">Your snippet has been submitted successfully and will be reviewed.</p>
-                  <Button onClick={closeDialog}>Close</Button>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={handleSubmitSnippetClick}
+          >
+            <Plus className="h-4 w-4" />
+            Submit your snippet
+            <ExternalLink className="h-3.5 w-3.5 ml-1" />
+          </Button>
         </div>
       </div>
       <UseCaseHelper type="snippets" />
@@ -910,9 +782,6 @@ print("Data successfully uploaded to Snowflake!")`,
                   </div>
                   <Badge className="uppercase">{snippet.category === 'tmdl' ? 'TMDL' : snippet.category}</Badge>
                 </div>
-                {/* <div className="text-xs text-muted-foreground">
-                  Submitted by {snippet.submittedBy} on {snippet.submittedDate}
-                </div> */}
               </div>
               
               <CodeDisplay code={snippet.code} language={snippet.language === 'prompt' ? 'markdown' : snippet.language} />
