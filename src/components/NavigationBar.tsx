@@ -79,7 +79,8 @@ const NavigationBar: React.FC = () => {
             </DialogClose>
           </DialogHeader>
           <div className="space-y-4">
-            <p>Power BI Assistant is a tool to analyze and visualize the structure of Power BI models from VPAX files.</p>
+            <p>PowerBI Assistant tool is designed to help Power BI developers understand their model better, 
+              identify optimization opportunities, document their models & leverage AI to create new measures/find insights</p>
             
             <div className="space-y-2">
               <h3 className="font-medium">How to use the app:</h3>
@@ -90,11 +91,6 @@ const NavigationBar: React.FC = () => {
                 <li>Export data for documentation purposes</li>
               </ol>
             </div>
-            
-            <p className="text-sm text-muted-foreground">
-              This tool is designed to help Power BI developers understand their model structure better, 
-              identify optimization opportunities, and document their models.
-            </p>
           </div>
         </DialogContent>
       </Dialog>
