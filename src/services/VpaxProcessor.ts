@@ -96,7 +96,15 @@ export function gbconverter(number: number|undefined) {
   if (number===undefined)
     return undefined;
   const val_in_gb = number / (1024 * 1024 * 1024);
-  return `${val_in_gb.toFixed(3)}GB`;
+  
+  // If the value is less than 1GB, convert to MB
+  if (val_in_gb < 1) {
+    const val_in_mb = number / (1024 * 1024);
+    return `${val_in_mb.toFixed(3)}MB`;
+  } else {
+    // Otherwise show in GB
+    return `${val_in_gb.toFixed(3)}GB`;
+  }
 }
 
 export function dateconverter(date: string|undefined) {

@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import ModelMetadataCard from '@/components/ModelMetadataCard';
 import RelationshipFlowVisualizer from '@/components/RelationshipFlowVisualizer';
@@ -44,14 +45,21 @@ const ModelMetadataWithVisualization: React.FC<ModelMetadataWithVisualizationPro
       });
       
       if (hasValidSize) {
-        // Convert to GB for display with three decimal places
+        // Convert to GB for display with appropriate unit
         const totalGB = totalSize / (1024 * 1024 * 1024);
-        modelInfo.Value[totalSizeIndex] = `${totalGB.toFixed(3)}GB`;
+        
+        // If less than 1GB, show in MB
+        if (totalGB < 1) {
+          const totalMB = totalSize / (1024 * 1024);
+          modelInfo.Value[totalSizeIndex] = `${totalMB.toFixed(3)}MB`;
+        } else {
+          modelInfo.Value[totalSizeIndex] = `${totalGB.toFixed(3)}GB`;
+        }
       } else if (isDirectQuery) {
         // Handle DirectQuery models with no size data
         modelInfo.Value[totalSizeIndex] = "DirectQuery (Size N/A)";
       } else {
-        modelInfo.Value[totalSizeIndex] = "0GB";
+        modelInfo.Value[totalSizeIndex] = "0MB";
       }
     }
     

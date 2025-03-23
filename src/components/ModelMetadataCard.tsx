@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarDays, Database, Table, FileBox, Layers, Grid, BarChart3, GitFork } from 'lucide-react';
 
@@ -46,9 +45,15 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
       return `${(value / 1000000).toFixed(2)}M`;
     }
     
-    // For Total Size of Model, handle DirectQuery specially
-    if (attribute === 'Total Size of Model' && typeof value === 'string' && value.includes('DirectQuery')) {
-      return value;
+    // For Total Size of Model, handle DirectQuery and size units specially
+    if (attribute === 'Total Size of Model') {
+      if (typeof value === 'string') {
+        if (value.includes('DirectQuery')) {
+          return value;
+        }
+        // No need to modify MB or GB units, they're already formatted correctly
+        return value;
+      }
     }
     
     return value?.toString() || "N/A";
