@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -64,10 +63,8 @@ const Index = () => {
           "Mode": i % 2 === 0 ? "DirectQuery" : "Import",
           "Partitions": Math.floor(Math.random() * 3) + 1,
           "Rows": Math.floor(Math.random() * 1000000) + 1000,
-          "Total Table Size": Math.floor(Math.random() * 5000000) + 100000,
-          "Columns Size": Math.floor(Math.random() * 4000000) + 80000,
-          "Relationships Size": Math.floor(Math.random() * 1000000) + 20000,
-          "PctOfTotalSize": Math.random() * 20,
+          "Table Size": Math.floor(Math.random() * 5000000) + 100000,
+          "% of Total Size": Math.random() * 20,
           "Is Hidden": i % 5 === 0,
           "Latest Partition Modified": "2023-06-10",
           "Latest Partition Refreshed": "2023-06-12"
@@ -83,9 +80,7 @@ const Index = () => {
           DisplayFolder: i % 4 === 0 ? "Metrics" : i % 3 === 0 ? "Dimensions" : "",
           Description: `Description for column ${i+1}`,
           IsKey: i % 10 === 0,
-          DataSize: Math.floor(Math.random() * 500000) + 1000,
-          TotalSize: Math.floor(Math.random() * 700000) + 5000,
-          PctOfTotalSize: Math.random() * 15
+          DataSize: Math.floor(Math.random() * 500000) + 1000
         })),
         measureData: Array(45).fill(0).map((_, i) => ({
           MeasureName: `Measure_${i+1}`,
