@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 
@@ -10,9 +11,11 @@ export interface TableData {
   "Table Name": string;
   "Mode": string;
   "Partitions": number;
-  "Rows": number;
-  "Table Size": number;
-  "% of Total Size": number;
+  "Rows": string | number;
+  "Total Table Size": number;
+  "Columns Size": number;
+  "Relationships Size": number;
+  "PctOfTotalSize": string;
   "Is Hidden": boolean;
   [key: string]: any;
 }
@@ -35,6 +38,7 @@ export interface ColumnData {
   DictionarySize?: number;
   DataSize?: number;
   TotalSize?: number;
+  PctOfTotalSize?: string;
   IsReferenced?: boolean;
   IsNullable?: boolean;
   ColumnExpression?: string;
@@ -187,7 +191,7 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
       console.warn('No DaxVpaView.json or similar file found. Using default values.');
       
       const { modelInfo, tableData, expressionData } = processModelBim(modelBimData, modelName);
-      console.log(modelInfo)
+      
       return {
         modelInfo,
         tableData,
@@ -239,7 +243,7 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
 
 function processModelBim(data: any, extractedModelName: string): { modelInfo: ModelInfo; tableData: TableData[]; expressionData: ExpressionData[] } {
   const tables = data.model?.tables || data.tables || data.Tables || [];
-  const { numPartitions, maxRowCount, totalTableSize, tableData, expressionData } = calculateMetadata(tables);
+  const { numPartitions, maxRowCount, tableData, expressionData } = calculateMetadata(tables);
   
   const modelName = extractedModelName !== "Unknown" ? 
                     extractedModelName : 
@@ -250,12 +254,15 @@ function processModelBim(data: any, extractedModelName: string): { modelInfo: Mo
                     data.model?.database?.name || 
                     "Unknown";
   
+  // Calculate total model size from tableData
+  const totalModelSize = tableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
+  
   const modelInfo: ModelInfo = {
     Attribute: ["Model Name", "Date Modified", "Total Size of Model", "Number of Tables", "Number of Partitions", "Max Row Count of Biggest Table", "Total Columns", "Total Measures"],
     Value: [
       modelName,
       dateconverter(data.lastUpdate) || dateconverter(data.LastUpdate) || dateconverter(data.model?.lastUpdate) || "Unknown",
-      gbconverter(data.model?.estimatedSize) || gbconverter(data.estimatedSize) || "Not Available",
+      gbconverter(totalModelSize) || "Not Available",
       tables.length,
       numPartitions,
       maxRowCount === 0 ? "Not Available" : maxRowCount,
@@ -267,10 +274,9 @@ function processModelBim(data: any, extractedModelName: string): { modelInfo: Mo
   return { modelInfo, tableData, expressionData };
 }
 
-function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount: number; totalTableSize: number; tableData: TableData[]; expressionData: ExpressionData[] } {
+function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount: number; tableData: TableData[]; expressionData: ExpressionData[] } {
   let numPartitions = 0;
   let maxRowCount = 0;
-  const totalTableSize = tables.reduce((sum, table) => sum + (table.estimatedSize || 0), 0);
   const tableData: TableData[] = [];
   const expressionData: ExpressionData[] = [];
   
@@ -278,7 +284,6 @@ function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount:
     const partitions = table.partitions || [];
     numPartitions += partitions.length;
     const tableRowCount = partitions.reduce((sum: number, partition: any) => sum + (partition.rows || 0), 0);
-    maxRowCount = Math.max(maxRowCount, tableRowCount);
     
     const expression = partitions.length > 0 && partitions[0].source ? partitions[0].source.expression || "" : "";
     
@@ -297,8 +302,10 @@ function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount:
       "Mode": partitions.length > 0 ? partitions[0].mode || "Unknown" : "Unknown",
       "Partitions": partitions.length,
       "Rows": tableRowCount,
-      "Table Size": table.estimatedSize || 0,
-      "% of Total Size": totalTableSize > 0 ? Math.round((table.estimatedSize || 0) / totalTableSize * 100 * 100) / 100 : 0,
+      "Total Table Size": table.estimatedSize || 0,
+      "Columns Size": 0, // This will be updated during merging with DaxVpaView data
+      "Relationships Size": 0, // This will be updated during merging with DaxVpaView data
+      "PctOfTotalSize": "0%", // This will be updated after all tables are processed
       "Is Hidden": table.isHidden || false,
       "Latest Partition Modified": modifiedTime,
       "Latest Partition Refreshed": refreshedTime
@@ -310,7 +317,17 @@ function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount:
     });
   }
   
-  return { numPartitions, maxRowCount, totalTableSize, tableData, expressionData };
+  // Calculate the total size for percentage calculation
+  const totalSize = tableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
+  
+  // Add percentage to each table
+  tableData.forEach(table => {
+    table["PctOfTotalSize"] = totalSize > 0 
+      ? `${((table["Total Table Size"] / totalSize) * 100).toFixed(2)}%` 
+      : "0%";
+  });
+  
+  return { numPartitions, maxRowCount, tableData, expressionData };
 }
 
 function processDaxVpaView(data: any): { daxTableData: Record<string, any>; columnData: ColumnData[]; measureData: MeasureData[]; relationships: Relationship[] } {
@@ -318,6 +335,9 @@ function processDaxVpaView(data: any): { daxTableData: Record<string, any>; colu
   for (const table of data.Tables || []) {
     daxTableData[table.TableName] = table;
   }
+  
+  // Calculate total size for all columns for PctOfTotalSize
+  const totalColumnSize = (data.Columns || []).reduce((sum: number, column: any) => sum + (column.TotalSize || 0), 0);
   
   const columnData: ColumnData[] = (data.Columns || []).map((column: any) => ({
     TableName: column.TableName || "Unknown",
@@ -337,6 +357,7 @@ function processDaxVpaView(data: any): { daxTableData: Record<string, any>; colu
     DictionarySize: column.DictionarySize || 0,
     DataSize: column.DataSize || 0,
     TotalSize: column.TotalSize || 0,
+    PctOfTotalSize: totalColumnSize > 0 ? `${((column.TotalSize || 0) / totalColumnSize * 100).toFixed(2)}%` : "0%",
     IsReferenced: column.IsReferenced || false,
     IsNullable: column.IsNullable || false,
     ColumnExpression: column.ColumnExpression || ""
@@ -386,12 +407,23 @@ function processDaxVpaView(data: any): { daxTableData: Record<string, any>; colu
 }
 
 function mergeMetadata(tableData: TableData[], daxTableData: Record<string, any>): TableData[] {
+  // Calculate total size for all tables for PctOfTotalSize
+  const totalTableSize = Object.values(daxTableData)
+    .reduce((sum: number, table: any) => sum + (table.TableSize || 0), 0);
+  
   return tableData.map(table => {
     const daxInfo = daxTableData[table["Table Name"]] || {};
+    const tableSize = daxInfo.TableSize || 0;
+    const columnsSize = daxInfo.ColumnsSize || 0;
+    const relationshipsSize = tableSize - columnsSize;
+    
     return {
       ...table,
-      "Columns Size": daxInfo.ColumnsSize || "N/A",
-      "DAX Table Size": daxInfo.TableSize || "N/A"
+      "Total Table Size": tableSize,
+      "Columns Size": columnsSize,
+      "Relationships Size": relationshipsSize,
+      "PctOfTotalSize": totalTableSize > 0 ? `${((tableSize / totalTableSize) * 100).toFixed(2)}%` : "0%",
+      "Rows": daxInfo.RowsCount !== undefined ? daxInfo.RowsCount : table["Rows"] || "N/A"
     };
   });
 }

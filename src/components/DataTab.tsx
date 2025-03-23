@@ -32,56 +32,75 @@ const DataTab: React.FC<DataTabProps> = ({
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [openFilterDropdowns, setOpenFilterDropdowns] = useState<Record<string, boolean>>({});
   
+  // Calculate PctOfTotalSize for columns if TotalSize exists
+  const processedData = useMemo(() => {
+    if (data.length === 0) return [];
+    
+    // For columns data, calculate PctOfTotalSize
+    if (data[0].hasOwnProperty('TotalSize')) {
+      const totalSizeSum = data.reduce((sum, item) => sum + (item.TotalSize || 0), 0);
+      
+      return data.map(item => ({
+        ...item,
+        PctOfTotalSize: totalSizeSum > 0 
+          ? `${((item.TotalSize || 0) / totalSizeSum * 100).toFixed(2)}%` 
+          : '0%'
+      }));
+    }
+    
+    return data;
+  }, [data]);
+  
   // Get all available columns
   const allColumns = useMemo(() => {
-    if (data.length === 0) return [];
+    if (processedData.length === 0) return [];
     // Remove Lineage Tag from columns
-    return Object.keys(data[0]).filter(col => col !== "Lineage Tag");
-  }, [data]);
+    return Object.keys(processedData[0]).filter(col => col !== "Lineage Tag");
+  }, [processedData]);
   
   // Set active columns on first render
   useMemo(() => {
-    if (activeColumns.length === 0 && data.length > 0) {
+    if (activeColumns.length === 0 && processedData.length > 0) {
       // Initialize with all columns except Lineage Tag
-      setActiveColumns(Object.keys(data[0]).filter(col => col !== "Lineage Tag"));
+      setActiveColumns(Object.keys(processedData[0]).filter(col => col !== "Lineage Tag"));
     }
-  }, [data, activeColumns.length]);
+  }, [processedData, activeColumns.length]);
 
   // Get additional filters based on data
   const availableFilters = useMemo(() => {
-    if (data.length === 0) return {};
+    if (processedData.length === 0) return {};
     
     const filters: Record<string, string[]> = {};
     
     // Add Table Name filter for tables, columns, and measures metadata
-    if (data[0].hasOwnProperty('TableName')) {
-      const tableNames = Array.from(new Set(data.map(item => item.TableName))).filter(Boolean).sort();
+    if (processedData[0].hasOwnProperty('TableName')) {
+      const tableNames = Array.from(new Set(processedData.map(item => item.TableName))).filter(Boolean).sort();
       filters['TableName'] = tableNames as string[];
     }
     
-    if (data[0].hasOwnProperty('Table Name')) {
-      const tableNames = Array.from(new Set(data.map(item => item['Table Name']))).filter(Boolean).sort();
+    if (processedData[0].hasOwnProperty('Table Name')) {
+      const tableNames = Array.from(new Set(processedData.map(item => item['Table Name']))).filter(Boolean).sort();
       filters['Table Name'] = tableNames as string[];
     }
     
     // Add Column Name filter for columns metadata
-    if (data[0].hasOwnProperty('ColumnName')) {
-      const columnNames = Array.from(new Set(data.map(item => item.ColumnName))).filter(Boolean).sort();
+    if (processedData[0].hasOwnProperty('ColumnName')) {
+      const columnNames = Array.from(new Set(processedData.map(item => item.ColumnName))).filter(Boolean).sort();
       filters['ColumnName'] = columnNames as string[];
     }
     
     return filters;
-  }, [data]);
+  }, [processedData]);
 
   // Get unique values for each filter column
   const filterOptions: Record<string, string[]> = {};
   filterColumns.forEach(column => {
-    const uniqueValues = Array.from(new Set(data.map(item => item[column]))).filter(Boolean);
+    const uniqueValues = Array.from(new Set(processedData.map(item => item[column]))).filter(Boolean);
     filterOptions[column] = uniqueValues as string[];
   });
 
   // Create a filtered version of the data
-  const filteredData = data.filter(item => {
+  const filteredData = processedData.filter(item => {
     // Apply filters
     for (const [key, values] of Object.entries(filters)) {
       if (values && values.length > 0) {
@@ -315,7 +334,7 @@ const DataTab: React.FC<DataTabProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                {data.length > 0 && activeColumns.map((key) => (
+                {processedData.length > 0 && activeColumns.map((key) => (
                   <TableHead key={key} className="whitespace-nowrap">
                     {key}
                   </TableHead>
