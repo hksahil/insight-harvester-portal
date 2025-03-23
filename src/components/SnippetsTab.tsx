@@ -730,6 +730,10 @@ print("Data successfully uploaded to Snowflake!")`,
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    console.log("Form submission data:", Object.fromEntries(formData));
+    
     setFormSubmitted(true);
   };
 
@@ -770,12 +774,11 @@ print("Data successfully uploaded to Snowflake!")`,
                     </DialogDescription>
                   </DialogHeader>
                   <form 
-                    name="snippet-submission" 
-                    method="POST" 
+                    name="snippet-submission"
                     data-netlify="true"
+                    method="POST"
                     onSubmit={handleFormSubmit}
                     className="space-y-4 py-4"
-		    netlify
                   >
                     <input type="hidden" name="form-name" value="snippet-submission" />
                     
@@ -797,6 +800,36 @@ print("Data successfully uploaded to Snowflake!")`,
                         placeholder="Briefly describe what your snippet does and how it's useful" 
                         required 
                       />
+                    </div>
+                    
+                    <div className="grid w-full gap-1.5">
+                      <Label htmlFor="snippet-code">Code Snippet</Label>
+                      <Textarea 
+                        id="snippet-code" 
+                        name="snippet-code" 
+                        placeholder="Paste your code snippet here" 
+                        className="font-mono text-sm"
+                        required 
+                        rows={6}
+                      />
+                    </div>
+                    
+                    <div className="grid w-full gap-1.5">
+                      <Label htmlFor="snippet-category">Category</Label>
+                      <select 
+                        id="snippet-category" 
+                        name="snippet-category" 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+                        required
+                      >
+                        <option value="">Select a category</option>
+                        <option value="prompt">Prompt</option>
+                        <option value="tmdl">TMDL</option>
+                        <option value="dax">DAX</option>
+                        <option value="sql">SQL</option>
+                        <option value="python">Python</option>
+                        <option value="powerquery">PowerQuery</option>
+                      </select>
                     </div>
                     
                     <div className="grid w-full gap-1.5">
