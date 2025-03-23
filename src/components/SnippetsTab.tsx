@@ -772,7 +772,6 @@ print("Data successfully uploaded to Snowflake!")`,
                   <form 
                     name="snippet-submission" 
                     method="POST" 
-                    netlify="true"
                     data-netlify="true"
                     onSubmit={handleFormSubmit}
                     className="space-y-4 py-4"
