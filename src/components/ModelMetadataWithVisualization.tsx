@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import ModelMetadataCard from '@/components/ModelMetadataCard';
 import RelationshipFlowVisualizer from '@/components/RelationshipFlowVisualizer';
@@ -45,9 +44,9 @@ const ModelMetadataWithVisualization: React.FC<ModelMetadataWithVisualizationPro
       });
       
       if (hasValidSize) {
-        // Convert to GB for display
+        // Convert to GB for display with three decimal places
         const totalGB = totalSize / (1024 * 1024 * 1024);
-        modelInfo.Value[totalSizeIndex] = `${Math.round(totalGB * 100) / 100}GB`;
+        modelInfo.Value[totalSizeIndex] = `${totalGB.toFixed(3)}GB`;
       } else if (isDirectQuery) {
         // Handle DirectQuery models with no size data
         modelInfo.Value[totalSizeIndex] = "DirectQuery (Size N/A)";

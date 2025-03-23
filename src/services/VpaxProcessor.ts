@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 
@@ -97,7 +96,7 @@ export function gbconverter(number: number|undefined) {
   if (number===undefined)
     return undefined;
   const val_in_gb = number / (1024 * 1024 * 1024);
-  return `${Math.round(val_in_gb * 100) / 100}GB`;
+  return `${val_in_gb.toFixed(3)}GB`;
 }
 
 export function dateconverter(date: string|undefined) {
