@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 
@@ -10,9 +11,11 @@ export interface TableData {
   "Table Name": string;
   "Mode": string;
   "Partitions": number;
-  "Rows": number;
-  "Table Size": number;
-  "% of Total Size": number;
+  "Rows": number | string;
+  "Total Table Size": number;
+  "Columns Size": number;
+  "Relationships Size"?: number;
+  "PctOfTotalSize"?: number;
   "Is Hidden": boolean;
   [key: string]: any;
 }
@@ -35,6 +38,7 @@ export interface ColumnData {
   DictionarySize?: number;
   DataSize?: number;
   TotalSize?: number;
+  PctOfTotalSize?: number;
   IsReferenced?: boolean;
   IsNullable?: boolean;
   ColumnExpression?: string;
@@ -215,17 +219,44 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     
     const mergedTableData = mergeMetadata(tableData, daxTableData);
     
+    // Calculate PctOfTotalSize for columns
+    const totalColumnSize = columnData.reduce((sum, column) => sum + (column.TotalSize || 0), 0);
+    const columnsWithPct = columnData.map(column => ({
+      ...column,
+      PctOfTotalSize: totalColumnSize > 0 ? 
+        Math.round(((column.TotalSize || 0) / totalColumnSize) * 10000) / 100 : 0
+    }));
+    
+    // Calculate total table size for model info
+    const totalTableSize = mergedTableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
+    
+    // Find max row count
+    const maxRowCount = Math.max(...mergedTableData.map(table => {
+      const rows = typeof table.Rows === 'number' ? table.Rows : 0;
+      return rows;
+    }));
+    
     const relationshipsCount = relationships.length;
     const updatedModelInfo = {
       ...modelInfo,
       Attribute: [...modelInfo.Attribute, "Total Relationships"],
-      Value: [...modelInfo.Value, relationshipsCount]
+      Value: [
+        modelInfo.Value[0], // Model Name
+        modelInfo.Value[1], // Date Modified
+        gbconverter(totalTableSize) || "Not Available", // Update Total Size of Model
+        modelInfo.Value[3], // Number of Tables
+        modelInfo.Value[4], // Number of Partitions
+        maxRowCount === 0 ? "Not Available" : maxRowCount, // Update Max Row Count
+        modelInfo.Value[6], // Total Columns
+        modelInfo.Value[7], // Total Measures
+        relationshipsCount // Total Relationships
+      ]
     };
     
     return {
       modelInfo: updatedModelInfo,
       tableData: mergedTableData,
-      columnData,
+      columnData: columnsWithPct,
       measureData,
       expressionData,
       relationships
@@ -297,8 +328,7 @@ function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount:
       "Mode": partitions.length > 0 ? partitions[0].mode || "Unknown" : "Unknown",
       "Partitions": partitions.length,
       "Rows": tableRowCount,
-      "Table Size": table.estimatedSize || 0,
-      "% of Total Size": totalTableSize > 0 ? Math.round((table.estimatedSize || 0) / totalTableSize * 100 * 100) / 100 : 0,
+      "Total Table Size": table.estimatedSize || 0,
       "Is Hidden": table.isHidden || false,
       "Latest Partition Modified": modifiedTime,
       "Latest Partition Refreshed": refreshedTime
@@ -386,14 +416,30 @@ function processDaxVpaView(data: any): { daxTableData: Record<string, any>; colu
 }
 
 function mergeMetadata(tableData: TableData[], daxTableData: Record<string, any>): TableData[] {
-  return tableData.map(table => {
+  const mergedTableData = tableData.map(table => {
     const daxInfo = daxTableData[table["Table Name"]] || {};
+    const columnsSize = daxInfo.ColumnsSize || 0;
+    const totalTableSize = daxInfo.TableSize || table["Total Table Size"] || 0;
+    const relationshipsSize = totalTableSize - columnsSize;
+    
     return {
       ...table,
-      "Columns Size": daxInfo.ColumnsSize || "N/A",
-      "DAX Table Size": daxInfo.TableSize || "N/A"
+      "Rows": daxInfo.RowsCount !== undefined ? daxInfo.RowsCount : table["Rows"] || "N/A",
+      "Columns Size": columnsSize,
+      "Total Table Size": totalTableSize,
+      "Relationships Size": relationshipsSize > 0 ? relationshipsSize : 0
     };
   });
+  
+  // Calculate total table size for percentage
+  const totalSize = mergedTableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
+  
+  // Add percentage of total size
+  return mergedTableData.map(table => ({
+    ...table,
+    "PctOfTotalSize": totalSize > 0 ? 
+      Math.round(((table["Total Table Size"] || 0) / totalSize) * 10000) / 100 : 0
+  }));
 }
 
 function mapCardinalityToAcronym(cardinalityType: string | undefined): string {

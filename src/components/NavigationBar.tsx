@@ -120,7 +120,12 @@ const NavigationBar: React.FC = () => {
             <div>
               <h3 className="font-semibold">How do I create a VPAX file?</h3>
               <p className="text-sm text-muted-foreground">
-                You can create a VPAX file using tools like DAX Studio, Tabular Editor, or the Power BI Performance Analyzer.
+                You can create a VPAX file using tools like DAX Studio, Tabular Editor, or the Power BI Performance Analyzer. 
+                <a href="https://www.notion.so/How-to-Generate-VPAX-File-of-your-DataModel-1bf6644e204a80618392dd02583ea4fb?pvs=21" 
+                   target="_blank" 
+                   className="text-primary hover:underline ml-1">
+                  Step by Step Guide
+                </a>
               </p>
             </div>
             

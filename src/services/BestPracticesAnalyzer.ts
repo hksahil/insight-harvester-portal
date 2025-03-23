@@ -1,841 +1,460 @@
-import { ProcessedData } from './VpaxProcessor';
+
+import { ProcessedData } from '@/services/VpaxProcessor';
+
+export type RuleCategory = 'maintenance' | 'dax' | 'naming' | 'modeling' | 'formatting' | 'report' | 'performance' | 'error-prevention';
 
 export interface Rule {
   id: string;
   name: string;
   description: string;
   category: RuleCategory;
-  evaluate: (data: ProcessedData) => RuleResult;
-}
-
-export type RuleCategory = 
-  | 'maintenance' 
-  | 'dax' 
-  | 'naming' 
-  | 'modeling' 
-  | 'formatting' 
-  | 'report' 
-  | 'performance' 
-  | 'error-prevention';
-
-export interface RuleResult {
-  passed: boolean;
-  details?: string;
-  affectedObjects?: string[];
+  check: (data: ProcessedData) => {
+    passed: boolean;
+    affectedObjects?: string[];
+  };
 }
 
 export interface CategoryResult {
   category: RuleCategory;
   displayName: string;
-  rules: Rule[];
-  results: Record<string, RuleResult>;
   totalRules: number;
   passedRules: number;
   failedRules: number;
+  rules: Rule[];
+  results: Record<string, {
+    passed: boolean;
+    affectedObjects?: string[];
+  }>;
 }
 
 export interface AnalysisResult {
-  categories: CategoryResult[];
   totalRules: number;
   passedRules: number;
   failedRules: number;
+  categories: CategoryResult[];
 }
 
-// Maintenance best practices rules
-const maintenanceRules: Rule[] = [
+// Define all the rules here
+const rules: Rule[] = [
+  // Maintenance rules
   {
-    id: 'tables-have-relationships',
-    name: 'Ensure tables have relationships',
-    description: 'Tables should be connected to at least one other table via relationships',
+    id: 'meaningful-table-names',
+    name: 'Use meaningful table names',
+    description: 'Table names should be descriptive and avoid generic terms like "Table" or numbers.',
     category: 'maintenance',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const tablesWithRelationships = new Set<string>();
-      
-      data.relationships.forEach(rel => {
-        tablesWithRelationships.add(rel.FromTableName);
-        tablesWithRelationships.add(rel.ToTableName);
-      });
-      
-      const disconnectedTables = data.tableData
-        .filter(table => !tablesWithRelationships.has(table["Table Name"]))
-        .map(table => table["Table Name"]);
+    check: (data: ProcessedData) => {
+      const badNames = data.tableData
+        .filter(t => 
+          /^Table(\d+)?$/i.test(t['Table Name']) ||
+          /^New Table(\d+)?$/i.test(t['Table Name']) ||
+          t['Table Name'].length < 3
+        )
+        .map(t => t['Table Name']);
       
       return {
-        passed: disconnectedTables.length === 0,
-        details: disconnectedTables.length > 0 
-          ? `${disconnectedTables.length} tables have no relationships` 
-          : 'All tables have relationships',
-        affectedObjects: disconnectedTables
+        passed: badNames.length === 0,
+        affectedObjects: badNames
       };
     }
   },
   {
-    id: 'objects-have-descriptions',
-    name: 'Visible objects have descriptions',
-    description: 'All visible columns and measures should have descriptions',
+    id: 'meaningful-column-names',
+    name: 'Use meaningful column names',
+    description: 'Column names should be descriptive and avoid generic terms like "Column" or numbers.',
     category: 'maintenance',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const columnsWithoutDesc = data.columnData
-        .filter(col => !col.IsHidden && (!col.Description || col.Description.trim() === ''))
-        .map(col => `${col.TableName}.${col.ColumnName}`);
+    check: (data: ProcessedData) => {
+      const badNames = data.columnData
+        .filter(c => 
+          /^Column(\d+)?$/i.test(c.ColumnName) ||
+          /^New Column(\d+)?$/i.test(c.ColumnName) ||
+          c.ColumnName.length < 3
+        )
+        .map(c => c.FullColumnName || `${c.TableName}[${c.ColumnName}]`);
       
+      return {
+        passed: badNames.length === 0,
+        affectedObjects: badNames
+      };
+    }
+  },
+  {
+    id: 'meaningful-measure-names',
+    name: 'Use meaningful measure names',
+    description: 'Measure names should be descriptive and avoid generic terms like "Measure" or numbers.',
+    category: 'maintenance',
+    check: (data: ProcessedData) => {
+      const badNames = data.measureData
+        .filter(m => 
+          /^Measure(\d+)?$/i.test(m.MeasureName) ||
+          /^New Measure(\d+)?$/i.test(m.MeasureName) ||
+          m.MeasureName.length < 3
+        )
+        .map(m => m.FullMeasureName || `${m.TableName}[${m.MeasureName}]`);
+      
+      return {
+        passed: badNames.length === 0,
+        affectedObjects: badNames
+      };
+    }
+  },
+  {
+    id: 'measure-description',
+    name: 'Add descriptions to measures',
+    description: 'Measures should have descriptions to help users understand their purpose.',
+    category: 'maintenance',
+    check: (data: ProcessedData) => {
       const measuresWithoutDesc = data.measureData
-        .filter(measure => !measure.Description || measure.Description.trim() === '')
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      const allObjectsWithoutDesc = [...columnsWithoutDesc, ...measuresWithoutDesc];
+        .filter(m => !m.Description || m.Description.trim() === '')
+        .map(m => m.FullMeasureName || `${m.TableName}[${m.MeasureName}]`);
       
       return {
-        passed: allObjectsWithoutDesc.length === 0,
-        details: allObjectsWithoutDesc.length > 0 
-          ? `${allObjectsWithoutDesc.length} objects have no description` 
-          : 'All objects have descriptions',
-        affectedObjects: allObjectsWithoutDesc
+        passed: measuresWithoutDesc.length === 0,
+        affectedObjects: measuresWithoutDesc
       };
     }
   },
+  
+  // DAX rules
   {
-    id: 'no-unused-datasources',
-    name: 'Remove datasources not referenced by any partition',
-    description: 'All tables should have at least one partition',
-    category: 'maintenance',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const tablesWithNoPartitions = data.tableData
-        .filter(table => table["Partitions"] === 0)
-        .map(table => table["Table Name"]);
-      
-      return {
-        passed: tablesWithNoPartitions.length === 0,
-        details: tablesWithNoPartitions.length > 0 
-          ? `${tablesWithNoPartitions.length} tables have no partitions` 
-          : 'All tables have partitions',
-        affectedObjects: tablesWithNoPartitions
-      };
-    }
-  },
-  {
-    id: 'all-objects-have-descriptions',
-    name: 'All columns and measures have descriptions',
-    description: 'All columns and measures should have descriptions for better documentation',
-    category: 'maintenance',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const columnsWithoutDesc = data.columnData
-        .filter(col => !col.Description || col.Description.trim() === '')
-        .map(col => `${col.TableName}.${col.ColumnName}`);
-      
-      const measuresWithoutDesc = data.measureData
-        .filter(measure => !measure.Description || measure.Description.trim() === '')
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      const allObjectsWithoutDesc = [...columnsWithoutDesc, ...measuresWithoutDesc];
-      
-      return {
-        passed: allObjectsWithoutDesc.length === 0,
-        details: allObjectsWithoutDesc.length > 0 
-          ? `${allObjectsWithoutDesc.length} objects have no description` 
-          : 'All objects have descriptions',
-        affectedObjects: allObjectsWithoutDesc
-      };
-    }
-  },
-  {
-    id: 'display-folders-used',
-    name: 'Display folders are used to improve measure organization',
-    description: 'Display folders should be used for better organization of measures',
-    category: 'maintenance',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithoutFolder = data.measureData
-        .filter(measure => !measure.DisplayFolder || measure.DisplayFolder.trim() === '')
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithoutFolder.length === 0,
-        details: measuresWithoutFolder.length > 0 
-          ? `${measuresWithoutFolder.length} measures have no display folder` 
-          : 'All measures use display folders',
-        affectedObjects: measuresWithoutFolder
-      };
-    }
-  },
-  {
-    id: 'measures-in-display-folders',
-    name: 'Measures are grouped into Display Folders for organization',
-    description: 'All measures should be organized into display folders',
-    category: 'maintenance',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithoutFolder = data.measureData
-        .filter(measure => !measure.DisplayFolder || measure.DisplayFolder.trim() === '')
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithoutFolder.length === 0,
-        details: measuresWithoutFolder.length > 0 
-          ? `${measuresWithoutFolder.length} measures have no display folder` 
-          : 'All measures are in display folders',
-        affectedObjects: measuresWithoutFolder
-      };
-    }
-  }
-];
-
-// DAX best practices rules
-const daxRules: Rule[] = [
-  {
-    id: 'no-duplicate-measures',
-    name: 'No two measures have same definition',
-    description: 'Avoid duplicate measure expressions to prevent maintenance issues',
+    id: 'complex-measures',
+    name: 'Avoid overly complex measures',
+    description: 'Measures with very long expressions can be difficult to maintain and understand.',
     category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const expressionMap = new Map<string, string[]>();
+    check: (data: ProcessedData) => {
+      const complexMeasures = data.measureData
+        .filter(m => m.MeasureExpression && m.MeasureExpression.length > 500)
+        .map(m => m.FullMeasureName || `${m.TableName}[${m.MeasureName}]`);
       
-      data.measureData.forEach(measure => {
-        const expression = measure.MeasureExpression?.trim();
-        if (expression) {
-          const normalizedExpression = expression.toLowerCase().replace(/\s+/g, ' ');
-          const measures = expressionMap.get(normalizedExpression) || [];
-          measures.push(`${measure.TableName}.${measure.MeasureName}`);
-          expressionMap.set(normalizedExpression, measures);
-        }
-      });
+      return {
+        passed: complexMeasures.length === 0,
+        affectedObjects: complexMeasures
+      };
+    }
+  },
+  {
+    id: 'nested-calcuations',
+    name: 'Avoid deeply nested calculations',
+    description: 'Deeply nested CALCULATE functions can cause performance issues and are difficult to read.',
+    category: 'dax',
+    check: (data: ProcessedData) => {
+      const deeplyNested = data.measureData
+        .filter(m => {
+          const expr = m.MeasureExpression || '';
+          const calculateMatches = expr.match(/CALCULATE\s*\(/gi);
+          return calculateMatches && calculateMatches.length > 3;
+        })
+        .map(m => m.FullMeasureName || `${m.TableName}[${m.MeasureName}]`);
       
-      const duplicates: string[] = [];
+      return {
+        passed: deeplyNested.length === 0,
+        affectedObjects: deeplyNested
+      };
+    }
+  },
+  
+  // Naming rules
+  {
+    id: 'consistent-naming',
+    name: 'Use consistent naming conventions',
+    description: 'Tables, columns, and measures should follow consistent naming patterns.',
+    category: 'naming',
+    check: (data: ProcessedData) => {
+      // This is a simplified check - it just looks for mixed case patterns
+      const camelCasePattern = /^[a-z][a-zA-Z0-9]*$/;
+      const pascalCasePattern = /^[A-Z][a-zA-Z0-9]*$/;
       
-      expressionMap.forEach((measures, _) => {
-        if (measures.length > 1) {
-          duplicates.push(...measures);
+      const inconsistentNames: string[] = [];
+      
+      // Sample a few table names to determine the convention
+      const tableNames = data.tableData.slice(0, 5).map(t => t['Table Name']);
+      const tableCamelCase = tableNames.filter(name => camelCasePattern.test(name)).length;
+      const tablePascalCase = tableNames.filter(name => pascalCasePattern.test(name)).length;
+      
+      const tableConvention = tableCamelCase > tablePascalCase ? 'camel' : 'pascal';
+      
+      // Check if tables follow the convention
+      data.tableData.forEach(table => {
+        const name = table['Table Name'];
+        if ((tableConvention === 'camel' && !camelCasePattern.test(name)) ||
+            (tableConvention === 'pascal' && !pascalCasePattern.test(name))) {
+          inconsistentNames.push(`Table: ${name}`);
         }
       });
       
       return {
-        passed: duplicates.length === 0,
-        details: duplicates.length > 0 
-          ? `${duplicates.length / 2} duplicate measure definitions found` 
-          : 'No duplicate measure definitions',
-        affectedObjects: duplicates
+        passed: inconsistentNames.length === 0,
+        affectedObjects: inconsistentNames
       };
     }
   },
+  
+  // Modeling rules
   {
-    id: 'use-divide-function',
-    name: 'Use the DIVIDE function for division',
-    description: 'Use DIVIDE() instead of / for division to handle division by zero',
-    category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithDivision = data.measureData
-        .filter(measure => {
-          const expression = measure.MeasureExpression || '';
-          // Look for division operators not in comments and not in DIVIDE function
-          const hasDivisionOperator = /[^\/]\/[^\/]/.test(expression.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, ''));
-          const usesOnlyDivideFunction = !hasDivisionOperator || (hasDivisionOperator && /DIVIDE\s*\(/i.test(expression));
-          return !usesOnlyDivideFunction;
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithDivision.length === 0,
-        details: measuresWithDivision.length > 0 
-          ? `${measuresWithDivision.length} measures use / instead of DIVIDE()` 
-          : 'All divisions use DIVIDE()',
-        affectedObjects: measuresWithDivision
-      };
-    }
-  },
-  {
-    id: 'use-treatas-over-intersect',
-    name: 'Use TREATAS instead of INTERSECT for virtual relationships',
-    description: 'TREATAS is more efficient than INTERSECT for virtual relationships',
-    category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithIntersect = data.measureData
-        .filter(measure => {
-          const expression = measure.MeasureExpression || '';
-          return /INTERSECT\s*\(/i.test(expression) && !/TREATAS\s*\(/i.test(expression);
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithIntersect.length === 0,
-        details: measuresWithIntersect.length > 0 
-          ? `${measuresWithIntersect.length} measures use INTERSECT instead of TREATAS` 
-          : 'No measures use INTERSECT',
-        affectedObjects: measuresWithIntersect
-      };
-    }
-  },
-  {
-    id: 'avoid-iferror',
-    name: 'Avoid using IFERROR function',
-    description: 'IFERROR can mask real issues, use IF(ISERROR()) pattern instead',
-    category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithIfError = data.measureData
-        .filter(measure => {
-          const expression = measure.MeasureExpression || '';
-          return /IFERROR\s*\(/i.test(expression);
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithIfError.length === 0,
-        details: measuresWithIfError.length > 0 
-          ? `${measuresWithIfError.length} measures use IFERROR` 
-          : 'No measures use IFERROR',
-        affectedObjects: measuresWithIfError
-      };
-    }
-  },
-  {
-    id: 'avoid-ifblank',
-    name: 'Avoid using IFBLANK function',
-    description: 'IFBLANK should be replaced with COALESCE() for better readability and performance',
-    category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithIfBlank = data.measureData
-        .filter(measure => {
-          const expression = measure.MeasureExpression || '';
-          return /IFBLANK\s*\(/i.test(expression);
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithIfBlank.length === 0,
-        details: measuresWithIfBlank.length > 0 
-          ? `${measuresWithIfBlank.length} measures use IFBLANK instead of COALESCE` 
-          : 'No measures use IFBLANK',
-        affectedObjects: measuresWithIfBlank
-      };
-    }
-  },
-  {
-    id: 'avoid-all-in-filters',
-    name: 'Avoid using ALL() in filters',
-    description: 'ALL() in filters should be replaced with REMOVEFILTERS() for better readability',
-    category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithAllInFilters = data.measureData
-        .filter(measure => {
-          const expression = measure.MeasureExpression || '';
-          return /ALL\s*\(/i.test(expression) && !/ALLEXCEPT\s*\(/i.test(expression);
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithAllInFilters.length === 0,
-        details: measuresWithAllInFilters.length > 0 
-          ? `${measuresWithAllInFilters.length} measures use ALL() instead of REMOVEFILTERS()` 
-          : 'No measures use ALL() in filters',
-        affectedObjects: measuresWithAllInFilters
-      };
-    }
-  },
-  {
-    id: 'avoid-nested-if',
-    name: 'Avoid nested IF conditions in measures',
-    description: 'Nested IF conditions should be replaced with SWITCH() for better readability',
-    category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithNestedIf = data.measureData
-        .filter(measure => {
-          const expression = measure.MeasureExpression || '';
-          // Check for patterns like IF(..., IF(... or multiple IF statements
-          return /IF\s*\([^)]*IF\s*\(/i.test(expression);
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithNestedIf.length === 0,
-        details: measuresWithNestedIf.length > 0 
-          ? `${measuresWithNestedIf.length} measures use nested IF conditions` 
-          : 'No measures use nested IF conditions',
-        affectedObjects: measuresWithNestedIf
-      };
-    }
-  },
-  {
-    id: 'avoid-distinctcount',
-    name: 'Avoid using DISTINCTCOUNT function in measures',
-    description: 'DISTINCTCOUNT should be replaced with COUNTROWS(VALUES()) for better performance',
-    category: 'dax',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const measuresWithDistinctCount = data.measureData
-        .filter(measure => {
-          const expression = measure.MeasureExpression || '';
-          return /DISTINCTCOUNT\s*\(/i.test(expression);
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: measuresWithDistinctCount.length === 0,
-        details: measuresWithDistinctCount.length > 0 
-          ? `${measuresWithDistinctCount.length} measures use DISTINCTCOUNT instead of COUNTROWS(VALUES())` 
-          : 'No measures use DISTINCTCOUNT',
-        affectedObjects: measuresWithDistinctCount
-      };
-    }
-  }
-];
-
-// Naming best practices rules
-const namingRules: Rule[] = [
-  {
-    id: 'no-special-characters',
-    name: 'Objects should not contain special characters',
-    description: 'Table, column, and measure names should not contain special characters',
-    category: 'naming',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const specialCharsRegex = /[^\w\s]/;
-      
-      const tablesWithSpecialChars = data.tableData
-        .filter(table => specialCharsRegex.test(table["Table Name"]))
-        .map(table => table["Table Name"]);
-      
-      const columnsWithSpecialChars = data.columnData
-        .filter(col => specialCharsRegex.test(col.ColumnName))
-        .map(col => `${col.TableName}.${col.ColumnName}`);
-      
-      const measuresWithSpecialChars = data.measureData
-        .filter(measure => specialCharsRegex.test(measure.MeasureName))
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      const allObjectsWithSpecialChars = [
-        ...tablesWithSpecialChars, 
-        ...columnsWithSpecialChars, 
-        ...measuresWithSpecialChars
-      ];
-      
-      return {
-        passed: allObjectsWithSpecialChars.length === 0,
-        details: allObjectsWithSpecialChars.length > 0 
-          ? `${allObjectsWithSpecialChars.length} objects contain special characters` 
-          : 'No objects contain special characters',
-        affectedObjects: allObjectsWithSpecialChars
-      };
-    }
-  },
-  {
-    id: 'columns-use-camel-case',
-    name: 'Column names use Camel Case consistently',
-    description: 'All column names should follow camelCase naming convention',
-    category: 'naming',
-    evaluate: (data: ProcessedData): RuleResult => {
-      // camelCase: first character lowercase, no spaces, words start with uppercase
-      const camelCaseRegex = /^[a-z][a-zA-Z0-9]*$/;
-      
-      const columnsNotCamelCase = data.columnData
-        .filter(col => !camelCaseRegex.test(col.ColumnName))
-        .map(col => `${col.TableName}.${col.ColumnName}`);
-      
-      return {
-        passed: columnsNotCamelCase.length === 0,
-        details: columnsNotCamelCase.length > 0 
-          ? `${columnsNotCamelCase.length} columns do not use camelCase` 
-          : 'All columns use camelCase',
-        affectedObjects: columnsNotCamelCase
-      };
-    }
-  },
-  {
-    id: 'id-columns-naming',
-    name: 'ID columns end with _ID or _Key',
-    description: 'Columns containing IDs should end with _ID or _Key',
-    category: 'naming',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const idColumns = data.columnData
-        .filter(col => 
-          col.ColumnName.includes("ID") || 
-          col.ColumnName.includes("Id") || 
-          col.ColumnName.includes("id"))
-        .filter(col => 
-          !col.ColumnName.endsWith("_ID") && 
-          !col.ColumnName.endsWith("_Key") && 
-          !col.ColumnName.endsWith("_key") && 
-          !col.ColumnName.endsWith("_KEY"))
-        .map(col => `${col.TableName}.${col.ColumnName}`);
-      
-      return {
-        passed: idColumns.length === 0,
-        details: idColumns.length > 0 
-          ? `${idColumns.length} ID columns do not end with _ID or _Key` 
-          : 'All ID columns end with _ID or _Key',
-        affectedObjects: idColumns
-      };
-    }
-  },
-  {
-    id: 'tables-use-singular-nouns',
-    name: 'Tables use singular nouns for naming',
-    description: 'Table names should use singular nouns instead of plural',
-    category: 'naming',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const pluralRegex = /s$/i;
-      
-      const tablesWithPluralNames = data.tableData
-        .filter(table => pluralRegex.test(table["Table Name"]))
-        .map(table => table["Table Name"]);
-      
-      return {
-        passed: tablesWithPluralNames.length === 0,
-        details: tablesWithPluralNames.length > 0 
-          ? `${tablesWithPluralNames.length} tables use plural nouns` 
-          : 'All tables use singular nouns',
-        affectedObjects: tablesWithPluralNames
-      };
-    }
-  }
-];
-
-// Modeling best practices rules
-const modelingRules: Rule[] = [
-  {
-    id: 'tables-use-partitioning',
-    name: 'Partitioning is used to improve refresh performance',
-    description: 'Tables should use partitioning for better refresh performance',
+    id: 'hidden-measures-in-folder',
+    name: 'Put hidden measures in display folders',
+    description: 'Measures that are meant to be hidden or used as intermediates should be put into a display folder.',
     category: 'modeling',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const tablesWithNoPartitions = data.tableData
-        .filter(table => table["Partitions"] === 0)
-        .map(table => table["Table Name"]);
+    check: (data: ProcessedData) => {
+      const withoutFolder = data.measureData
+        .filter(m => !m.DisplayFolder || m.DisplayFolder.trim() === '')
+        .map(m => m.FullMeasureName || `${m.TableName}[${m.MeasureName}]`);
       
       return {
-        passed: tablesWithNoPartitions.length === 0,
-        details: tablesWithNoPartitions.length > 0 
-          ? `${tablesWithNoPartitions.length} tables have no partitions` 
-          : 'All tables use partitioning',
-        affectedObjects: tablesWithNoPartitions
+        passed: withoutFolder.length === 0,
+        affectedObjects: withoutFolder
       };
     }
   },
   {
-    id: 'avoid-bidirectional-relationships',
-    name: 'Avoid bi-directional relationships',
-    description: 'CrossFilteringBehavior should be OneDirection to avoid performance issues',
+    id: 'query-folding-enabled',
+    name: 'Enable query folding for all tables',
+    description: 'Query folding should be enabled for all tables to improve performance.',
     category: 'modeling',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const biDirectionalRelationships = data.relationships
-        .filter(rel => 
-          rel.CrossFilteringBehavior === 'BothDirections' || 
-          rel.CrossFilteringBehavior === 'Both' ||
-          (rel.cardinality && rel.cardinality.endsWith('B')))
-        .map(rel => `${rel.FromTableName} -> ${rel.ToTableName}`);
+    check: (data: ProcessedData) => {
+      const tablesWithoutFolding = data.expressionData
+        .filter(e => {
+          const expression = e.Expression || '';
+          return expression.includes('EnableFolding') && !expression.includes('EnableFolding=true');
+        })
+        .map(e => e['Table Name']);
       
       return {
-        passed: biDirectionalRelationships.length === 0,
-        details: biDirectionalRelationships.length > 0 
-          ? `${biDirectionalRelationships.length} bi-directional relationships found` 
-          : 'No bi-directional relationships',
-        affectedObjects: biDirectionalRelationships
+        passed: tablesWithoutFolding.length === 0,
+        affectedObjects: tablesWithoutFolding
       };
     }
   },
   {
-    id: 'set-isavailableinmdx-false',
-    name: 'Set IsAvailableInMDX to false',
-    description: 'IsAvailableInMDX should be False for better performance',
+    id: 'reduce-high-cardinality',
+    name: 'Reduce cardinality of big columns',
+    description: 'High cardinality columns (datetime, double, etc.) should be optimized to reduce memory usage.',
     category: 'modeling',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const columnsWithMdxEnabled = data.columnData
-        .filter(col => col.IsAvailableInMDX === true)
-        .map(col => `${col.TableName}.${col.ColumnName}`);
+    check: (data: ProcessedData) => {
+      const highCardinalityColumns = data.columnData
+        .filter(c => {
+          const isHighCardinalityType = ['DateTime', 'Double', 'Decimal'].includes(c.DataType);
+          const isLargeSize = c.TotalSize && c.TotalSize > 1000000; // 1MB
+          return isHighCardinalityType && isLargeSize;
+        })
+        .map(c => c.FullColumnName || `${c.TableName}[${c.ColumnName}]`);
       
       return {
-        passed: columnsWithMdxEnabled.length === 0,
-        details: columnsWithMdxEnabled.length > 0 
-          ? `${columnsWithMdxEnabled.length} columns have IsAvailableInMDX set to true` 
-          : 'All columns have IsAvailableInMDX set to false',
-        affectedObjects: columnsWithMdxEnabled
+        passed: highCardinalityColumns.length === 0,
+        affectedObjects: highCardinalityColumns
       };
     }
   },
+  
+  // Formatting rules
   {
-    id: 'avoid-datetime-columns',
-    name: 'Split date and time',
-    description: 'DateTime columns should be split into separate date and time columns',
-    category: 'modeling',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const dateTimeColumns = data.columnData
-        .filter(col => col.DataType === 'DateTime')
-        .map(col => `${col.TableName}.${col.ColumnName}`);
+    id: 'consistent-format-strings',
+    name: 'Use consistent format strings',
+    description: 'Format strings for similar measure types should be consistent.',
+    category: 'formatting',
+    check: (data: ProcessedData) => {
+      const percentMeasures = data.measureData.filter(m => 
+        m.MeasureName.toLowerCase().includes('percent') || 
+        m.MeasureName.toLowerCase().includes('pct') ||
+        m.MeasureName.toLowerCase().includes('%')
+      );
+      
+      const formatStrings = new Set(percentMeasures.map(m => m.FormatString));
+      const inconsistentPercent = formatStrings.size > 1;
       
       return {
-        passed: dateTimeColumns.length === 0,
-        details: dateTimeColumns.length > 0 
-          ? `${dateTimeColumns.length} DateTime columns found` 
-          : 'No DateTime columns found',
-        affectedObjects: dateTimeColumns
+        passed: !inconsistentPercent,
+        affectedObjects: inconsistentPercent ? percentMeasures.map(m => `${m.TableName}[${m.MeasureName}]`) : []
+      };
+    }
+  },
+  
+  // Report rules
+  {
+    id: 'avoid-hidden-tables',
+    name: 'Avoid using hidden tables for visualization',
+    description: 'Hidden tables should only be used for calculation purposes, not for direct visualization.',
+    category: 'report',
+    check: (data: ProcessedData) => {
+      const hiddenTables = data.tableData
+        .filter(t => t['Is Hidden'] === true)
+        .map(t => t['Table Name']);
+      
+      return {
+        passed: hiddenTables.length === 0,
+        affectedObjects: hiddenTables
+      };
+    }
+  },
+  
+  // Performance rules
+  {
+    id: 'limit-relationship-count',
+    name: 'Limit the number of relationships',
+    description: 'Having too many relationships can impact performance.',
+    category: 'performance',
+    check: (data: ProcessedData) => {
+      const relationshipCount = data.relationships.length;
+      const passed = relationshipCount <= 30;
+      
+      return {
+        passed,
+        affectedObjects: passed ? [] : [`${relationshipCount} relationships exceed the recommended limit of 30`]
       };
     }
   },
   {
     id: 'avoid-many-to-many',
-    name: 'Avoid Many to Many relationships',
-    description: 'Many to Many relationships can cause performance issues',
-    category: 'modeling',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const manyToManyRelationships = data.relationships
-        .filter(rel => 
-          (rel.FromCardinalityType === 'Many' && rel.ToCardinalityType === 'Many') ||
-          (rel.cardinality && rel.cardinality.startsWith('M-M')))
-        .map(rel => `${rel.FromTableName} -> ${rel.ToTableName}`);
+    name: 'Avoid many-to-many relationships',
+    description: 'Many-to-many relationships can cause performance issues and unexpected results.',
+    category: 'performance',
+    check: (data: ProcessedData) => {
+      const manyToMany = data.relationships
+        .filter(r => r.cardinality && r.cardinality.startsWith('M-M'))
+        .map(r => `${r.FromTableName} to ${r.ToTableName}`);
       
       return {
-        passed: manyToManyRelationships.length === 0,
-        details: manyToManyRelationships.length > 0 
-          ? `${manyToManyRelationships.length} many-to-many relationships found` 
-          : 'No many-to-many relationships',
-        affectedObjects: manyToManyRelationships
+        passed: manyToMany.length === 0,
+        affectedObjects: manyToMany
       };
     }
-  }
-];
-
-// Formatting best practices rules
-const formattingRules: Rule[] = [
+  },
+  
+  // Error prevention
   {
-    id: 'relationships-use-integer-type',
-    name: 'Relationship columns should be of integer data type',
-    description: 'For better performance, relationship columns should use integer data types',
-    category: 'formatting',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const relationshipColumnNames = new Set<string>();
+    id: 'data-types-match-in-relationships',
+    name: 'Data types should match in relationships',
+    description: 'Column data types in relationships should match to prevent conversion issues.',
+    category: 'error-prevention',
+    check: (data: ProcessedData) => {
+      const mismatches: string[] = [];
       
       data.relationships.forEach(rel => {
-        if (rel.FromColumn) relationshipColumnNames.add(`${rel.FromTableName}.${rel.FromColumn}`);
-        if (rel.ToColumn) relationshipColumnNames.add(`${rel.ToTableName}.${rel.ToColumn}`);
+        const fromCol = data.columnData.find(c => 
+          c.TableName === rel.FromTableName && 
+          c.ColumnName === rel.FromColumn
+        );
+        
+        const toCol = data.columnData.find(c => 
+          c.TableName === rel.ToTableName && 
+          c.ColumnName === rel.ToColumn
+        );
+        
+        if (fromCol && toCol && fromCol.DataType !== toCol.DataType) {
+          mismatches.push(`${fromCol.TableName}[${fromCol.ColumnName}](${fromCol.DataType}) to ${toCol.TableName}[${toCol.ColumnName}](${toCol.DataType})`);
+        }
       });
       
-      const nonIntegerRelColumns = data.columnData
-        .filter(col => {
-          const fullName = `${col.TableName}.${col.ColumnName}`;
-          return relationshipColumnNames.has(fullName) && 
-                 col.DataType !== 'Integer' && 
-                 col.DataType !== 'Int64';
-        })
-        .map(col => `${col.TableName}.${col.ColumnName}`);
-      
       return {
-        passed: nonIntegerRelColumns.length === 0,
-        details: nonIntegerRelColumns.length > 0 
-          ? `${nonIntegerRelColumns.length} relationship columns are not integer type` 
-          : 'All relationship columns use integer data types',
-        affectedObjects: nonIntegerRelColumns
-      };
-    }
-  },
-  {
-    id: 'capitalize-first-letter',
-    name: 'First letter of columns/measures should be capitalized',
-    description: 'All columns and measures should start with a capital letter',
-    category: 'formatting',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const nonCapitalizedColumns = data.columnData
-        .filter(col => col.ColumnName.length > 0 && col.ColumnName[0] !== col.ColumnName[0].toUpperCase())
-        .map(col => `${col.TableName}.${col.ColumnName}`);
-      
-      const nonCapitalizedMeasures = data.measureData
-        .filter(measure => measure.MeasureName.length > 0 && measure.MeasureName[0] !== measure.MeasureName[0].toUpperCase())
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      const allNonCapitalized = [...nonCapitalizedColumns, ...nonCapitalizedMeasures];
-      
-      return {
-        passed: allNonCapitalized.length === 0,
-        details: allNonCapitalized.length > 0 
-          ? `${allNonCapitalized.length} objects don't start with a capital letter` 
-          : 'All objects start with a capital letter',
-        affectedObjects: allNonCapitalized
-      };
-    }
-  },
-  {
-    id: 'percentage-format',
-    name: 'Percentage should be formatted with thousand separator and 1 decimal',
-    description: 'Percentage measures should use proper formatting',
-    category: 'formatting',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const incorrectlyFormattedPercentages = data.measureData
-        .filter(measure => {
-          // Check if it's a percentage measure (by name or data type)
-          const isPercentage = 
-            measure.MeasureName.toLowerCase().includes('percent') || 
-            measure.MeasureName.toLowerCase().includes('%') ||
-            measure.DataType.toLowerCase().includes('percent');
-          
-          // Check for correct format string (should have '#,0.0%' or similar)
-          const hasCorrectFormat = 
-            measure.FormatString && 
-            measure.FormatString.includes(',') && 
-            measure.FormatString.includes('.') && 
-            measure.FormatString.includes('%');
-          
-          return isPercentage && !hasCorrectFormat;
-        })
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      return {
-        passed: incorrectlyFormattedPercentages.length === 0,
-        details: incorrectlyFormattedPercentages.length > 0 
-          ? `${incorrectlyFormattedPercentages.length} percentage measures have incorrect formatting` 
-          : 'All percentage measures have correct formatting',
-        affectedObjects: incorrectlyFormattedPercentages
-      };
-    }
-  },
-  {
-    id: 'no-trailing-spaces',
-    name: 'Objects should not start and end with space',
-    description: 'Table, column, and measure names should not have leading or trailing spaces',
-    category: 'formatting',
-    evaluate: (data: ProcessedData): RuleResult => {
-      const tablesWithSpaces = data.tableData
-        .filter(table => table["Table Name"] !== table["Table Name"].trim())
-        .map(table => table["Table Name"]);
-      
-      const columnsWithSpaces = data.columnData
-        .filter(col => col.ColumnName !== col.ColumnName.trim())
-        .map(col => `${col.TableName}.${col.ColumnName}`);
-      
-      const measuresWithSpaces = data.measureData
-        .filter(measure => measure.MeasureName !== measure.MeasureName.trim())
-        .map(measure => `${measure.TableName}.${measure.MeasureName}`);
-      
-      const allObjectsWithSpaces = [...tablesWithSpaces, ...columnsWithSpaces, ...measuresWithSpaces];
-      
-      return {
-        passed: allObjectsWithSpaces.length === 0,
-        details: allObjectsWithSpaces.length > 0 
-          ? `${allObjectsWithSpaces.length} objects have leading or trailing spaces` 
-          : 'No objects have leading or trailing spaces',
-        affectedObjects: allObjectsWithSpaces
+        passed: mismatches.length === 0,
+        affectedObjects: mismatches
       };
     }
   }
-];
-
-export const allRules: Rule[] = [
-  ...maintenanceRules,
-  ...daxRules,
-  ...namingRules,
-  ...modelingRules,
-  ...formattingRules
 ];
 
 export function analyzeModel(data: ProcessedData): AnalysisResult {
-  const categoryMap: Record<RuleCategory, {
-    displayName: string;
-    rules: Rule[];
-    results: Record<string, RuleResult>;
-    totalRules: number;
-    passedRules: number;
-    failedRules: number;
-  }> = {
-    'maintenance': { 
-      displayName: 'Maintenance', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+  const categoryResults: Record<RuleCategory, CategoryResult> = {
+    'maintenance': {
+      category: 'maintenance',
+      displayName: 'Maintenance',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     },
-    'dax': { 
-      displayName: 'DAX Expressions', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+    'dax': {
+      category: 'dax',
+      displayName: 'DAX Quality',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     },
-    'naming': { 
-      displayName: 'Naming Conventions', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+    'naming': {
+      category: 'naming',
+      displayName: 'Naming Conventions',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     },
-    'modeling': { 
-      displayName: 'Modeling', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+    'modeling': {
+      category: 'modeling',
+      displayName: 'Modeling Best Practices',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     },
-    'formatting': { 
-      displayName: 'Formatting', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+    'formatting': {
+      category: 'formatting',
+      displayName: 'Formatting',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     },
-    'report': { 
-      displayName: 'Report', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+    'report': {
+      category: 'report',
+      displayName: 'Reporting',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     },
-    'performance': { 
-      displayName: 'Performance', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+    'performance': {
+      category: 'performance',
+      displayName: 'Performance',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     },
-    'error-prevention': { 
-      displayName: 'Error Prevention', 
-      rules: [], 
-      results: {}, 
-      totalRules: 0, 
-      passedRules: 0, 
-      failedRules: 0 
+    'error-prevention': {
+      category: 'error-prevention',
+      displayName: 'Error Prevention',
+      totalRules: 0,
+      passedRules: 0,
+      failedRules: 0,
+      rules: [],
+      results: {}
     }
   };
   
   let totalRules = 0;
   let passedRules = 0;
-  let failedRules = 0;
   
-  // Group rules by category and evaluate each rule
-  allRules.forEach(rule => {
-    const category = categoryMap[rule.category];
-    category.rules.push(rule);
+  // Group rules by category and run checks
+  rules.forEach(rule => {
+    const category = rule.category;
+    const result = rule.check(data);
     
-    const result = rule.evaluate(data);
-    category.results[rule.id] = result;
+    categoryResults[category].rules.push(rule);
+    categoryResults[category].results[rule.id] = result;
+    categoryResults[category].totalRules++;
+    totalRules++;
     
-    category.totalRules++;
     if (result.passed) {
-      category.passedRules++;
+      categoryResults[category].passedRules++;
       passedRules++;
     } else {
-      category.failedRules++;
-      failedRules++;
+      categoryResults[category].failedRules++;
     }
-    
-    totalRules++;
   });
   
-  // Convert to array of categories
-  const categories = Object.entries(categoryMap)
-    .filter(([_, category]) => category.rules.length > 0)
-    .map(([categoryId, category]) => ({
-      category: categoryId as RuleCategory,
-      displayName: category.displayName,
-      rules: category.rules,
-      results: category.results,
-      totalRules: category.totalRules,
-      passedRules: category.passedRules,
-      failedRules: category.failedRules
-    }));
+  const categoriesArray = Object.values(categoryResults).filter(cat => cat.totalRules > 0);
   
   return {
-    categories,
     totalRules,
     passedRules,
-    failedRules
+    failedRules: totalRules - passedRules,
+    categories: categoriesArray
   };
 }
-
