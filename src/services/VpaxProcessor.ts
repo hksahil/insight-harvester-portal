@@ -328,7 +328,7 @@ function calculateMetadata(tables: any[]): { numPartitions: number; maxRowCount:
       "Partitions": partitions.length,
       "Rows": tableRowCount,
       "Total Table Size": table.estimatedSize || 0,
-      "Columns Size": 0, // Adding this to fix the TypeScript error
+      "Columns Size": 0,
       "Is Hidden": table.isHidden || false,
       "Latest Partition Modified": modifiedTime,
       "Latest Partition Refreshed": refreshedTime
