@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, Filter, ChevronUp, ChevronDown } from 'lucide-react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
   const [cardinalityFilters, setCardinalityFilters] = useState<string[]>([]);
   const [showTableDropdown, setShowTableDropdown] = useState(false);
   const [showCardinalityDropdown, setShowCardinalityDropdown] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   
   // Get unique table names
   const tableNames = Array.from(new Set([
@@ -28,24 +29,55 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
     ...relationships.map(rel => rel.cardinality)
   ])).filter(Boolean).sort();
   
-  // Filter relationships based on selected filters
-  const filteredRelationships = relationships.filter(rel => {
-    // Apply table filter
-    if (tableFilters.length > 0) {
-      if (!tableFilters.some(table => rel.FromTableName === table || rel.ToTableName === table)) {
-        return false;
+  // Filter and sort relationships based on selected filters
+  const filteredRelationships = useMemo(() => {
+    // First filter the relationships
+    let result = relationships.filter(rel => {
+      // Apply table filter
+      if (tableFilters.length > 0) {
+        if (!tableFilters.some(table => rel.FromTableName === table || rel.ToTableName === table)) {
+          return false;
+        }
       }
+      
+      // Apply cardinality filter
+      if (cardinalityFilters.length > 0) {
+        if (!cardinalityFilters.includes(rel.cardinality)) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    // Then sort if sorting is configured
+    if (sortConfig !== null) {
+      result = [...result].sort((a, b) => {
+        const key = sortConfig.key as keyof Relationship;
+        
+        // Handle numeric values (for columns like UsedSize, MissingKeys, etc.)
+        if (!isNaN(Number(a[key])) && !isNaN(Number(b[key]))) {
+          return sortConfig.direction === 'asc' 
+            ? Number(a[key]) - Number(b[key])
+            : Number(b[key]) - Number(a[key]);
+        }
+        
+        // Handle string values
+        const valueA = a[key]?.toString() || '';
+        const valueB = b[key]?.toString() || '';
+        
+        if (valueA < valueB) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (valueA > valueB) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
     }
     
-    // Apply cardinality filter
-    if (cardinalityFilters.length > 0) {
-      if (!cardinalityFilters.includes(rel.cardinality)) {
-        return false;
-      }
-    }
-    
-    return true;
-  });
+    return result;
+  }, [relationships, tableFilters, cardinalityFilters, sortConfig]);
 
   const toggleTableFilter = (tableName: string) => {
     if (tableFilters.includes(tableName)) {
@@ -63,6 +95,21 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
     }
   };
   
+  // Handle column sort
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    } else if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
+      // If already sorted descending, remove sort
+      setSortConfig(null);
+      return;
+    }
+    
+    setSortConfig({ key, direction });
+  };
+  
   return (
     <div className="animate-fade-in space-y-6">
       <h2 className="text-xl font-medium">Relationships</h2>
@@ -74,6 +121,7 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
             onClick={() => {
               setTableFilters([]);
               setCardinalityFilters([]);
+              setSortConfig(null);
             }} 
             className="text-sm text-primary hover:underline"
           >
@@ -174,22 +222,214 @@ const RelationshipsTab: React.FC<RelationshipsTabProps> = ({ relationships }) =>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>FromTableName</TableHead>
-                  <TableHead>FromFullColumnName</TableHead>
-                  <TableHead>FromCardinalityType</TableHead>
-                  <TableHead>ToTableName</TableHead>
-                  <TableHead>ToFullColumnName</TableHead>
-                  <TableHead>ToCardinalityType</TableHead>
-                  <TableHead>Cardinality</TableHead>
-                  <TableHead>JoinOnDateBehavior</TableHead>
-                  <TableHead>CrossFilteringBehavior</TableHead>
-                  <TableHead>RelationshipType</TableHead>
-                  <TableHead>IsActive</TableHead>
-                  <TableHead>SecurityFilteringBehavior</TableHead>
-                  <TableHead>UsedSizeFrom</TableHead>
-                  <TableHead>UsedSize</TableHead>
-                  <TableHead>MissingKeys</TableHead>
-                  <TableHead>InvalidRows</TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('FromTableName')}
+                  >
+                    <div className="flex items-center gap-1">
+                      FromTableName
+                      {sortConfig?.key === 'FromTableName' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('FromFullColumnName')}
+                  >
+                    <div className="flex items-center gap-1">
+                      FromFullColumnName
+                      {sortConfig?.key === 'FromFullColumnName' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('FromCardinalityType')}
+                  >
+                    <div className="flex items-center gap-1">
+                      FromCardinalityType
+                      {sortConfig?.key === 'FromCardinalityType' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('ToTableName')}
+                  >
+                    <div className="flex items-center gap-1">
+                      ToTableName
+                      {sortConfig?.key === 'ToTableName' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('ToFullColumnName')}
+                  >
+                    <div className="flex items-center gap-1">
+                      ToFullColumnName
+                      {sortConfig?.key === 'ToFullColumnName' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('ToCardinalityType')}
+                  >
+                    <div className="flex items-center gap-1">
+                      ToCardinalityType
+                      {sortConfig?.key === 'ToCardinalityType' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('cardinality')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Cardinality
+                      {sortConfig?.key === 'cardinality' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('JoinOnDateBehavior')}
+                  >
+                    <div className="flex items-center gap-1">
+                      JoinOnDateBehavior
+                      {sortConfig?.key === 'JoinOnDateBehavior' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('CrossFilteringBehavior')}
+                  >
+                    <div className="flex items-center gap-1">
+                      CrossFilteringBehavior
+                      {sortConfig?.key === 'CrossFilteringBehavior' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('RelationshipType')}
+                  >
+                    <div className="flex items-center gap-1">
+                      RelationshipType
+                      {sortConfig?.key === 'RelationshipType' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('IsActive')}
+                  >
+                    <div className="flex items-center gap-1">
+                      IsActive
+                      {sortConfig?.key === 'IsActive' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('SecurityFilteringBehavior')}
+                  >
+                    <div className="flex items-center gap-1">
+                      SecurityFilteringBehavior
+                      {sortConfig?.key === 'SecurityFilteringBehavior' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('UsedSizeFrom')}
+                  >
+                    <div className="flex items-center gap-1">
+                      UsedSizeFrom
+                      {sortConfig?.key === 'UsedSizeFrom' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('UsedSize')}
+                  >
+                    <div className="flex items-center gap-1">
+                      UsedSize
+                      {sortConfig?.key === 'UsedSize' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('MissingKeys')}
+                  >
+                    <div className="flex items-center gap-1">
+                      MissingKeys
+                      {sortConfig?.key === 'MissingKeys' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort('InvalidRows')}
+                  >
+                    <div className="flex items-center gap-1">
+                      InvalidRows
+                      {sortConfig?.key === 'InvalidRows' && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

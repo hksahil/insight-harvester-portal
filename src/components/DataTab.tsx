@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, X, Info } from 'lucide-react';
+import { Search, Filter, X, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,7 @@ const DataTab: React.FC<DataTabProps> = ({
   const [activeColumns, setActiveColumns] = useState<string[]>([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [openFilterDropdowns, setOpenFilterDropdowns] = useState<Record<string, boolean>>({});
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   
   // Calculate PctOfTotalSize for columns if TotalSize exists
   const processedData = useMemo(() => {
@@ -100,30 +101,57 @@ const DataTab: React.FC<DataTabProps> = ({
   });
 
   // Create a filtered version of the data
-  const filteredData = processedData.filter(item => {
-    // Apply filters
-    for (const [key, values] of Object.entries(filters)) {
-      if (values && values.length > 0) {
-        if (!values.includes(item[key]?.toString())) {
+  const filteredData = useMemo(() => {
+    // First filter the data
+    let result = processedData.filter(item => {
+      // Apply filters
+      for (const [key, values] of Object.entries(filters)) {
+        if (values && values.length > 0) {
+          if (!values.includes(item[key]?.toString())) {
+            return false;
+          }
+        }
+      }
+      
+      // Apply search if searchColumn is provided
+      if (searchQuery && searchColumn && item[searchColumn]) {
+        const stringValue = String(item[searchColumn]).toLowerCase();
+        if (!stringValue.includes(searchQuery.toLowerCase())) {
           return false;
         }
       }
+      
+      return true;
+    });
+    
+    // Then sort the data if sorting is configured
+    if (sortConfig !== null) {
+      result = [...result].sort((a, b) => {
+        // Handle numeric values
+        if (!isNaN(Number(a[sortConfig.key])) && !isNaN(Number(b[sortConfig.key]))) {
+          return sortConfig.direction === 'asc' 
+            ? Number(a[sortConfig.key]) - Number(b[sortConfig.key])
+            : Number(b[sortConfig.key]) - Number(a[sortConfig.key]);
+        }
+        
+        // Handle string values
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
     }
     
-    // Apply search if searchColumn is provided
-    if (searchQuery && searchColumn && item[searchColumn]) {
-      const stringValue = String(item[searchColumn]).toLowerCase();
-      if (!stringValue.includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-    }
-    
-    return true;
-  });
+    return result;
+  }, [processedData, filters, searchQuery, searchColumn, sortConfig]);
 
   const resetFilters = () => {
     setFilters({});
     setSearchQuery("");
+    setSortConfig(null);
   };
 
   const toggleColumn = (column: string) => {
@@ -157,6 +185,21 @@ const DataTab: React.FC<DataTabProps> = ({
       ...openFilterDropdowns,
       [column]: !openFilterDropdowns[column]
     });
+  };
+
+  // Handle column sort
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    } else if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
+      // If already sorted descending, remove sort
+      setSortConfig(null);
+      return;
+    }
+    
+    setSortConfig({ key, direction });
   };
 
   // Check if we should show the size note
@@ -335,8 +378,19 @@ const DataTab: React.FC<DataTabProps> = ({
             <TableHeader>
               <TableRow>
                 {processedData.length > 0 && activeColumns.map((key) => (
-                  <TableHead key={key} className="whitespace-nowrap">
-                    {key}
+                  <TableHead 
+                    key={key} 
+                    className="whitespace-nowrap cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleSort(key)}
+                  >
+                    <div className="flex items-center gap-1">
+                      {key}
+                      {sortConfig?.key === key && (
+                        sortConfig.direction === 'asc' 
+                          ? <ChevronUp className="h-3 w-3" /> 
+                          : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
                   </TableHead>
                 ))}
               </TableRow>

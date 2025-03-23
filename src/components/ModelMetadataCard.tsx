@@ -40,6 +40,12 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
     if (value === 0 && attribute === 'Max Row Count of Biggest Table') {
       return "Not Available";
     }
+    
+    // For Max Row Count, convert to millions
+    if (attribute === 'Max Row Count of Biggest Table' && typeof value === 'number') {
+      return `${(value / 1000000).toFixed(2)}M`;
+    }
+    
     return value?.toString() || "N/A";
   };
 
