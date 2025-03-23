@@ -169,13 +169,6 @@ const NavigationBar: React.FC = () => {
             </div>
             
             <div>
-              <h3 className="font-semibold">Performance Recommendations</h3>
-              <p className="text-sm text-muted-foreground">
-                Smart recommendations to improve the performance of your Power BI model based on industry best practices.
-              </p>
-            </div>
-            
-            <div>
               <h3 className="font-semibold">Documentation Export Improvements</h3>
               <p className="text-sm text-muted-foreground">
                 Enhanced documentation export with customizable templates and more export formats.
