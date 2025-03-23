@@ -29,7 +29,7 @@ const ModelMetadataWithVisualization: React.FC<ModelMetadataWithVisualizationPro
     if (totalSizeIndex !== -1) {
       // Calculate total size from the sum of Total Table Size in tableData
       const totalBytes = data.tableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
-      // Convert to GB for display (as this is what gbconverter does)
+      // Convert to GB for display
       const totalGB = totalBytes / (1024 * 1024 * 1024);
       modelInfo.Value[totalSizeIndex] = `${Math.round(totalGB * 100) / 100}GB`;
     }
