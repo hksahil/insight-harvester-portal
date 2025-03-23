@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 
@@ -231,10 +230,10 @@ export async function processVpaxFile(file: File): Promise<ProcessedData> {
     const totalTableSize = mergedTableData.reduce((sum, table) => sum + (table["Total Table Size"] || 0), 0);
     
     // Find max row count
-    const maxRowCount = Math.max(...mergedTableData.map(table) => {
+    const maxRowCount = Math.max(...mergedTableData.map(table => {
       const rows = typeof table.Rows === 'number' ? table.Rows : 0;
       return rows;
-    });
+    }));
     
     const relationshipsCount = relationships.length;
     const updatedModelInfo = {
