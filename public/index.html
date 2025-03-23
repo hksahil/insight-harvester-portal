@@ -8,7 +8,7 @@
 </head>
 <body>
   <!-- Hidden form for Netlify to discover at build time -->
-  <form name="snippet-submission" data-netlify="true" hidden>
+  <form name="snippet-submission" netlify netlify-honeypot="bot-field" hidden>
     <input type="hidden" name="form-name" value="snippet-submission" />
     <input type="text" name="snippet-name" />
     <textarea name="snippet-description"></textarea>

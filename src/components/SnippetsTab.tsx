@@ -731,10 +731,25 @@ print("Data successfully uploaded to Snowflake!")`,
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const formData = new FormData(e.target as HTMLFormElement);
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    
     console.log("Form submission data:", Object.fromEntries(formData));
     
-    setFormSubmitted(true);
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(formData as any).toString()
+    })
+      .then(() => {
+        console.log("Form successfully submitted");
+        setFormSubmitted(true);
+        toast.success("Snippet submitted successfully!");
+      })
+      .catch((error) => {
+        console.error("Form submission error:", error);
+        toast.error("Error submitting snippet. Please try again.");
+      });
   };
 
   const closeDialog = () => {
@@ -775,11 +790,18 @@ print("Data successfully uploaded to Snowflake!")`,
                   </DialogHeader>
                   <form 
                     name="snippet-submission"
-                    data-netlify="true"
                     method="POST"
+                    data-netlify="true"
+                    netlify-honeypot="bot-field"
                     onSubmit={handleFormSubmit}
                     className="space-y-4 py-4"
                   >
+                    <p className="hidden">
+                      <label>
+                        Don't fill this out if you're human: <input name="bot-field" />
+                      </label>
+                    </p>
+                    
                     <input type="hidden" name="form-name" value="snippet-submission" />
                     
                     <div className="grid w-full gap-1.5">
