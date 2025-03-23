@@ -58,30 +58,42 @@ const Index = () => {
             35
           ]
         },
-        tableData: Array(15).fill(0).map((_, i) => ({
-          "Table Name": `Table_${i+1}`,
-          "Mode": i % 2 === 0 ? "DirectQuery" : "Import",
-          "Partitions": Math.floor(Math.random() * 3) + 1,
-          "Rows": Math.floor(Math.random() * 1000000) + 1000,
-          "Table Size": Math.floor(Math.random() * 5000000) + 100000,
-          "% of Total Size": Math.random() * 20,
-          "Is Hidden": i % 5 === 0,
-          "Latest Partition Modified": "2023-06-10",
-          "Latest Partition Refreshed": "2023-06-12"
-        })),
-        columnData: Array(120).fill(0).map((_, i) => ({
-          TableName: `Table_${Math.floor(i/8) + 1}`,
-          ColumnName: `Column_${i+1}`,
-          FullColumnName: `Table_${Math.floor(i/8) + 1}[Column_${i+1}]`,
-          DataType: ["String", "Integer", "Decimal", "DateTime", "Boolean"][i % 5],
-          ColumnType: ["Data", "Calculated", "Key"][i % 3],
-          IsHidden: i % 7 === 0,
-          Encoding: "UTF-8",
-          DisplayFolder: i % 4 === 0 ? "Metrics" : i % 3 === 0 ? "Dimensions" : "",
-          Description: `Description for column ${i+1}`,
-          IsKey: i % 10 === 0,
-          DataSize: Math.floor(Math.random() * 500000) + 1000
-        })),
+        tableData: Array(15).fill(0).map((_, i) => {
+          const tableSize = Math.floor(Math.random() * 5000000) + 100000;
+          const columnsSize = Math.floor(tableSize * 0.8);
+          const relationshipsSize = tableSize - columnsSize;
+          return {
+            "Table Name": `Table_${i+1}`,
+            "Mode": i % 2 === 0 ? "DirectQuery" : "Import",
+            "Partitions": Math.floor(Math.random() * 3) + 1,
+            "Rows": Math.floor(Math.random() * 1000000) + 1000,
+            "Total Table Size": tableSize,
+            "Columns Size": columnsSize,
+            "Relationships Size": relationshipsSize,
+            "PctOfTotalSize": "6.67%",
+            "Is Hidden": i % 5 === 0,
+            "Latest Partition Modified": "2023-06-10",
+            "Latest Partition Refreshed": "2023-06-12"
+          };
+        }),
+        columnData: Array(120).fill(0).map((_, i) => {
+          const totalSize = Math.floor(Math.random() * 500000) + 1000;
+          return {
+            TableName: `Table_${Math.floor(i/8) + 1}`,
+            ColumnName: `Column_${i+1}`,
+            FullColumnName: `Table_${Math.floor(i/8) + 1}[Column_${i+1}]`,
+            DataType: ["String", "Integer", "Decimal", "DateTime", "Boolean"][i % 5],
+            ColumnType: ["Data", "Calculated", "Key"][i % 3],
+            IsHidden: i % 7 === 0,
+            Encoding: "UTF-8",
+            DisplayFolder: i % 4 === 0 ? "Metrics" : i % 3 === 0 ? "Dimensions" : "",
+            Description: `Description for column ${i+1}`,
+            IsKey: i % 10 === 0,
+            DataSize: Math.floor(Math.random() * 400000) + 1000,
+            TotalSize: totalSize,
+            PctOfTotalSize: "0.83%"
+          };
+        }),
         measureData: Array(45).fill(0).map((_, i) => ({
           MeasureName: `Measure_${i+1}`,
           TableName: `Table_${Math.floor(i/3) + 1}`,
