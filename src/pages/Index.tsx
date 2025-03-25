@@ -291,7 +291,7 @@ const Index = () => {
                 </h1>
               </div>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Upload your Power BI .vpax files to analyze model structure, relationships, and query data
+                Upload your Power BI .vpax to to benchmark your model, perform impact analysis, maintain a code repository, leverage AI capabilities for deeper insights & much more.
               </p>
             </div>
             
