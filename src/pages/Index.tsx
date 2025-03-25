@@ -218,7 +218,7 @@ const Index = () => {
       },
       {
         id: 'measure-visualizer',
-        label: 'Measure Visualizer',
+        label: 'Impact Analysis',
         content: (
           <div className="space-y-6">
             <MeasureVisualizer 
