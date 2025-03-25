@@ -427,7 +427,7 @@ const MeasureVisualizerInner: React.FC<MeasureVisualizerProps> = ({ measureData,
 
   return (
     <div className="animate-fade-in space-y-6 p-2">
-      <h2 className="text-xl font-medium">Measure Dependencies</h2>
+      <h2 className="text-xl font-medium">Impact Analysis</h2>
       
       <UseCaseHelper type="measures" />
       
