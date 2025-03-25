@@ -291,7 +291,7 @@ const Index = () => {
                 </h1>
               </div>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Upload your Power BI .vpax to to benchmark your model, perform impact analysis, maintain a code repository, leverage AI capabilities for deeper insights & much more.
+                Upload your Power BI .vpax to to benchmark your model, perform impact analysis, maintain a code repository, leverage AI capabilities & much more.
               </p>
             </div>
             
