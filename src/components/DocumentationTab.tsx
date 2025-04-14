@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import UseCaseHelper from './UseCaseHelper';
 import { ProcessedData } from '@/services/VpaxProcessor';
+import RelationshipFlowVisualizer from './RelationshipFlowVisualizer';
+import html2canvas from 'html2canvas';
 
 interface DocumentationTabProps {
   data: ProcessedData;
@@ -13,12 +15,30 @@ interface DocumentationTabProps {
 
 const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
   const [isExporting, setIsExporting] = useState(false);
+  const flowRef = useRef<HTMLDivElement>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
     
     try {
-      exportToExcel();
+      // First, capture the relationship diagram as an image
+      if (flowRef.current) {
+        const canvas = await html2canvas(flowRef.current, {
+          backgroundColor: '#ffffff',
+          logging: false,
+          scale: 2, // Higher quality
+        });
+        
+        // Convert canvas to base64 image
+        const imageData = canvas.toDataURL('image/png');
+        
+        // Now export to Excel with the image
+        exportToExcel(imageData);
+      } else {
+        // Export without image if ref is not available
+        exportToExcel();
+      }
+      
       toast.success('Excel export completed successfully!');
     } catch (error) {
       console.error('Export error:', error);
@@ -28,7 +48,7 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = (diagramImage?: string) => {
     // Create a new workbook
     const workbook = XLSX.utils.book_new();
     
@@ -42,6 +62,43 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
     ];
     const modelInfoSheet = XLSX.utils.aoa_to_sheet(modelInfoData);
     XLSX.utils.book_append_sheet(workbook, modelInfoSheet, "Model Info");
+    
+    // Add relationship diagram sheet if image is available
+    if (diagramImage) {
+      // Create a worksheet for the diagram
+      const ws = XLSX.utils.aoa_to_sheet([
+        ["Model Relationship Diagram"],
+        ["This diagram shows the relationships between tables in your model"]
+      ]);
+      
+      // Set column widths
+      ws['!cols'] = [{ wch: 120 }]; // Make column wider
+      
+      // Set row heights
+      ws['!rows'] = [{ hpt: 30 }, { hpt: 30 }, { hpt: 400 }]; // Make row taller for image
+      
+      // Add the image
+      const imageId = workbook.addImage({
+        base64: diagramImage,
+        extension: 'png',
+      });
+      
+      // Position the image in cell A3
+      ws['!images'] = [
+        {
+          name: 'relationshipDiagram',
+          type: 'image',
+          position: {
+            type: 'twoCellAnchor',
+            from: { col: 0, row: 2 },
+            to: { col: 10, row: 25 }
+          }
+        }
+      ];
+      
+      // Add the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, ws, "Relationship Diagram");
+    }
     
     // Add tables sheet
     if (data.tableData.length > 0) {
@@ -132,6 +189,10 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
             </li>
             <li className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary"></div>
+              <span>Relationship diagram visualization</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
               <span>Table list with properties ({data.tableData.length} tables)</span>
             </li>
             <li className="flex items-center gap-2">
@@ -151,6 +212,13 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
               <span>M expressions for each table</span>
             </li>
           </ul>
+        </div>
+      </div>
+      
+      {/* Hidden relationship diagram for capturing */}
+      <div className="hidden">
+        <div ref={flowRef} style={{ width: '1200px', height: '800px', background: 'white' }}>
+          <RelationshipFlowVisualizer relationships={data.relationships} />
         </div>
       </div>
     </div>

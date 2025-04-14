@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, forwardRef } from 'react';
 import {
   ReactFlow,
   MiniMap,
