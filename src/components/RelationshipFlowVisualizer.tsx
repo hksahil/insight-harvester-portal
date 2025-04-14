@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, forwardRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -69,7 +69,7 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
     
     // Create nodes for each table
     const circleRadius = 300;
-    const angelStep = (2 * Math.PI) / (allTables.size - 1);
+    const angelStep = (2 * Math.PI) / (Math.max(allTables.size - 1, 1));
     let currentAngle = 0;
     let dimTableCount = 0;
     
@@ -159,7 +159,7 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
   
   return (
     <div className="space-y-8">
-      <div className="relative h-[600px] border border-border rounded-lg overflow-hidden bg-background">
+      <div style={{ width: '1200px', height: '800px', background: 'white', border: '1px solid #e5e7eb' }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -173,8 +173,9 @@ const RelationshipFlowVisualizer: React.FC<RelationshipFlowVisualizerProps> = ({
         >
           <Controls />
           <MiniMap 
-            className="bg-white/30 backdrop-blur-sm !bottom-5 !right-5" 
-            nodeColor={() => '#3B82F6'} // All nodes are the same blue color
+            nodeColor={() => '#3B82F6'} 
+            maskColor="rgba(255, 255, 255, 0.5)"
+            position="bottom-right" 
           />
           <Background color="#E5E7EB" gap={16} />
         </ReactFlow>

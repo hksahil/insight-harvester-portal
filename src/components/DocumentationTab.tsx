@@ -23,11 +23,24 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
     try {
       // First, capture the relationship diagram as an image
       if (flowRef.current) {
+        // Make diagram visible before capturing
+        flowRef.current.style.display = 'block';
+        flowRef.current.style.position = 'absolute';
+        flowRef.current.style.zIndex = '-1000';
+        
+        // Wait for diagram to render
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const canvas = await html2canvas(flowRef.current, {
           backgroundColor: '#ffffff',
           logging: false,
           scale: 2, // Higher quality
+          allowTaint: true,
+          useCORS: true,
         });
+        
+        // Hide the diagram again after capture
+        flowRef.current.style.display = 'none';
         
         // Convert canvas to base64 image
         const imageData = canvas.toDataURL('image/png');
@@ -113,7 +126,11 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         const downloadLink = document.createElement('a');
         downloadLink.href = URL.createObjectURL(blob);
         downloadLink.download = diagramFileName;
+        document.body.appendChild(downloadLink);
         downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        console.log('Diagram image exported successfully');
       } catch (error) {
         console.error('Error saving diagram image:', error);
       }
@@ -234,8 +251,8 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
         </div>
       </div>
       
-      {/* Hidden relationship diagram for capturing */}
-      <div className="hidden">
+      {/* Relationship diagram for capturing - hidden but rendered */}
+      <div style={{ display: 'none' }}>
         <div ref={flowRef} style={{ width: '1200px', height: '800px', background: 'white' }}>
           <RelationshipFlowVisualizer relationships={data.relationships} />
         </div>
