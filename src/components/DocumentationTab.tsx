@@ -77,27 +77,46 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
       // Set row heights
       ws['!rows'] = [{ hpt: 30 }, { hpt: 30 }, { hpt: 400 }]; // Make row taller for image
       
-      // Add the image
-      const imageId = workbook.addImage({
-        base64: diagramImage,
-        extension: 'png',
-      });
-      
-      // Position the image in cell A3
-      ws['!images'] = [
-        {
-          name: 'relationshipDiagram',
-          type: 'image',
-          position: {
-            type: 'twoCellAnchor',
-            from: { col: 0, row: 2 },
-            to: { col: 10, row: 25 }
-          }
-        }
-      ];
+      // For XLSX version that doesn't have direct image support,
+      // we'll add a note explaining the diagram is available separately
+      ws.A3 = { 
+        t: 's', 
+        v: "The model relationship diagram can't be embedded directly. You can find it saved separately."
+      };
       
       // Add the worksheet to the workbook
       XLSX.utils.book_append_sheet(workbook, ws, "Relationship Diagram");
+      
+      // Save the image separately
+      try {
+        // Remove the header from the data URL
+        const base64Data = diagramImage.split(',')[1];
+        
+        // Create a binary string from the base64 data
+        const binaryString = atob(base64Data);
+        
+        // Convert binary string to array buffer
+        const byteArray = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          byteArray[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Generate the file name
+        const modelName = data.modelInfo.Value[0]?.toString().replace(/[^a-zA-Z0-9]/g, '_') || 'PowerBI_Model';
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+        const diagramFileName = `${modelName}_Relationship_Diagram_${timestamp}.png`;
+        
+        // Create a blob from the array buffer
+        const blob = new Blob([byteArray], { type: 'image/png' });
+        
+        // Create a download link and click it
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = diagramFileName;
+        downloadLink.click();
+      } catch (error) {
+        console.error('Error saving diagram image:', error);
+      }
     }
     
     // Add tables sheet
@@ -189,7 +208,7 @@ const DocumentationTab: React.FC<DocumentationTabProps> = ({ data }) => {
             </li>
             <li className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary"></div>
-              <span>Relationship diagram visualization</span>
+              <span>Relationship diagram visualization (as a separate PNG file)</span>
             </li>
             <li className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary"></div>
