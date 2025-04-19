@@ -17,16 +17,19 @@ import SnippetsTab from "@/components/SnippetsTab";
 import UseCaseHelper from "@/components/UseCaseHelper";
 import { toast } from 'sonner';
 import { processVpaxFile, ProcessedData } from '@/services/VpaxProcessor';
-import { DatabaseZap, LineChart, FileCode, BarChart3, FileText, Brain } from 'lucide-react';
+import { DatabaseZap, LineChart, FileCode, BarChart3, FileText, Brain, LogIn } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [isFileUploaded, setIsFileUploaded] = useState(false);
   const [isDataProcessing, setIsDataProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check initial session
