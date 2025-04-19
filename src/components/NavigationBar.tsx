@@ -1,21 +1,53 @@
 
-import React, { useState } from 'react';
-import { Home, Info, HelpCircle, Calendar, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, LogIn, LogOut, Info, HelpCircle, Calendar } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
 const NavigationBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [user, setUser] = useState<User | null>(null);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [faqDialogOpen, setFaqDialogOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
-  const [isHomePage, setIsHomePage] = useState(true);
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Initial check
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+      navigate('/');
+    } catch (error: any) {
+      toast.error('Error logging out: ' + error.message);
+    }
+  };
 
   const goToHome = () => {
     navigate('/');
     window.location.reload();
+  };
+
+  const goToAuth = () => {
+    navigate('/auth');
   };
 
   return (
@@ -65,6 +97,28 @@ const NavigationBar: React.FC = () => {
             <Calendar className="h-4 w-4" />
             Upcoming Features
           </Button>
+
+          {user ? (
+            <Button 
+              onClick={handleLogout}
+              variant="ghost"
+              className="flex items-center gap-2"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          ) : (
+            <Button 
+              onClick={goToAuth}
+              variant="ghost"
+              className="flex items-center gap-2"
+              title="Login"
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Button>
+          )}
         </div>
       </div>
 
