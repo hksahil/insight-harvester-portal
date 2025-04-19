@@ -314,12 +314,22 @@ const Index = () => {
             </div>
             
             <div className="mt-8 flex flex-col items-center justify-center gap-6">
-              {user ? (
+              <div className="flex gap-4">
+                <SampleData onLoadSample={loadSampleData} />
+                {!user && (
+                  <Button 
+                    variant="default"
+                    size="lg"
+                    className="gap-2"
+                    onClick={() => navigate('/auth')}
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Login to use your own Power BI models
+                  </Button>
+                )}
+              </div>
+              {user && (
                 <FileUploader onFileUpload={handleFileUpload} />
-              ) : (
-                <div className="text-center">
-                  <SampleData onLoadSample={loadSampleData} />
-                </div>
               )}
             </div>
             
@@ -341,9 +351,9 @@ const Index = () => {
                   <div className="p-3 bg-primary/10 rounded-full">
                     <LineChart className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold">Best Practices</h3>
+                  <h3 className="text-xl font-semibold">Impact Analysis</h3>
                   <p className="text-sm text-muted-foreground">
-                    Evaluate your model against industry best practices and get recommendations for improvements.
+                    Understand dependencies and relationships between measures, columns, and tables in your model.
                   </p>
                 </div>
               </Card>
@@ -356,6 +366,42 @@ const Index = () => {
                   <h3 className="text-xl font-semibold">DAX Analysis</h3>
                   <p className="text-sm text-muted-foreground">
                     Review DAX expressions, measure dependencies, and identify optimization opportunities.
+                  </p>
+                </div>
+              </Card>
+
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <BarChart3 className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Best Practices</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Evaluate your model against industry best practices and get recommendations for improvements.
+                  </p>
+                </div>
+              </Card>
+
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <FileText className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Documentation</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically generate comprehensive documentation for your Power BI model.
+                  </p>
+                </div>
+              </Card>
+
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <Brain className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">AI Assistant</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Get AI-powered insights and suggestions for improving your Power BI model.
                   </p>
                 </div>
               </Card>
