@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -58,7 +59,7 @@ const Auth: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
       <main className="flex-grow flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <Card className="border border-border/50 shadow-lg backdrop-blur-sm bg-card/90">
             <CardHeader className="space-y-1 text-center">
               <CardTitle className="text-2xl font-bold tracking-tight">
