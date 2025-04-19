@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FileUploaderProps {
   onFileUpload: (file: File) => void;
@@ -11,6 +13,31 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleFileProcess = async (files: FileList) => {
+    setError(null);
+    
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Please sign in to upload files');
+      navigate('/auth');
+      return;
+    }
+
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.name.endsWith('.vpax')) {
+        setFileName(file.name);
+        onFileUpload(file);
+        toast.success('File uploaded successfully');
+      } else {
+        setError('Please upload a .vpax file');
+        toast.error('Please upload a .vpax file');
+      }
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -24,30 +51,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    
-    const files = e.dataTransfer.files;
-    handleFiles(files);
+    handleFileProcess(e.dataTransfer.files);
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      handleFiles(files);
-    }
-  };
-
-  const handleFiles = (files: FileList) => {
-    setError(null);
-    if (files.length > 0) {
-      const file = files[0];
-      if (file.name.endsWith('.vpax')) {
-        setFileName(file.name);
-        onFileUpload(file);
-        toast.success('File uploaded successfully');
-      } else {
-        setError('Please upload a .vpax file');
-        toast.error('Please upload a .vpax file');
-      }
+      handleFileProcess(files);
     }
   };
 
