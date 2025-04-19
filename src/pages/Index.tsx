@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -312,53 +313,53 @@ const Index = () => {
               </p>
             </div>
             
-            {user ? (
-              <FileUploader onFileUpload={handleFileUpload} />
-            ) : (
-              <div className="mt-4 text-center">
-                <SampleData onLoadSample={loadSampleData} />
-              </div>
-            )}
+            <div className="mt-8 flex flex-col items-center justify-center gap-6">
+              {user ? (
+                <FileUploader onFileUpload={handleFileUpload} />
+              ) : (
+                <div className="text-center">
+                  <SampleData onLoadSample={loadSampleData} />
+                </div>
+              )}
+            </div>
             
-            {user && (
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="p-3 bg-primary/10 rounded-full">
-                      <DatabaseZap className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold">Model Analysis</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Analyze your Power BI model structure including tables, columns, measures, and relationships.
-                    </p>
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <DatabaseZap className="h-8 w-8 text-primary" />
                   </div>
-                </Card>
-                
-                <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="p-3 bg-primary/10 rounded-full">
-                      <LineChart className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold">Best Practices</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Evaluate your model against industry best practices and get recommendations for improvements.
-                    </p>
+                  <h3 className="text-xl font-semibold">Model Analysis</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Analyze your Power BI model structure including tables, columns, measures, and relationships.
+                  </p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <LineChart className="h-8 w-8 text-primary" />
                   </div>
-                </Card>
-                
-                <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="p-3 bg-primary/10 rounded-full">
-                      <FileCode className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold">DAX Analysis</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Review DAX expressions, measure dependencies, and identify optimization opportunities.
-                    </p>
+                  <h3 className="text-xl font-semibold">Best Practices</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Evaluate your model against industry best practices and get recommendations for improvements.
+                  </p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <FileCode className="h-8 w-8 text-primary" />
                   </div>
-                </Card>
-              </div>
-            )}
+                  <h3 className="text-xl font-semibold">DAX Analysis</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Review DAX expressions, measure dependencies, and identify optimization opportunities.
+                  </p>
+                </div>
+              </Card>
+            </div>
           </div>
         ) : (
           <div className="mt-12 animate-fade-in">
