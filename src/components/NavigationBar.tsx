@@ -54,7 +54,6 @@ const NavigationBar: React.FC = () => {
     <header className="animate-slide-down glass fixed top-0 left-0 right-0 z-50 border-b border-border/40">
       <div className="container flex items-center justify-between h-16 px-4 sm:px-6">
         <div className="flex items-center space-x-4">
-          <UserProfileButton />
           <span className="text-xl font-semibold tracking-tight">Power BI Assistant</span>
         </div>
         
@@ -100,15 +99,18 @@ const NavigationBar: React.FC = () => {
           </Button>
 
           {user ? (
-            <Button 
-              onClick={handleLogout}
-              variant="destructive"
-              className="flex items-center gap-2"
-              title="Logout"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+            <>
+              <UserProfileButton />
+              <Button 
+                onClick={handleLogout}
+                variant="destructive"
+                className="flex items-center gap-2"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </>
           ) : (
             <Button 
               onClick={goToAuth}

@@ -27,7 +27,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       return;
     }
 
-    if (isLimitReached) {
+    if (usage && !usage.is_premium && (usage.processed_files_count >= 5)) {
       toast.error('You have reached the limit of 5 free file uploads. Please upgrade to premium.');
       navigate('/premium');
       return;
@@ -37,12 +37,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       const file = files[0];
       if (file.name.endsWith('.vpax')) {
         setFileName(file.name);
-        onFileUpload(file);
         
-        // Increment file count
         const success = await incrementFileCount();
         if (success) {
+          onFileUpload(file);
           toast.success('File uploaded successfully');
+        } else {
+          toast.error('Failed to update file count');
         }
       } else {
         setError('Please upload a .vpax file');
@@ -82,7 +83,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       );
     }
 
-    if (isLimitReached) {
+    const isAtLimit = usage && !usage.is_premium && (usage.processed_files_count >= 5);
+
+    if (isAtLimit) {
       return (
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="p-4 rounded-full bg-destructive/10">
