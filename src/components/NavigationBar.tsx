@@ -110,7 +110,8 @@ const NavigationBar: React.FC = () => {
           ) : (
             <Button 
               onClick={goToAuth}
-              className="flex items-center gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
+              className="flex items-center gap-2"
+              style={{ backgroundColor: 'rgb(0, 128, 255)', color: 'white' }}
               title="Login"
             >
               <LogIn className="h-4 w-4" />
