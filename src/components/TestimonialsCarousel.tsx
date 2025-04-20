@@ -41,6 +41,15 @@ const TestimonialsCarousel = () => {
           opts={{
             align: "start",
             loop: true,
+            draggable: true,
+            watchDrag: true,
+            skipSnaps: false,
+            inViewThreshold: 0.7,
+            autoplay: {
+              delay: 5000,
+              stopOnInteraction: false,
+              stopOnMouseEnter: true,
+            },
           }}
           className="w-full"
         >
@@ -48,7 +57,7 @@ const TestimonialsCarousel = () => {
             {testimonials.map((testimonial, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                 <div className="h-full p-6">
-                  <div className="bg-background/50 backdrop-blur-sm rounded-lg p-8 h-full border shadow-sm flex flex-col justify-between">
+                  <div className="bg-background/50 backdrop-blur-sm rounded-lg p-8 h-full border shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md">
                     <blockquote className="text-lg mb-6 text-muted-foreground">
                       "{testimonial.quote}"
                     </blockquote>
@@ -71,3 +80,4 @@ const TestimonialsCarousel = () => {
 };
 
 export default TestimonialsCarousel;
+
