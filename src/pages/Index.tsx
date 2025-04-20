@@ -15,6 +15,7 @@ import SampleData from "@/components/SampleData";
 import SnippetsTab from "@/components/SnippetsTab";
 import UseCaseHelper from "@/components/UseCaseHelper";
 import FeatureHighlight from '@/components/FeatureHighlight';
+import PricingComparison from '@/components/PricingComparison';
 import { toast } from 'sonner';
 import { processVpaxFile, ProcessedData } from '@/services/VpaxProcessor';
 import { DatabaseZap, LineChart, FileCode, BarChart3, FileText, Brain, LogIn } from 'lucide-react';
@@ -412,6 +413,7 @@ const Index = () => {
             </div>
 
             <FeatureHighlight />
+            <PricingComparison />
           </div>
         ) : (
           <div className="mt-12 animate-fade-in">
