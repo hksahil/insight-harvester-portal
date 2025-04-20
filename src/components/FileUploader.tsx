@@ -40,15 +40,19 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       if (file.name.endsWith('.vpax')) {
         setFileName(file.name);
         
-        // Process file first
-        onFileUpload(file);
-        
-        // Then increment count after successful processing
-        const success = await incrementFileCount();
-        if (!success) {
-          toast.error('Failed to update file count, but file was processed');
-        } else {
-          toast.success('File uploaded and processed successfully');
+        try {
+          // Process file first
+          onFileUpload(file);
+          
+          // Increment count only AFTER successful processing
+          const success = await incrementFileCount();
+          if (!success) {
+            toast.error('Failed to update file count');
+          } else {
+            toast.success('File uploaded and processed successfully');
+          }
+        } catch (error) {
+          toast.error('Error processing file: ' + (error instanceof Error ? error.message : 'Unknown error'));
         }
       } else {
         setError('Please upload a .vpax file');

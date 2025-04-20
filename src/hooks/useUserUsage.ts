@@ -35,12 +35,21 @@ export function useUserUsage() {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) return false;
-    if (!usage) return false;
-
+    
     try {
-      const success = await incrementUserFileCount(session.user.id, usage.processed_files_count);
+      // Get latest usage data before updating
+      const latestUsage = await getUserUsage(session.user.id);
+      if (!latestUsage) return false;
+      
+      // Check if user has reached the limit
+      if (!latestUsage.is_premium && latestUsage.processed_files_count >= 5) {
+        return false;
+      }
+      
+      const success = await incrementUserFileCount(session.user.id, latestUsage.processed_files_count);
       
       if (success) {
+        // Update local state
         setUsage(prev => prev ? {
           ...prev,
           processed_files_count: prev.processed_files_count + 1
