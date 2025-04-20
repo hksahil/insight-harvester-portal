@@ -22,29 +22,31 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
-
 const Index = () => {
   const [isFileUploaded, setIsFileUploaded] = useState(false);
   const [isDataProcessing, setIsDataProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
-
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setUser(session?.user ?? null);
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
-
   const handleFileUpload = async (file: File) => {
     setIsDataProcessing(true);
-    
     try {
       const data = await processVpaxFile(file);
       setProcessedData(data);
@@ -56,32 +58,20 @@ const Index = () => {
       setIsDataProcessing(false);
     }
   };
-
   const loadSampleData = async () => {
     setIsDataProcessing(true);
-    
     try {
       const sampleData: ProcessedData = {
         modelInfo: {
-          Attribute: [
-            "Model Name", "Date Modified", "Total Size of Model", 
-            "Number of Tables", "Number of Partitions", 
-            "Max Row Count of Biggest Table", "Total Columns", "Total Measures", 
-            "Total Relationships"
-          ],
-          Value: [
-            "Adventure Works", "2023-06-15", "1.2 GB", 
-            15, 20, 
-            1500000, 120, 45, 
-            35
-          ]
+          Attribute: ["Model Name", "Date Modified", "Total Size of Model", "Number of Tables", "Number of Partitions", "Max Row Count of Biggest Table", "Total Columns", "Total Measures", "Total Relationships"],
+          Value: ["Adventure Works", "2023-06-15", "1.2 GB", 15, 20, 1500000, 120, 45, 35]
         },
         tableData: Array(15).fill(0).map((_, i) => {
           const tableSize = Math.floor(Math.random() * 5000000) + 100000;
           const columnsSize = Math.floor(tableSize * 0.8);
           const relationshipsSize = tableSize - columnsSize;
           return {
-            "Table Name": `Table_${i+1}`,
+            "Table Name": `Table_${i + 1}`,
             "Mode": i % 2 === 0 ? "DirectQuery" : "Import",
             "Partitions": Math.floor(Math.random() * 3) + 1,
             "Rows": Math.floor(Math.random() * 1000000) + 1000,
@@ -97,15 +87,15 @@ const Index = () => {
         columnData: Array(120).fill(0).map((_, i) => {
           const totalSize = Math.floor(Math.random() * 500000) + 1000;
           return {
-            TableName: `Table_${Math.floor(i/8) + 1}`,
-            ColumnName: `Column_${i+1}`,
-            FullColumnName: `Table_${Math.floor(i/8) + 1}[Column_${i+1}]`,
+            TableName: `Table_${Math.floor(i / 8) + 1}`,
+            ColumnName: `Column_${i + 1}`,
+            FullColumnName: `Table_${Math.floor(i / 8) + 1}[Column_${i + 1}]`,
             DataType: ["String", "Integer", "Decimal", "DateTime", "Boolean"][i % 5],
             ColumnType: ["Data", "Calculated", "Key"][i % 3],
             IsHidden: i % 7 === 0,
             Encoding: "UTF-8",
             DisplayFolder: i % 4 === 0 ? "Metrics" : i % 3 === 0 ? "Dimensions" : "",
-            Description: `Description for column ${i+1}`,
+            Description: `Description for column ${i + 1}`,
             IsKey: i % 10 === 0,
             DataSize: Math.floor(Math.random() * 400000) + 1000,
             TotalSize: totalSize,
@@ -113,18 +103,18 @@ const Index = () => {
           };
         }),
         measureData: Array(45).fill(0).map((_, i) => ({
-          MeasureName: `Measure_${i+1}`,
-          TableName: `Table_${Math.floor(i/3) + 1}`,
-          FullMeasureName: `Table_${Math.floor(i/3) + 1}[Measure_${i+1}]`,
-          MeasureExpression: `SUM(Table_${Math.floor(i/3) + 1}[Column_${i+1}])`,
+          MeasureName: `Measure_${i + 1}`,
+          TableName: `Table_${Math.floor(i / 3) + 1}`,
+          FullMeasureName: `Table_${Math.floor(i / 3) + 1}[Measure_${i + 1}]`,
+          MeasureExpression: `SUM(Table_${Math.floor(i / 3) + 1}[Column_${i + 1}])`,
           DisplayFolder: i % 3 === 0 ? "KPIs" : i % 2 === 0 ? "Metrics" : "Analysis",
-          Description: `Calculates the ${i+1}th metric`,
+          Description: `Calculates the ${i + 1}th metric`,
           DataType: ["Currency", "Number", "Percentage", "Text"][i % 4],
           FormatString: i % 4 === 0 ? "$#,0.00" : i % 4 === 1 ? "#,0" : i % 4 === 2 ? "0.00%" : "@"
         })),
         expressionData: Array(15).fill(0).map((_, i) => ({
-          "Table Name": `Table_${i+1}`,
-          "Expression": `let\n  Source = Sql.Database(\"server\", \"database\"),\n  dbo_Table${i+1} = Source{[Schema=\"dbo\",Item=\"Table${i+1}\"]}[Data],\n  #\"Filtered Rows\" = Table.SelectRows(dbo_Table${i+1}, each [Column1] <> null)\nin\n  #\"Filtered Rows\"`
+          "Table Name": `Table_${i + 1}`,
+          "Expression": `let\n  Source = Sql.Database(\"server\", \"database\"),\n  dbo_Table${i + 1} = Source{[Schema=\"dbo\",Item=\"Table${i + 1}\"]}[Data],\n  #\"Filtered Rows\" = Table.SelectRows(dbo_Table${i + 1}, each [Column1] <> null)\nin\n  #\"Filtered Rows\"`
         })),
         relationships: Array(35).fill(0).map((_, i) => {
           const fromTable = `Table_${Math.floor(Math.random() * 5) + 1}`;
@@ -133,7 +123,6 @@ const Index = () => {
           const toCardinality = Math.random() > 0.5 ? "Many" : "One";
           const fromColumn = `Column_${Math.floor(Math.random() * 20) + 1}`;
           const toColumn = `Column_${Math.floor(Math.random() * 20) + 1}`;
-          
           return {
             FromTableName: fromTable,
             FromFullColumnName: `${fromTable}[${fromColumn}]`,
@@ -156,7 +145,6 @@ const Index = () => {
           };
         })
       };
-
       setProcessedData(sampleData);
       setIsFileUploaded(true);
       toast.success('Sample data loaded successfully');
@@ -166,141 +154,82 @@ const Index = () => {
       setIsDataProcessing(false);
     }
   };
-
   const getTabs = () => {
     if (!processedData) return [];
-    
-    return [
-      {
-        id: 'model-metadata',
-        label: 'Model',
-        content: (
-          <ModelMetadataWithVisualization data={processedData} />
-        ),
-      },
-      {
-        id: 'relationships',
-        label: 'Relationships',
-        content: (
-          <div className="space-y-6">
+    return [{
+      id: 'model-metadata',
+      label: 'Model',
+      content: <ModelMetadataWithVisualization data={processedData} />
+    }, {
+      id: 'relationships',
+      label: 'Relationships',
+      content: <div className="space-y-6">
             <UseCaseHelper type="relationships" />
             <RelationshipsTab relationships={processedData.relationships} />
           </div>
-        ),
-      },
-      {
-        id: 'tables-metadata',
-        label: 'Tables',
-        content: (
-          <div className="space-y-6">
+    }, {
+      id: 'tables-metadata',
+      label: 'Tables',
+      content: <div className="space-y-6">
             <UseCaseHelper type="tables" />
-            <DataTab 
-              data={processedData.tableData} 
-              title="Tables Metadata" 
-              filterColumns={["Mode", "Is Hidden"]} 
-            />
+            <DataTab data={processedData.tableData} title="Tables Metadata" filterColumns={["Mode", "Is Hidden"]} />
           </div>
-        ),
-      },
-      {
-        id: 'columns-metadata',
-        label: 'Columns',
-        content: (
-          <div className="space-y-6">
+    }, {
+      id: 'columns-metadata',
+      label: 'Columns',
+      content: <div className="space-y-6">
             <UseCaseHelper type="columns" />
-            <DataTab 
-              data={processedData.columnData} 
-              title="Columns Metadata" 
-              filterColumns={["TableName", "DataType", "IsHidden"]} 
-              searchColumn="ColumnName"
-              enableColumnSelection={true}
-            />
+            <DataTab data={processedData.columnData} title="Columns Metadata" filterColumns={["TableName", "DataType", "IsHidden"]} searchColumn="ColumnName" enableColumnSelection={true} />
           </div>
-        ),
-      },
-      {
-        id: 'measures-metadata',
-        label: 'Measures',
-        content: (
-          <div className="space-y-6">
+    }, {
+      id: 'measures-metadata',
+      label: 'Measures',
+      content: <div className="space-y-6">
             <UseCaseHelper type="measures" />
-            <DataTab 
-              data={processedData.measureData} 
-              title="Measures Metadata" 
-              filterColumns={["TableName", "DataType"]} 
-              searchColumn="MeasureExpression"
-              enableColumnSelection={true}
-            />
+            <DataTab data={processedData.measureData} title="Measures Metadata" filterColumns={["TableName", "DataType"]} searchColumn="MeasureExpression" enableColumnSelection={true} />
           </div>
-        ),
-      },
-      {
-        id: 'measure-visualizer',
-        label: 'Impact Analysis',
-        content: (
-          <div className="space-y-6">
-            <MeasureVisualizer 
-              measureData={processedData.measureData}
-              columnData={processedData.columnData}
-            />
+    }, {
+      id: 'measure-visualizer',
+      label: 'Impact Analysis',
+      content: <div className="space-y-6">
+            <MeasureVisualizer measureData={processedData.measureData} columnData={processedData.columnData} />
           </div>
-        ),
-      },
-      {
-        id: 'best-practices',
-        label: 'Best Practices',
-        content: (
-          <div className="space-y-6">
+    }, {
+      id: 'best-practices',
+      label: 'Best Practices',
+      content: <div className="space-y-6">
             <BestPracticesAnalyzer data={processedData} />
           </div>
-        ),
-      },
-      {
-        id: 'expressions',
-        label: 'PowerQuery',
-        content: (
-          <div className="space-y-6">
+    }, {
+      id: 'expressions',
+      label: 'PowerQuery',
+      content: <div className="space-y-6">
             <UseCaseHelper type="expressions" />
             <ExpressionDisplay expressions={processedData.expressionData} />
           </div>
-        ),
-      },
-      {
-        id: 'snippets',
-        label: 'Reusable Snippets',
-        content: (
-          <SnippetsTab />
-        ),
-      },
-      {
-        id: 'documentation',
-        label: 'Documentation',
-        content: (
-          <div className="space-y-6">
+    }, {
+      id: 'snippets',
+      label: 'Reusable Snippets',
+      content: <SnippetsTab />
+    }, {
+      id: 'documentation',
+      label: 'Documentation',
+      content: <div className="space-y-6">
             <DocumentationTab data={processedData} />
           </div>
-        ),
-      },
-      {
-        id: 'ask-gpt',
-        label: 'Ask GPT',
-        content: (
-          <AskGPT 
-            tableData={processedData.tableData}
-            columnData={processedData.columnData}
-          />
-        ),
-      },
-    ];
+    }, {
+      id: 'ask-gpt',
+      label: 'Ask GPT',
+      content: <AskGPT tableData={processedData.tableData} columnData={processedData.columnData} />
+    }];
   };
-
-  return (
-    <div className="min-h-screen pb-16 bg-gradient-to-b from-background to-muted/20" style={{paddingBottom:'0px'}}>
+  return <div className="min-h-screen pb-16 bg-gradient-to-b from-background to-muted/20" style={{
+    paddingBottom: '0px'
+  }}>
       <NavigationBar />
       
       <main className="container mx-auto pt-24 px-4 sm:px-6">
-        {!isFileUploaded ? (
-          <div>
+        {!isFileUploaded ? <div>
             <div className="animate-fade-in max-w-3xl mx-auto text-center space-y-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-foreground/20 blur-3xl opacity-70 -z-10 rounded-full"></div>
@@ -313,27 +242,20 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="mt-8 flex flex-col items-center justify-center gap-6">
+            <div className="mt-2 flex flex-col items-center justify-center gap-6 my-0">
               <div className="flex gap-4 items-center">
-                {!user && (
-                  <>
+                {!user && <>
                     <SampleData onLoadSample={loadSampleData} />
-                    <Button 
-                      variant="default"
-                      size="lg"
-                      className="flex items-center gap-2"
-                      style={{ backgroundColor: 'rgb(0, 128, 255)', color: 'white' }}
-                      onClick={() => navigate('/auth')}
-                    >
+                    <Button variant="default" size="lg" className="flex items-center gap-2" style={{
+                backgroundColor: 'rgb(0, 128, 255)',
+                color: 'white'
+              }} onClick={() => navigate('/auth')}>
                       <LogIn className="h-4 w-4" />
                       Login to use your own Power BI models
                     </Button>
-                  </>
-                )}
+                  </>}
               </div>
-              {user && (
-                <FileUploader onFileUpload={handleFileUpload} />
-              )}
+              {user && <FileUploader onFileUpload={handleFileUpload} />}
             </div>
             
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -409,26 +331,19 @@ const Index = () => {
                 </div>
               </Card>
             </div>
-          </div>
-        ) : (
-          <div className="mt-12 animate-fade-in">
+          </div> : <div className="mt-12 animate-fade-in">
             <TabsContainer tabs={getTabs()} />
-          </div>
-        )}
+          </div>}
         
-        {isDataProcessing && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+        {isDataProcessing && <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="space-y-4 text-center">
               <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
               <p className="text-lg font-medium">Processing file...</p>
             </div>
-          </div>
-        )}
+          </div>}
       </main>
       
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
