@@ -1,28 +1,26 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Tables } from '@/integrations/supabase/types';
 
-// This file contains direct SQL queries that can be used when
-// TypeScript definitions are not yet available for new tables
+// Define the type for user_usage to match the table structure
+type UserUsageRow = Tables<'user_usage'>;
 
-// This function is only needed during development and will be removed
-// once proper TypeScript types are generated for the user_usage table
-export async function getUserUsage(userId: string) {
-  // We're using a raw SQL query to avoid TypeScript errors
+export async function getUserUsage(userId: string): Promise<UserUsageRow | null> {
   const { data, error } = await supabase
     .from('user_usage')
-    .select('*')
+    .select('processed_files_count, is_premium')
     .eq('id', userId)
     .single();
   
   if (error) {
     console.error('Error in getUserUsage:', error);
-    throw error;
+    return null;
   }
   
   return data;
 }
 
-export async function incrementUserFileCount(userId: string, currentCount: number) {
+export async function incrementUserFileCount(userId: string, currentCount: number): Promise<boolean> {
   const { error } = await supabase
     .from('user_usage')
     .update({ processed_files_count: currentCount + 1 })
@@ -30,7 +28,7 @@ export async function incrementUserFileCount(userId: string, currentCount: numbe
   
   if (error) {
     console.error('Error in incrementUserFileCount:', error);
-    throw error;
+    return false;
   }
   
   return true;

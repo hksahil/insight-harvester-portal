@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { getUserUsage, incrementUserFileCount } from '@/services/directSupabaseQuery';
@@ -24,7 +24,7 @@ export function useUserUsage() {
 
     try {
       const data = await getUserUsage(session.user.id);
-      return data;
+      return data as UserUsage;
     } catch (error) {
       console.error('Error fetching user usage:', error);
       return null;
@@ -35,18 +35,19 @@ export function useUserUsage() {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) return false;
-
     if (!usage) return false;
 
     try {
-      await incrementUserFileCount(session.user.id, usage.processed_files_count);
+      const success = await incrementUserFileCount(session.user.id, usage.processed_files_count);
       
-      setUsage(prev => prev ? {
-        ...prev,
-        processed_files_count: prev.processed_files_count + 1
-      } : null);
+      if (success) {
+        setUsage(prev => prev ? {
+          ...prev,
+          processed_files_count: prev.processed_files_count + 1
+        } : null);
+      }
       
-      return true;
+      return success;
     } catch (error) {
       console.error('Error updating file count:', error);
       return false;
@@ -55,7 +56,7 @@ export function useUserUsage() {
 
   useEffect(() => {
     fetchUserUsage().then(data => {
-      setUsage(data as UserUsage);
+      setUsage(data);
       setLoading(false);
     });
   }, []);

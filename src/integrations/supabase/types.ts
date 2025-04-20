@@ -30,6 +30,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_usage: {
+        Row: {
+          id: string
+          is_premium: boolean | null
+          processed_files_count: number | null
+        }
+        Insert: {
+          id: string
+          is_premium?: boolean | null
+          processed_files_count?: number | null
+        }
+        Update: {
+          id?: string
+          is_premium?: boolean | null
+          processed_files_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
