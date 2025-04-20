@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import FileUploader from "@/components/FileUploader";
@@ -317,18 +316,20 @@ const Index = () => {
             </div>
             
             <div className="mt-8 flex flex-col items-center justify-center gap-6">
-              <div className="flex gap-4">
-                <SampleData onLoadSample={loadSampleData} />
+              <div className="flex gap-4 items-center">
                 {!user && (
-                  <Button 
-                    variant="default"
-                    size="lg"
-                    className="gap-2"
-                    onClick={() => navigate('/auth')}
-                  >
-                    <LogIn className="h-4 w-4" />
-                    Login to use your own Power BI models
-                  </Button>
+                  <>
+                    <SampleData onLoadSample={loadSampleData} />
+                    <Button 
+                      variant="default"
+                      size="lg"
+                      className="flex items-center gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
+                      onClick={() => navigate('/auth')}
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Login to use your own Power BI models
+                    </Button>
+                  </>
                 )}
               </div>
               {user && (

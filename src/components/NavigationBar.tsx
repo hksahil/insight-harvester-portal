@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, LogIn, LogOut, Info, HelpCircle, Calendar } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -101,7 +100,7 @@ const NavigationBar: React.FC = () => {
           {user ? (
             <Button 
               onClick={handleLogout}
-              variant="ghost"
+              variant="destructive"
               className="flex items-center gap-2"
               title="Logout"
             >
@@ -111,8 +110,7 @@ const NavigationBar: React.FC = () => {
           ) : (
             <Button 
               onClick={goToAuth}
-              variant="ghost"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
               title="Login"
             >
               <LogIn className="h-4 w-4" />
