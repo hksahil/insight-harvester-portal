@@ -13,7 +13,7 @@ const SampleData: React.FC<SampleDataProps> = ({ onLoadSample }) => {
       onClick={onLoadSample}
       variant="outline"
       size="lg"
-      className="gap-2 mt-4"
+      className="gap-2"
     >
       <Play className="h-4 w-4" />
       Try with Sample Data

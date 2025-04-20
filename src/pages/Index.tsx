@@ -31,12 +31,10 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
@@ -323,7 +321,8 @@ const Index = () => {
                     <Button 
                       variant="default"
                       size="lg"
-                      className="flex items-center gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
+                      className="flex items-center gap-2"
+                      style={{ backgroundColor: 'rgb(0, 128, 255)', color: 'white' }}
                       onClick={() => navigate('/auth')}
                     >
                       <LogIn className="h-4 w-4" />
