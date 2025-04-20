@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle, LockIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserUsage } from '@/hooks/useUserUsage';
+import { Button } from '@/components/ui/button';
 
 interface FileUploaderProps {
   onFileUpload: (file: File) => void;
@@ -12,52 +14,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [processedFilesCount, setProcessedFilesCount] = useState(0);
-  const [isPremium, setIsPremium] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUserUsage = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error('Please sign in to upload files');
-        navigate('/auth');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('user_usage')
-        .select('processed_files_count, is_premium')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user usage:', error);
-        return;
-      }
-
-      setProcessedFilesCount(data?.processed_files_count || 0);
-      setIsPremium(data?.is_premium || false);
-    };
-
-    fetchUserUsage();
-  }, [navigate]);
-
-  const updateUserFileCount = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) return;
-
-    const { error } = await supabase
-      .from('user_usage')
-      .update({ processed_files_count: processedFilesCount + 1 })
-      .eq('id', session.user.id);
-
-    if (error) {
-      console.error('Error updating file count:', error);
-    }
-  };
+  const { usage, loading, incrementFileCount, isLimitReached } = useUserUsage();
 
   const handleFileProcess = async (files: FileList) => {
     setError(null);
@@ -69,8 +27,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       return;
     }
 
-    if (processedFilesCount >= 5 && !isPremium) {
+    if (isLimitReached) {
       toast.error('You have reached the limit of 5 free file uploads. Please upgrade to premium.');
+      navigate('/premium');
       return;
     }
 
@@ -80,11 +39,11 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
         setFileName(file.name);
         onFileUpload(file);
         
-        // Update file count
-        await updateUserFileCount();
-        setProcessedFilesCount(prev => prev + 1);
-        
-        toast.success('File uploaded successfully');
+        // Increment file count
+        const success = await incrementFileCount();
+        if (success) {
+          toast.success('File uploaded successfully');
+        }
       } else {
         setError('Please upload a .vpax file');
         toast.error('Please upload a .vpax file');
@@ -115,7 +74,15 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
   };
 
   const renderUploadContent = () => {
-    if (processedFilesCount >= 5 && !isPremium) {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center p-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      );
+    }
+
+    if (isLimitReached) {
       return (
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="p-4 rounded-full bg-destructive/10">
@@ -131,12 +98,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
               You have used all 5 free file uploads. Upgrade to premium to continue.
             </p>
             
-            <button 
+            <Button 
               onClick={() => navigate('/premium')} 
-              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+              className="mt-4"
+              variant="default"
             >
               Upgrade to Premium
-            </button>
+            </Button>
           </div>
         </div>
       );
@@ -169,7 +137,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
             </p>
           ) : (
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-              Drag and drop your .vpax file here, or click to browse
+              {usage && !usage.is_premium ? 
+                `${5 - (usage.processed_files_count || 0)} free uploads remaining` : 
+                'Drag and drop your .vpax file here, or click to browse'}
             </p>
           )}
         </div>
@@ -197,9 +167,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="flex flex-col items-center justify-center space-y-4">
-        {renderUploadContent()}
-      </div>
+      {renderUploadContent()}
     </div>
   );
 };
