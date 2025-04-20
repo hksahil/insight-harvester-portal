@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { getUserUsage, incrementUserFileCount } from '@/services/directSupabaseQuery';
 
 interface UserUsage {
   processed_files_count: number;
@@ -22,18 +22,13 @@ export function useUserUsage() {
       return null;
     }
 
-    const { data, error } = await supabase
-      .from('user_usage')
-      .select('processed_files_count, is_premium')
-      .eq('id', session.user.id)
-      .single();
-
-    if (error) {
+    try {
+      const data = await getUserUsage(session.user.id);
+      return data;
+    } catch (error) {
       console.error('Error fetching user usage:', error);
       return null;
     }
-
-    return data;
   };
 
   const incrementFileCount = async () => {
@@ -41,29 +36,26 @@ export function useUserUsage() {
     
     if (!session) return false;
 
-    const { error } = await supabase
-      .from('user_usage')
-      .update({ 
-        processed_files_count: (usage?.processed_files_count || 0) + 1 
-      })
-      .eq('id', session.user.id);
+    if (!usage) return false;
 
-    if (error) {
+    try {
+      await incrementUserFileCount(session.user.id, usage.processed_files_count);
+      
+      setUsage(prev => prev ? {
+        ...prev,
+        processed_files_count: prev.processed_files_count + 1
+      } : null);
+      
+      return true;
+    } catch (error) {
       console.error('Error updating file count:', error);
       return false;
     }
-
-    setUsage(prev => prev ? {
-      ...prev,
-      processed_files_count: prev.processed_files_count + 1
-    } : null);
-
-    return true;
   };
 
   useEffect(() => {
     fetchUserUsage().then(data => {
-      setUsage(data);
+      setUsage(data as UserUsage);
       setLoading(false);
     });
   }, []);
