@@ -8,7 +8,7 @@ type UserUsageRow = Tables<'user_usage'>;
 export async function getUserUsage(userId: string): Promise<UserUsageRow | null> {
   const { data, error } = await supabase
     .from('user_usage')
-    .select('processed_files_count, is_premium')
+    .select('id, processed_files_count, is_premium')
     .eq('id', userId)
     .single();
   
