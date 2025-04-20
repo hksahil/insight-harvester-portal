@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
+import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 
 const Index = () => {
   const [isFileUploaded, setIsFileUploaded] = useState(false);
@@ -414,6 +415,7 @@ const Index = () => {
 
             <FeatureHighlight />
             <PricingComparison />
+            <TestimonialsCarousel />
           </div>
         ) : (
           <div className="mt-12 animate-fade-in">
