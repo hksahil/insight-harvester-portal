@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -7,6 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from 'embla-carousel-autoplay';
 
 const testimonials = [
   {
@@ -30,6 +31,14 @@ const testimonials = [
 ];
 
 const TestimonialsCarousel = () => {
+  const autoplayPlugin = React.useMemo(() => 
+    Autoplay({
+      delay: 5000,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+    }), 
+  []);
+
   return (
     <div className="py-24 px-4 bg-muted/20">
       <h2 className="text-4xl font-semibold mb-12 text-center">
@@ -41,16 +50,8 @@ const TestimonialsCarousel = () => {
           opts={{
             align: "start",
             loop: true,
-            draggable: true,
-            watchDrag: true,
-            skipSnaps: false,
-            inViewThreshold: 0.7,
-            autoplay: {
-              delay: 5000,
-              stopOnInteraction: false,
-              stopOnMouseEnter: true,
-            },
           }}
+          plugins={[autoplayPlugin]}
           className="w-full"
         >
           <CarouselContent>
@@ -80,4 +81,3 @@ const TestimonialsCarousel = () => {
 };
 
 export default TestimonialsCarousel;
-
