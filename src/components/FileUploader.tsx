@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle, LockIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -27,6 +28,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       return;
     }
 
+    // Check if user has reached the limit
     if (usage && !usage.is_premium && (usage.processed_files_count >= 5)) {
       toast.error('You have reached the limit of 5 free file uploads. Please upgrade to premium.');
       navigate('/premium');
@@ -38,12 +40,15 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       if (file.name.endsWith('.vpax')) {
         setFileName(file.name);
         
+        // Process file first
+        onFileUpload(file);
+        
+        // Then increment count after successful processing
         const success = await incrementFileCount();
-        if (success) {
-          onFileUpload(file);
-          toast.success('File uploaded successfully');
+        if (!success) {
+          toast.error('Failed to update file count, but file was processed');
         } else {
-          toast.error('Failed to update file count');
+          toast.success('File uploaded and processed successfully');
         }
       } else {
         setError('Please upload a .vpax file');

@@ -1,19 +1,33 @@
 
 import { useState } from 'react';
-import { UserRound } from 'lucide-react';
+import { UserRound, LogOut } from 'lucide-react';
 import { useUserUsage } from '@/hooks/useUserUsage';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export const UserProfileButton = () => {
   const { usage, loading } = useUserUsage();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Get user email
   supabase.auth.getSession().then(({ data: { session } }) => {
     setUserEmail(session?.user?.email ?? null);
   });
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+      navigate('/');
+    } catch (error: any) {
+      toast.error('Error logging out: ' + error.message);
+    }
+  };
 
   if (!userEmail || loading) return null;
 
@@ -47,6 +61,14 @@ export const UserProfileButton = () => {
               <span className="font-medium">{usage?.processed_files_count || 0}</span>
             </div>
           </div>
+          <Button 
+            onClick={handleLogout} 
+            variant="destructive" 
+            className="w-full flex items-center gap-2 mt-4"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
         </div>
       </PopoverContent>
     </Popover>

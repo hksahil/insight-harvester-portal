@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Home, LogIn, LogOut, Info, HelpCircle, Calendar } from 'lucide-react';
+import { Home, Info, HelpCircle, Calendar } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { User } from '@supabase/supabase-js';
-import { toast } from 'sonner';
 import { UserProfileButton } from './UserProfileButton';
 
 const NavigationBar: React.FC = () => {
@@ -30,16 +29,6 @@ const NavigationBar: React.FC = () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success('Logged out successfully');
-      navigate('/');
-    } catch (error: any) {
-      toast.error('Error logging out: ' + error.message);
-    }
-  };
 
   const goToHome = () => {
     navigate('/');
@@ -99,18 +88,7 @@ const NavigationBar: React.FC = () => {
           </Button>
 
           {user ? (
-            <>
-              <UserProfileButton />
-              <Button 
-                onClick={handleLogout}
-                variant="destructive"
-                className="flex items-center gap-2"
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
-            </>
+            <UserProfileButton />
           ) : (
             <Button 
               onClick={goToAuth}
@@ -118,7 +96,6 @@ const NavigationBar: React.FC = () => {
               style={{ backgroundColor: 'rgb(0, 128, 255)', color: 'white' }}
               title="Login"
             >
-              <LogIn className="h-4 w-4" />
               Login
             </Button>
           )}
