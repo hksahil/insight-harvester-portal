@@ -386,7 +386,7 @@ const Index = () => {
                       onClick={() => navigate('/auth')}
                     >
                       <LogIn className="h-4 w-4" />
-                      Try on your own datamodels
+                      Try on your PowerBI Models
                     </Button>
                   </>
                 )}

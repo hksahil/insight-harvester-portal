@@ -10,6 +10,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { LogIn } from 'lucide-react';
+
 
 // Use the 4 images you provided via URL
 const CAROUSEL_IMAGES = [
@@ -33,12 +35,22 @@ const FeatureHighlight = () => {
           measure dependencies, and optimize performance with our powerful analysis tools.
         </p>
         <Button 
+                      variant="default"
+                      size="lg"
+                      className="flex items-center gap-2"
+                      style={{ backgroundColor: 'rgb(0, 128, 255)', color: 'white' }}
+                      onClick={() => navigate('/auth')}
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Try on your PowerBI Models
+                    </Button>
+        {/* <Button 
           onClick={() => navigate('/premium')} 
           size="lg"
           className="bg-[#0080ff] hover:bg-[#2A2F3C] text-white group"
         >
           Upgrade to Premium <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-        </Button>
+        </Button> */}
       </div>
       <div className="relative max-w-xl w-full mx-auto">
         <Carousel>
