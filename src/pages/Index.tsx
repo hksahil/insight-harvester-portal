@@ -284,7 +284,7 @@ const Index = () => {
             <UseCaseHelper type="expressions" />
             <ExpressionDisplay
               expressions={processedData.expressionData}
-              renderExtra={(exprObj: any) => {
+              renderExtra={(exprObj) => {
                 const expr = exprObj["Expression"];
                 const baseTables = extractBaseTables(expr);
                 return (

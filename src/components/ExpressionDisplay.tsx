@@ -9,9 +9,10 @@ interface ExpressionData {
 
 interface ExpressionDisplayProps {
   expressions: ExpressionData[];
+  renderExtra?: (expression: ExpressionData) => React.ReactNode;
 }
 
-const ExpressionDisplay: React.FC<ExpressionDisplayProps> = ({ expressions }) => {
+const ExpressionDisplay: React.FC<ExpressionDisplayProps> = ({ expressions, renderExtra }) => {
   const [selectedTable, setSelectedTable] = useState<string>("All");
 
   const filteredExpressions = selectedTable === "All" 
@@ -43,12 +44,14 @@ const ExpressionDisplay: React.FC<ExpressionDisplayProps> = ({ expressions }) =>
       ) : (
         <div className="space-y-6">
           {filteredExpressions.map((expr, index) => (
-            <CodeDisplay
-              key={index}
-              code={expr.Expression}
-              language="m"
-              title={expr['Table Name']}
-            />
+            <div key={index} className="space-y-2">
+              <CodeDisplay
+                code={expr.Expression}
+                language="m"
+                title={expr['Table Name']}
+              />
+              {renderExtra && renderExtra(expr)}
+            </div>
           ))}
         </div>
       )}
