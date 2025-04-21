@@ -13,10 +13,10 @@ import {
 
 // Use the 4 images you provided via URL
 const CAROUSEL_IMAGES = [
-  "https://images.unsplash.com/photo-1615729947596-a598e5de0ab3",
-  "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07",
-  "https://images.unsplash.com/photo-1493397212122-2b85dda8106b",
-  "https://images.unsplash.com/photo-1524230572899-a752b3835840",
+"https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/Best%20practices.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9CZXN0IHByYWN0aWNlcy5wbmciLCJpYXQiOjE3NDUyNTY0MTMsImV4cCI6MTkwMjkzNjQxM30.F1O3ndo3T-HDprBmAK3rL7fB_LCiJi8_SGETnoyw9N8",
+"https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/Measure%20dependencies.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9NZWFzdXJlIGRlcGVuZGVuY2llcy5wbmciLCJpYXQiOjE3NDUyNTY0MzAsImV4cCI6MTkwMjkzNjQzMH0.upCkLGH885pZYVXKEaPnNxlHt5W6RV6ScUM90IxtSBs",
+"https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/Sharable%20Snippets.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9TaGFyYWJsZSBTbmlwcGV0cy5wbmciLCJpYXQiOjE3NDUyNTY0NDUsImV4cCI6MTkwMjkzNjQ0NX0.DjlGGI5DsUX2VE6E5WawVEk7pb5hCj-FxZ1QQaBsXf0",
+"https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/AI.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9BSS5wbmciLCJpYXQiOjE3NDUyNTY0NTgsImV4cCI6MTkwMjkzNjQ1OH0.FuAK_ol3fY2vWjS7gvErRMDNM1eJ9H1aXir8XUNWKoU"
 ];
 
 const FeatureHighlight = () => {
@@ -35,7 +35,7 @@ const FeatureHighlight = () => {
         <Button 
           onClick={() => navigate('/premium')} 
           size="lg"
-          className="bg-[#1A1F2C] hover:bg-[#2A2F3C] text-white group"
+          className="bg-[#0080ff] hover:bg-[#2A2F3C] text-white group"
         >
           Upgrade to Premium <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
