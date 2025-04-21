@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 declare global {
   interface Window {
     Razorpay?: any;
+    RAZORPAY_KEY_ID?: string;
   }
 }
 
