@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
 
 const Footer: React.FC = () => {
@@ -25,15 +24,46 @@ const Footer: React.FC = () => {
         </div>
         <Separator />
         <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
-          <Link to="/privacy-policy" className="hover:text-primary hover:underline">
-            Privacy Policy
-          </Link>
-          <Link to="/terms" className="hover:text-primary hover:underline">
+          <a 
+            href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/terms" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-primary hover:underline"
+          >
             Terms & Conditions
-          </Link>
-          <Link to="/refund" className="hover:text-primary hover:underline">
-            Return & Refund Policy
-          </Link>
+          </a>
+          <a 
+            href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/privacy" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-primary hover:underline"
+          >
+            Privacy Policy
+          </a>
+          <a 
+            href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/refund" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-primary hover:underline"
+          >
+            Refund Policy
+          </a>
+          <a 
+            href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/shipping" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-primary hover:underline"
+          >
+            Shipping Policy
+          </a>
+          <a 
+            href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/contact_us" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-primary hover:underline"
+          >
+            Contact Us
+          </a>
         </div>
       </div>
     </footer>
