@@ -26,21 +26,40 @@ import { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 
+// --- Updated base tables extraction logic ---
 function extractBaseTables(sql: string): string[] {
   if (!sql) return [];
 
-  const regex = /\b(?:from|join|update|into|table)\s+([a-zA-Z0-9_]+)/gi;
-  const subqueryRegex = /\(\s*select[^)]*from\s+([a-zA-Z0-9_]+)/gi;
-
   const baseTables = new Set<string>();
 
+  // 1. SQL-like statements
+  const regex = /\b(?:from|join|update|into|table)\s+([a-zA-Z0-9_]+)/gi;
   let match;
   while ((match = regex.exec(sql)) !== null) {
     baseTables.add(match[1]);
   }
+
+  // 2. Subselects in SQL
+  const subqueryRegex = /\(\s*select[^)]*from\s+([a-zA-Z0-9_]+)/gi;
   while ((match = subqueryRegex.exec(sql)) !== null) {
     baseTables.add(match[1]);
   }
+
+  // 3. PowerQuery M: Table.SelectRows or similar - first argument is table/view name
+  const selectRowsRegex = /Table\.SelectRows\s*\(\s*([a-zA-Z0-9_]+)\s*,/gi;
+  while ((match = selectRowsRegex.exec(sql)) !== null) {
+    baseTables.add(match[1]);
+  }
+
+  // 4. PowerQuery M: similar Extract for Table.SelectColumns, Table.AddColumn, etc. (optional for now)
+  // const pqFunctions = ["SelectColumns", "AddColumn", "RemoveColumns"];
+  // pqFunctions.forEach(fn => {
+  //   const pqRegex = new RegExp(`Table\\.${fn}\\s*\\(\\s*([a-zA-Z0-9_]+)\\s*,`, "gi");
+  //   while ((match = pqRegex.exec(sql)) !== null) {
+  //     baseTables.add(match[1]);
+  //   }
+  // });
+
   return Array.from(baseTables);
 }
 

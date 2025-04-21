@@ -43,9 +43,18 @@ const FeatureHighlight = () => {
       </div>
       <div className="relative max-w-xl w-full mx-auto">
         <Carousel>
+          {/* Position the arrows absolutely on top of the image */}
+          <div className="absolute top-1/2 left-0 w-full z-20 flex justify-between px-4 pointer-events-none" style={{transform: 'translateY(-50%)'}}>
+            <div className="pointer-events-auto">
+              <CarouselPrevious />
+            </div>
+            <div className="pointer-events-auto">
+              <CarouselNext />
+            </div>
+          </div>
           <CarouselContent>
             {DUMMY_IMAGES.map((src, idx) => (
-              <CarouselItem key={src} className="aspect-video bg-black/5 rounded-lg overflow-hidden flex items-center justify-center">
+              <CarouselItem key={src} className="aspect-video bg-black/5 rounded-lg overflow-hidden flex items-center justify-center relative">
                 <img 
                   src={src}
                   alt={`Demo ${idx + 1}`}
@@ -55,8 +64,6 @@ const FeatureHighlight = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
         </Carousel>
         <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
         <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
@@ -66,3 +73,4 @@ const FeatureHighlight = () => {
 };
 
 export default FeatureHighlight;
+
