@@ -26,6 +26,24 @@ import { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 
+function extractBaseTables(sql: string): string[] {
+  if (!sql) return [];
+
+  const regex = /\b(?:from|join|update|into|table)\s+([a-zA-Z0-9_]+)/gi;
+  const subqueryRegex = /\(\s*select[^)]*from\s+([a-zA-Z0-9_]+)/gi;
+
+  const baseTables = new Set<string>();
+
+  let match;
+  while ((match = regex.exec(sql)) !== null) {
+    baseTables.add(match[1]);
+  }
+  while ((match = subqueryRegex.exec(sql)) !== null) {
+    baseTables.add(match[1]);
+  }
+  return Array.from(baseTables);
+}
+
 const Index = () => {
   const [isFileUploaded, setIsFileUploaded] = useState(false);
   const [isDataProcessing, setIsDataProcessing] = useState(false);
@@ -264,7 +282,27 @@ const Index = () => {
         content: (
           <div className="space-y-6">
             <UseCaseHelper type="expressions" />
-            <ExpressionDisplay expressions={processedData.expressionData} />
+            <ExpressionDisplay
+              expressions={processedData.expressionData}
+              renderExtra={(exprObj: any) => {
+                const expr = exprObj["Expression"];
+                const baseTables = extractBaseTables(expr);
+                return (
+                  <div className="mt-2">
+                    <span className="font-semibold text-sm text-primary">Base Tables:</span>
+                    {baseTables.length > 0 ? (
+                      <ul className="list-disc ml-5 text-sm">
+                        {baseTables.map((tbl) => (
+                          <li key={tbl} className="text-muted-foreground">{tbl}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="ml-2 text-muted-foreground text-sm">[None Detected]</span>
+                    )}
+                  </div>
+                );
+              }}
+            />
           </div>
         ),
       },
