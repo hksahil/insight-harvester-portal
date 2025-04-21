@@ -11,72 +11,111 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const PricingComparison = () => {
-  const features = [
-    { name: 'External tool for Power BI Desktop', desktop: true, business: true },
-    { name: 'Load/save model meta data to disk ¹', desktop: false, business: true, note: '2' },
-    { name: 'Workspace Mode', desktop: false, business: true, note: '2' },
-    { name: 'DAX Optimizer access', desktop: false, business: false },
-    { name: 'Power BI Premium Per User', desktop: false, business: true },
-    { name: 'SQL Server Developer Edition', desktop: false, business: true, note: '2' },
-    { name: 'SQL Server Standard Edition', desktop: false, business: true },
-    { name: 'SQL Server Enterprise Edition', desktop: false, business: false },
-  ];
+const products = [
+  { label: 'PowerBI Application', key: 'powerbi' },
+  { label: 'PowerBI Assistant', key: 'assistant' },
+  { label: 'DAX Studio', key: 'dax' },
+  { label: 'Tabular Editor', key: 'tabular' },
+];
 
+const features = [
+  {
+    name: 'Works on web, no installations needed',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'Works outside client environment',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'Works without accessing underlying data',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'One Click documentation',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'Impact Analysis',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'Sharable code snppet repository',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'PowerQuery Analyser',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'Score your Datamodel against best practices',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+  {
+    name: 'AI Integration',
+    powerbi: false,
+    assistant: true,
+    dax: false,
+    tabular: false,
+  },
+];
+
+const PricingComparison = () => {
   return (
-    <div className="py-24 px-4">
-      <h2 className="text-4xl font-semibold mb-12">Compare editions</h2>
-      
+    <div className="py-12 px-2 md:px-8">
+      <h2 className="text-3xl md:text-4xl font-semibold mb-8 md:mb-12 text-center">Compare Editions</h2>
       <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[40%]"></TableHead>
-              <TableHead className="text-center">
-                <div className="flex flex-col items-center space-y-2">
-                  <img 
-                    src="public/lovable-uploads/477c7a2e-01f8-419e-9ef0-647351745947.png"
-                    alt="Power BI Logo"
-                    className="w-12 h-12"
-                  />
-                  <div className="font-bold text-xl">Desktop</div>
-                  <div className="text 2xl font-bold">$10 / monthly</div>
-                </div>
-              </TableHead>
-              <TableHead className="text-center">
-                <div className="flex flex-col items-center space-y-2">
-                  <img 
-                    src="public/lovable-uploads/477c7a2e-01f8-419e-9ef0-647351745947.png"
-                    alt="Power BI Logo"
-                    className="w-12 h-12"
-                  />
-                  <div className="font-bold text-xl">Business</div>
-                  <div className="text-2xl font-bold">$35 / monthly</div>
-                </div>
-              </TableHead>
+              <TableHead className="w-[32%]"></TableHead>
+              {products.map((product) => (
+                <TableHead key={product.key} className="text-center text-base font-bold">
+                  {product.label}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {features.map((feature, index) => (
-              <TableRow key={index} className="hover:bg-muted/50">
+            {features.map((feature, rowIdx) => (
+              <TableRow key={rowIdx} className="hover:bg-muted/40">
                 <TableCell className="font-medium">{feature.name}</TableCell>
-                <TableCell className="text-center">
-                  {feature.desktop ? (
-                    <Check className="h-5 w-5 mx-auto text-primary" />
-                  ) : (
-                    <X className="h-5 w-5 mx-auto text-muted-foreground" />
-                  )}
-                </TableCell>
-                <TableCell className="text-center">
-                  {feature.business ? (
-                    <div className="flex items-center justify-center gap-1">
-                      <Check className="h-5 w-5 text-primary" />
-                      {feature.note && <span className="text-sm text-muted-foreground">{feature.note}</span>}
-                    </div>
-                  ) : (
-                    <X className="h-5 w-5 mx-auto text-muted-foreground" />
-                  )}
-                </TableCell>
+                {products.map((product) => {
+                  const value = feature[product.key];
+                  return (
+                    <TableCell className="text-center" key={product.key}>
+                      {value ? (
+                        <Check className="h-5 w-5 text-primary mx-auto" />
+                      ) : (
+                        <X className="h-5 w-5 text-muted-foreground mx-auto" />
+                      )}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))}
           </TableBody>
