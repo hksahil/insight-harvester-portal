@@ -6,14 +6,68 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useUserUsage } from '@/hooks/useUserUsage';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
+
+const PREMIUM_AMOUNT = 49900; // INR in paise, i.e. ₹499.00
 
 const Premium: React.FC = () => {
   const { usage, loading } = useUserUsage();
 
-  const handleUpgrade = () => {
-    // TODO: Implement Stripe checkout or payment logic
-    // For now, just a placeholder toast
-    alert('Premium upgrade coming soon! Price: ₹499');
+  // Dynamically load Razorpay script
+  const loadRazorpayScript = () => {
+    return new Promise<boolean>((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleUpgrade = async () => {
+    const loaded = await loadRazorpayScript();
+    if (!loaded) {
+      toast.error("Failed to load Razorpay SDK. Please try again.");
+      return;
+    }
+
+    const options = {
+      key: import.meta.env.RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID || '', // fallback if set as global
+      amount: PREMIUM_AMOUNT,
+      currency: "INR",
+      name: "Power BI Assistant",
+      description: "Upgrade to Premium",
+      image: "/favicon.ico",
+      handler: function (response: any) {
+        toast.success("Payment successful! Thank you for upgrading to Premium.");
+        // Optionally: Trigger API/backend logic to upgrade the user
+        window.location.reload(); // Simple way to reload premium status for demo
+      },
+      prefill: {},
+      theme: { color: "#6366F1" },
+      modal: {
+        ondismiss: () => {
+          toast.info("Payment cancelled. You have not been charged.");
+        }
+      }
+    };
+
+    try {
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      toast.error("Failed to initiate payment. Please try again.");
+    }
   };
 
   if (loading) {
@@ -91,3 +145,4 @@ const Premium: React.FC = () => {
 };
 
 export default Premium;
+
