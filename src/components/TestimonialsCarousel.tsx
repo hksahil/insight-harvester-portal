@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -21,7 +20,7 @@ const testimonials = [
     title: "Analytics Manager"
   },
   {
-    quote: ""I'm the sole BI developer at my project, and documentation always fell to the bottom of my to‑do list. With PowerBI Assistant's one‑click Documentation, I now hand over fully annotated model docs to our auditors in under five minutes—no frantic late‑night edits required.",
+    quote: "I'm the sole BI developer at my project, and documentation always fell to the bottom of my to‑do list. With PowerBI Assistant's one‑click Documentation, I now hand over fully annotated model docs to our auditors in under five minutes—no frantic late‑night edits required.",
     author: "Priya Kumar",
     title: "BI Developer"
   },
@@ -67,7 +66,6 @@ const TestimonialsCarousel = () => {
                     <footer className="mt-auto">
                       <div className="font-semibold">{testimonial.author}</div>
                       <div className="text-sm text-muted-foreground">{testimonial.title}</div>
-                      {/* Removed company property rendering */}
                     </footer>
                   </div>
                 </div>
@@ -83,4 +81,3 @@ const TestimonialsCarousel = () => {
 };
 
 export default TestimonialsCarousel;
-
