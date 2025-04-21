@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,14 @@ const PREMIUM_AMOUNT = 49900; // INR in paise, i.e. ₹499.00
 
 const Premium: React.FC = () => {
   const { usage, loading } = useUserUsage();
+  
+  // Expose environment variable to window for debugging
+  useEffect(() => {
+    // This helps ensure we can access the key in the browser context
+    if (import.meta.env.RAZORPAY_KEY_ID) {
+      window.RAZORPAY_KEY_ID = import.meta.env.RAZORPAY_KEY_ID;
+    }
+  }, []);
 
   // Dynamically load Razorpay script
   const loadRazorpayScript = () => {
@@ -42,17 +50,31 @@ const Premium: React.FC = () => {
       return;
     }
 
+    // Debug log to check if key is available
+    console.log("Razorpay key status:", {
+      envKey: import.meta.env.RAZORPAY_KEY_ID ? "Available" : "Not available",
+      windowKey: window.RAZORPAY_KEY_ID ? "Available" : "Not available"
+    });
+
+    const keyToUse = import.meta.env.RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID;
+    
+    if (!keyToUse) {
+      toast.error("Razorpay API key not found. Please check your configuration.");
+      return;
+    }
+
     const options = {
-      key: import.meta.env.RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID || '', // fallback if set as global
+      key: keyToUse,
       amount: PREMIUM_AMOUNT,
       currency: "INR",
       name: "Power BI Assistant",
       description: "Upgrade to Premium",
       image: "/favicon.ico",
       handler: function (response: any) {
+        console.log("Payment success:", response);
         toast.success("Payment successful! Thank you for upgrading to Premium.");
         // Optionally: Trigger API/backend logic to upgrade the user
-        window.location.reload(); // Simple way to reload premium status for demo
+        setTimeout(() => window.location.reload(), 2000); // Give time for toast to be seen
       },
       prefill: {},
       theme: { color: "#6366F1" },
@@ -64,9 +86,11 @@ const Premium: React.FC = () => {
     };
 
     try {
+      console.log("Initializing Razorpay with key:", keyToUse.substring(0, 5) + "...");
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
+      console.error("Razorpay initialization error:", error);
       toast.error("Failed to initiate payment. Please try again.");
     }
   };
@@ -146,4 +170,3 @@ const Premium: React.FC = () => {
 };
 
 export default Premium;
-
