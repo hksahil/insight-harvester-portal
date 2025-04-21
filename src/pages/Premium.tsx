@@ -8,6 +8,8 @@ import { useUserUsage } from '@/hooks/useUserUsage';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 declare global {
   interface Window {
@@ -21,6 +23,9 @@ const Premium: React.FC = () => {
   const { usage, loading } = useUserUsage();
   const [razorpayKey, setRazorpayKey] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [showPayment, setShowPayment] = useState(false);
+  const [finalAmount, setFinalAmount] = useState(PREMIUM_AMOUNT);
   
   // Fetch Razorpay key from Supabase edge function
   useEffect(() => {
@@ -49,6 +54,31 @@ const Premium: React.FC = () => {
     fetchRazorpayKey();
   }, []);
 
+  // Apply promo code
+  const handleApplyPromo = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-promo-code', {
+        body: { code: promoCode }
+      });
+
+      if (error) {
+        toast.error("Failed to apply promo code");
+        return;
+      }
+
+      if (data.valid) {
+        const discountedAmount = Math.floor(PREMIUM_AMOUNT * (1 - data.discount));
+        setFinalAmount(discountedAmount);
+        toast.success(`Promo code applied! ${data.discount * 100}% discount`);
+      } else {
+        toast.error("Invalid promo code");
+      }
+    } catch (err) {
+      console.error('Error applying promo code:', err);
+      toast.error("Failed to apply promo code");
+    }
+  };
+
   // Dynamically load Razorpay script
   const loadRazorpayScript = () => {
     return new Promise<boolean>((resolve) => {
@@ -76,11 +106,11 @@ const Premium: React.FC = () => {
       return;
     }
 
-    console.log("Initializing payment with key available:", !!razorpayKey);
+    setShowPayment(true);
 
     const options = {
       key: razorpayKey,
-      amount: PREMIUM_AMOUNT,
+      amount: finalAmount,
       currency: "INR",
       name: "Power BI Assistant",
       description: "Upgrade to Premium",
@@ -88,13 +118,13 @@ const Premium: React.FC = () => {
       handler: function (response: any) {
         console.log("Payment success:", response);
         toast.success("Payment successful! Thank you for upgrading to Premium.");
-        // Optionally: Trigger API/backend logic to upgrade the user
-        setTimeout(() => window.location.reload(), 2000); // Give time for toast to be seen
+        setTimeout(() => window.location.reload(), 2000);
       },
       prefill: {},
       theme: { color: "#6366F1" },
       modal: {
         ondismiss: () => {
+          setShowPayment(false);
           toast.info("Payment cancelled. You have not been charged.");
         }
       }
@@ -150,35 +180,66 @@ const Premium: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
-      <main className="flex-grow flex items-center justify-center px-4 py-16">
-        <Card className="w-full max-w-md border border-border/50 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">
-              Upgrade to Premium
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-4">
-                You've used {usage?.processed_files_count || 0} of 5 free uploads.<br />
-                Unlock unlimited VPAX file processing for just ₹499
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                <li>✅ Unlimited VPAX file uploads</li>
-                <li>✅ Advanced analysis features</li>
-                <li>✅ Priority support</li>
-              </ul>
-              <Button 
-                onClick={handleUpgrade} 
-                className="w-full"
-                size="lg"
-                disabled={keyLoading}
-              >
-                {keyLoading ? "Loading..." : "Upgrade Now - ₹499"}
-              </Button>
+      <main className="flex-grow flex px-4 py-16">
+        <div className="w-full max-w-md mx-auto">
+          <Card className="border border-border/50 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-center">
+                Upgrade to Premium
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-4">
+                  You've used {usage?.processed_files_count || 0} of 5 free uploads.<br />
+                  Unlock unlimited VPAX file processing for just ₹499
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-2 mb-6">
+                  <li>✅ Unlimited VPAX file uploads</li>
+                  <li>✅ Advanced analysis features</li>
+                  <li>✅ Priority support</li>
+                </ul>
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter promo code"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={handleApplyPromo}
+                      disabled={!promoCode}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                  <Button 
+                    onClick={handleUpgrade} 
+                    className="w-full"
+                    size="lg"
+                    disabled={keyLoading}
+                  >
+                    {keyLoading ? "Loading..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Sheet open={showPayment} onOpenChange={setShowPayment}>
+          <SheetContent side="right" className="w-full sm:max-w-md">
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-4">Complete Your Payment</h3>
+                <p className="text-muted-foreground mb-4">
+                  Please complete your payment to upgrade to Premium.
+                </p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </SheetContent>
+        </Sheet>
       </main>
       <Footer />
     </div>
