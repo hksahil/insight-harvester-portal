@@ -11,13 +11,12 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 
-// Five dummy unsplash images
-const DUMMY_IMAGES = [
-  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
-  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-  "https://images.unsplash.com/photo-1518770660439-4636190af475",
-  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
-  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+// Use the 4 images you provided via URL
+const CAROUSEL_IMAGES = [
+  "https://images.unsplash.com/photo-1615729947596-a598e5de0ab3",
+  "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07",
+  "https://images.unsplash.com/photo-1493397212122-2b85dda8106b",
+  "https://images.unsplash.com/photo-1524230572899-a752b3835840",
 ];
 
 const FeatureHighlight = () => {
@@ -44,7 +43,10 @@ const FeatureHighlight = () => {
       <div className="relative max-w-xl w-full mx-auto">
         <Carousel>
           {/* Position the arrows absolutely on top of the image */}
-          <div className="absolute top-1/2 left-0 w-full z-20 flex justify-between px-4 pointer-events-none" style={{transform: 'translateY(-50%)'}}>
+          <div
+            className="absolute top-1/2 left-0 w-full z-20 flex justify-between px-4 pointer-events-none"
+            style={{ transform: 'translateY(-50%)' }}
+          >
             <div className="pointer-events-auto">
               <CarouselPrevious />
             </div>
@@ -53,7 +55,7 @@ const FeatureHighlight = () => {
             </div>
           </div>
           <CarouselContent>
-            {DUMMY_IMAGES.map((src, idx) => (
+            {CAROUSEL_IMAGES.map((src, idx) => (
               <CarouselItem key={src} className="aspect-video bg-black/5 rounded-lg overflow-hidden flex items-center justify-center relative">
                 <img 
                   src={src}
@@ -73,4 +75,3 @@ const FeatureHighlight = () => {
 };
 
 export default FeatureHighlight;
-

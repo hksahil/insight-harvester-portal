@@ -9,7 +9,7 @@ interface ExpressionData {
 
 interface ExpressionDisplayProps {
   expressions: ExpressionData[];
-  renderExtra?: (expression: ExpressionData) => React.ReactNode;
+  renderExtra?: (expression: ExpressionData) => React.ReactNode; // renderExtra marked optional
 }
 
 const ExpressionDisplay: React.FC<ExpressionDisplayProps> = ({ expressions, renderExtra }) => {
