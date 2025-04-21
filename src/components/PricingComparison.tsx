@@ -94,7 +94,10 @@ const PricingComparison = () => {
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[32%]"></TableHead>
               {products.map((product) => (
-                <TableHead key={product.key} className="text-center text-base font-bold">
+                <TableHead 
+                  key={product.key} 
+                  className={`text-center text-base font-bold ${product.key === 'assistant' ? 'bg-sky-50' : ''}`}
+                >
                   {product.label}
                 </TableHead>
               ))}
@@ -107,11 +110,14 @@ const PricingComparison = () => {
                 {products.map((product) => {
                   const value = feature[product.key];
                   return (
-                    <TableCell className="text-center" key={product.key}>
+                    <TableCell 
+                      className={`text-center ${product.key === 'assistant' ? 'bg-sky-50' : ''}`} 
+                      key={product.key}
+                    >
                       {value ? (
                         <Check className="h-5 w-5 text-primary mx-auto" />
                       ) : (
-                        <X className="h-5 w-5 text-muted-foreground mx-auto" />
+                        <X className="h-5 w-5 text-red-500 mx-auto" />
                       )}
                     </TableCell>
                   );

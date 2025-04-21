@@ -30,6 +30,30 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          code: string
+          discount: number
+          expires_at: string
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          code: string
+          discount: number
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          code?: string
+          discount?: number
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
       user_usage: {
         Row: {
           id: string

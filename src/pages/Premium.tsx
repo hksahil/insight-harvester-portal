@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import Footer from "@/components/Footer";
@@ -9,7 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 declare global {
   interface Window {
@@ -24,10 +22,8 @@ const Premium: React.FC = () => {
   const [razorpayKey, setRazorpayKey] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
   const [promoCode, setPromoCode] = useState('');
-  const [showPayment, setShowPayment] = useState(false);
   const [finalAmount, setFinalAmount] = useState(PREMIUM_AMOUNT);
   
-  // Fetch Razorpay key from Supabase edge function
   useEffect(() => {
     const fetchRazorpayKey = async () => {
       setKeyLoading(true);
@@ -54,7 +50,6 @@ const Premium: React.FC = () => {
     fetchRazorpayKey();
   }, []);
 
-  // Apply promo code
   const handleApplyPromo = async () => {
     try {
       const { data, error } = await supabase.functions.invoke('verify-promo-code', {
@@ -79,7 +74,6 @@ const Premium: React.FC = () => {
     }
   };
 
-  // Dynamically load Razorpay script
   const loadRazorpayScript = () => {
     return new Promise<boolean>((resolve) => {
       if (window.Razorpay) {
@@ -106,8 +100,6 @@ const Premium: React.FC = () => {
       return;
     }
 
-    setShowPayment(true);
-
     const options = {
       key: razorpayKey,
       amount: finalAmount,
@@ -124,7 +116,6 @@ const Premium: React.FC = () => {
       theme: { color: "#6366F1" },
       modal: {
         ondismiss: () => {
-          setShowPayment(false);
           toast.info("Payment cancelled. You have not been charged.");
         }
       }
@@ -180,66 +171,51 @@ const Premium: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
-      <main className="flex-grow flex px-4 py-16">
-        <div className="w-full max-w-md mx-auto">
-          <Card className="border border-border/50 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center">
-                Upgrade to Premium
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center">
-                <p className="text-muted-foreground mb-4">
-                  You've used {usage?.processed_files_count || 0} of 5 free uploads.<br />
-                  Unlock unlimited VPAX file processing for just ₹499
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                  <li>✅ Unlimited VPAX file uploads</li>
-                  <li>✅ Advanced analysis features</li>
-                  <li>✅ Priority support</li>
-                </ul>
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                    />
-                    <Button 
-                      variant="outline" 
-                      onClick={handleApplyPromo}
-                      disabled={!promoCode}
-                    >
-                      Apply
-                    </Button>
-                  </div>
+      <main className="flex-grow flex items-center justify-center px-4 py-16">
+        <Card className="w-full max-w-md border border-border/50 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">
+              Upgrade to Premium
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center">
+              <p className="text-muted-foreground mb-4">
+                You've used {usage?.processed_files_count || 0} of 5 free uploads.<br />
+                Unlock unlimited VPAX file processing for just ₹499
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-2 mb-6">
+                <li>✅ Unlimited VPAX file uploads</li>
+                <li>✅ Advanced analysis features</li>
+                <li>✅ Priority support</li>
+              </ul>
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter promo code"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                  />
                   <Button 
-                    onClick={handleUpgrade} 
-                    className="w-full"
-                    size="lg"
-                    disabled={keyLoading}
+                    variant="outline" 
+                    onClick={handleApplyPromo}
+                    disabled={!promoCode}
                   >
-                    {keyLoading ? "Loading..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
+                    Apply
                   </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Sheet open={showPayment} onOpenChange={setShowPayment}>
-          <SheetContent side="right" className="w-full sm:max-w-md">
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-4">Complete Your Payment</h3>
-                <p className="text-muted-foreground mb-4">
-                  Please complete your payment to upgrade to Premium.
-                </p>
+                <Button 
+                  onClick={handleUpgrade} 
+                  className="w-full"
+                  size="lg"
+                  disabled={keyLoading}
+                >
+                  {keyLoading ? "Loading..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
+                </Button>
               </div>
             </div>
-          </SheetContent>
-        </Sheet>
+          </CardContent>
+        </Card>
       </main>
       <Footer />
     </div>
