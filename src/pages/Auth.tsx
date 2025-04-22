@@ -79,7 +79,7 @@ const Auth: React.FC = () => {
           <Card className="border border-border/50 shadow-lg backdrop-blur-sm bg-card/90">
             <CardHeader className="space-y-1 text-center">
               <CardTitle className="text-2xl font-bold tracking-tight">
-                {isLogin ? 'Welcome back' : 'Create an account'}
+                {isLogin ? 'Sign In' : 'Create an account'}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 {isLogin 
@@ -102,7 +102,7 @@ const Auth: React.FC = () => {
                     }}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        {/* <FormLabel>Email</FormLabel> */}
                         <FormControl>
                           <Input 
                             type="email" 
@@ -128,7 +128,7 @@ const Auth: React.FC = () => {
                     }}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        {/* <FormLabel>Password</FormLabel> */}
                         <FormControl>
                           <Input 
                             type="password" 
