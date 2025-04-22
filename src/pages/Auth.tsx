@@ -75,7 +75,17 @@ const Auth: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
       <main className="flex-grow flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          {/* Image Column */}
+          <div className="hidden md:flex items-center justify-center">
+            <img 
+              src="https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/Login.svg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9Mb2dpbi5zdmciLCJpYXQiOjE3NDUzMTE3NjcsImV4cCI6MTkwMjk5MTc2N30.W7_m8pJ5Tb4iUI_4jPKaoxR9YF4VQ8L4IfisUO3LuhM" 
+              alt="Login Illustration" 
+              className="max-w-full h-auto object-contain" 
+            />
+          </div>
+
+          {/* Form Column */}
           <Card className="border border-border/50 shadow-lg backdrop-blur-sm bg-card/90">
             <CardHeader className="space-y-1 text-center">
               <CardTitle className="text-2xl font-bold tracking-tight">
@@ -208,3 +218,4 @@ const Auth: React.FC = () => {
 };
 
 export default Auth;
+
