@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,6 @@ type AuthFormData = {
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
   
   const form = useForm<AuthFormData>({
     defaultValues: {
@@ -28,10 +27,6 @@ const Auth: React.FC = () => {
       password: ''
     }
   });
-
-  // Extract redirectTo from search params if available
-  const searchParams = new URLSearchParams(location.search);
-  const redirectTo = searchParams.get('redirectTo') || '/';
 
   const handleAuth = async (data: AuthFormData) => {
     try {
@@ -44,7 +39,7 @@ const Auth: React.FC = () => {
         if (error) throw error;
         
         toast.success('Logged in successfully');
-        navigate(redirectTo);
+        navigate('/');
       } else {
         const { error } = await supabase.auth.signUp({
           email: data.email,
@@ -63,16 +58,10 @@ const Auth: React.FC = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      // Determine the redirect URL
-      const redirectURL = new URL(`${window.location.origin}/`);
-      if (redirectTo !== '/') {
-        redirectURL.pathname = redirectTo;
-      }
-
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectURL.toString()
+          redirectTo: `${window.location.origin}/`
         }
       });
 
@@ -92,7 +81,7 @@ const Auth: React.FC = () => {
               {/* Left side - Image */}
               <div className="hidden md:block bg-primary/5 relative overflow-hidden">
                 <img
-                  src="https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/Sharable%20Snippets.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9TaGFyYWJsZSBTbmlwcGV0cy5wbmciLCJpYXQiOjE3NDU2MTI1NzYsImV4cCI6MTkwMzI5MjU3Nn0.JtHUqNJs6svUjK1CotbsoxMxp9x4swndSue2wL9UFAY"
+                  src="/lovable-uploads/e0c89579-adfc-48be-a3b7-ac74c356167c.png"
                   alt="Login illustration"
                   className="object-contain h-full w-full p-4"
                 />

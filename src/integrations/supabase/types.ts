@@ -54,39 +54,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_snippets: {
-        Row: {
-          author_name: string
-          category: string
-          code: string
-          created_at: string
-          id: string
-          status: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          author_name: string
-          category: string
-          code: string
-          created_at?: string
-          id?: string
-          status?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          author_name?: string
-          category?: string
-          code?: string
-          created_at?: string
-          id?: string
-          status?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       user_usage: {
         Row: {
           id: string
