@@ -31,6 +31,14 @@ export function useUserUsage() {
     }
   };
 
+  const refetchUsage = async () => {
+    setLoading(true);
+    const data = await fetchUserUsage();
+    setUsage(data);
+    setLoading(false);
+    return data;
+  };
+
   const incrementFileCount = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     
@@ -74,6 +82,7 @@ export function useUserUsage() {
     usage,
     loading,
     incrementFileCount,
+    refetchUsage,
     isLimitReached: !!(usage && !usage.is_premium && usage.processed_files_count >= 5),
   };
 }

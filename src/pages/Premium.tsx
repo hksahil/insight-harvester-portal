@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import Footer from "@/components/Footer";
@@ -18,11 +19,12 @@ declare global {
 const PREMIUM_AMOUNT = 100; // INR in paise, i.e. ₹499.00
 
 const Premium: React.FC = () => {
-  const { usage, loading } = useUserUsage();
+  const { usage, loading, refetchUsage } = useUserUsage();
   const [razorpayKey, setRazorpayKey] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [finalAmount, setFinalAmount] = useState(PREMIUM_AMOUNT);
+  const [processingPayment, setProcessingPayment] = useState(false);
   
   useEffect(() => {
     const fetchRazorpayKey = async () => {
@@ -88,6 +90,29 @@ const Premium: React.FC = () => {
     });
   };
 
+  const updatePremiumStatus = async (paymentId: string) => {
+    try {
+      setProcessingPayment(true);
+      const { data, error } = await supabase.functions.invoke('update-premium-status', {
+        body: { payment_id: paymentId }
+      });
+
+      if (error) {
+        toast.error("Failed to activate premium status. Please contact support.");
+        console.error("Error updating premium status:", error);
+        return false;
+      }
+
+      await refetchUsage();
+      return true;
+    } catch (err) {
+      console.error("Error in premium status update:", err);
+      return false;
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
   const handleUpgrade = async () => {
     if (!razorpayKey) {
       toast.error("Razorpay API key not available. Please try again later.");
@@ -107,10 +132,20 @@ const Premium: React.FC = () => {
       name: "Power BI Assistant",
       description: "Upgrade to Premium",
       image: "/favicon.ico",
-      handler: function (response: any) {
+      handler: async function (response: any) {
         console.log("Payment success:", response);
-        toast.success("Payment successful! Thank you for upgrading to Premium.");
-        setTimeout(() => window.location.reload(), 2000);
+        const paymentId = response.razorpay_payment_id;
+        
+        toast.loading("Activating premium status...");
+        const success = await updatePremiumStatus(paymentId);
+        
+        if (success) {
+          toast.success("Payment successful! Your account has been upgraded to Premium.");
+          // Refresh the page after a short delay to show updated status
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          toast.error("Payment was received but we couldn't activate your premium status. Please contact support.");
+        }
       },
       prefill: {},
       theme: { color: "#6366F1" },
@@ -199,7 +234,7 @@ const Premium: React.FC = () => {
                   <Button 
                     variant="outline" 
                     onClick={handleApplyPromo}
-                    disabled={!promoCode}
+                    disabled={!promoCode || processingPayment}
                   >
                     Apply
                   </Button>
@@ -208,9 +243,9 @@ const Premium: React.FC = () => {
                   onClick={handleUpgrade} 
                   className="w-full"
                   size="lg"
-                  disabled={keyLoading}
+                  disabled={keyLoading || processingPayment}
                 >
-                  {keyLoading ? "Loading..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
+                  {keyLoading ? "Loading..." : processingPayment ? "Processing..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
                 </Button>
               </div>
             </div>
