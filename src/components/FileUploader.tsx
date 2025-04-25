@@ -171,7 +171,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
 
   return (
     <div 
-      className={`animate-fade-in mt-8 w-full max-w-2xl mx-auto border-2 ${
+      className={`animate-fade-in w-full max-w-2xl mx-auto border-2 ${
         isDragging ? 'border-primary border-dashed bg-primary/5' : 
         error ? 'border-dashed border-destructive/50' : 'border-dashed border-border'
       } rounded-lg p-10 text-center transition-all-ease hover:border-primary/50`}

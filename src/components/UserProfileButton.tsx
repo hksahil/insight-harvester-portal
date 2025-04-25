@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { UserRound, LogOut } from 'lucide-react';
+import { UserRound, LogOut, Angry } from 'lucide-react';
 import { useUserUsage } from '@/hooks/useUserUsage';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
