@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import PricingComparison from '@/components/PricingComparison';
 
 const PricingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -142,6 +143,9 @@ const PricingPage: React.FC = () => {
             <span className="inline-block bg-amber-100 text-amber-800 rounded-full px-2 py-0.5 mr-1">PRO</span>
             20% commission for influencers and $50 USD monthly for brands
           </p>
+
+          {/* Add the pricing comparison component */}
+          <PricingComparison />
         </div>
       </main>
       <Footer />
@@ -149,4 +153,4 @@ const PricingPage: React.FC = () => {
   );
 };
 
-export default Pricing;
+export default PricingPage;
