@@ -1,45 +1,32 @@
-
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavigationBar from "@/components/NavigationBar";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useUserUsage } from '@/hooks/useUserUsage';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Input } from "@/components/ui/input";
-
-declare global {
-  interface Window {
-    Razorpay?: any;
-  }
-}
+import PricingCard from '@/components/PricingCard';
 
 const PREMIUM_AMOUNT = 100; // INR in paise, i.e. ₹499.00
 
 const Premium: React.FC = () => {
+  const navigate = useNavigate();
   const { usage, loading, refetchUsage } = useUserUsage();
   const [razorpayKey, setRazorpayKey] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
   const [finalAmount, setFinalAmount] = useState(PREMIUM_AMOUNT);
   const [processingPayment, setProcessingPayment] = useState(false);
-  
+
   useEffect(() => {
     const fetchRazorpayKey = async () => {
       setKeyLoading(true);
       try {
         const { data, error } = await supabase.functions.invoke('get-razorpay-key');
-        
         if (error) {
           console.error('Error fetching Razorpay key:', error);
-          setKeyLoading(false);
           return;
         }
-        
         if (data?.key) {
-          console.log('Razorpay key fetched successfully');
           setRazorpayKey(data.key);
         }
       } catch (err) {
@@ -48,14 +35,13 @@ const Premium: React.FC = () => {
         setKeyLoading(false);
       }
     };
-    
     fetchRazorpayKey();
   }, []);
 
-  const handleApplyPromo = async () => {
+  const handleApplyPromo = async (code: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('verify-promo-code', {
-        body: { code: promoCode }
+        body: { code }
       });
 
       if (error) {
@@ -115,13 +101,13 @@ const Premium: React.FC = () => {
 
   const handleUpgrade = async () => {
     if (!razorpayKey) {
-      toast.error("Razorpay API key not available. Please try again later.");
+      toast.error("Payment system not available. Please try again later.");
       return;
     }
     
     const loaded = await loadRazorpayScript();
     if (!loaded) {
-      toast.error("Failed to load Razorpay SDK. Please try again.");
+      toast.error("Failed to load payment system. Please try again.");
       return;
     }
 
@@ -141,19 +127,13 @@ const Premium: React.FC = () => {
         
         if (success) {
           toast.success("Payment successful! Your account has been upgraded to Premium.");
-          // Refresh the page after a short delay to show updated status
           setTimeout(() => window.location.reload(), 1500);
         } else {
           toast.error("Payment was received but we couldn't activate your premium status. Please contact support.");
         }
       },
       prefill: {},
-      theme: { color: "#6366F1" },
-      modal: {
-        ondismiss: () => {
-          toast.info("Payment cancelled. You have not been charged.");
-        }
-      }
+      theme: { color: "#6366F1" }
     };
 
     try {
@@ -166,37 +146,20 @@ const Premium: React.FC = () => {
     }
   };
 
+  const handleContactSales = () => {
+    window.location.href = 'mailto:officialhksahil@gmail.com';
+  };
+
+  const handleUseFree = () => {
+    navigate('/auth');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
         <NavigationBar />
-        <main className="flex-grow flex items-center justify-center px-4 py-16">
-          <Skeleton className="w-full max-w-md h-[400px]" />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (usage?.is_premium) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
-        <NavigationBar />
-        <main className="flex-grow flex items-center justify-center px-4 py-16">
-          <Card className="w-full max-w-md border border-border/50 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center">
-                Premium Member
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center">
-                <p className="text-muted-foreground mb-4">
-                  Thank you for being a premium member! You have unlimited access to all features.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <main className="flex-grow flex items-center justify-center p-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </main>
         <Footer />
       </div>
@@ -206,51 +169,54 @@ const Premium: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
-      <main className="flex-grow flex items-center justify-center px-4 py-16">
-        <Card className="w-full max-w-md border border-border/50 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">
-              Upgrade to Premium
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-4">
-                You've used {usage?.processed_files_count || 0} of 5 free uploads.<br />
-                Unlock unlimited VPAX file processing for just ₹499
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                <li>✅ Unlimited VPAX file uploads</li>
-                <li>✅ Advanced analysis features</li>
-                <li>✅ Priority support</li>
-              </ul>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter promo code"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={handleApplyPromo}
-                    disabled={!promoCode || processingPayment}
-                  >
-                    Apply
-                  </Button>
-                </div>
-                <Button 
-                  onClick={handleUpgrade} 
-                  className="w-full"
-                  size="lg"
-                  disabled={keyLoading || processingPayment}
-                >
-                  {keyLoading ? "Loading..." : processingPayment ? "Processing..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <main className="flex-grow container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <PricingCard
+            title="FREE"
+            subtitle="Essential tools for individuals and teams"
+            price="0"
+            features={[
+              { text: "Dashboard Access", included: true },
+              { text: "Customer Support", included: true },
+              { text: "Limited Campaigns", included: true },
+              { text: "Limited Influencers", included: true },
+              { text: "Email Promotion", included: true },
+              { text: "AI Processing", included: true },
+            ]}
+            buttonText="Use Free Version"
+            onButtonClick={handleUseFree}
+          />
+          
+          <PricingCard
+            title="Premium"
+            subtitle={`You've used ${usage?.processed_files_count || 0} of 5 free uploads`}
+            price="499"
+            features={[
+              { text: "Unlimited VPAX file uploads", included: true },
+              { text: "Advanced analysis features", included: true },
+              { text: "Priority support", included: true },
+            ]}
+            buttonText={`Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
+            onButtonClick={handleUpgrade}
+            showPromoCode={true}
+            onApplyPromo={handleApplyPromo}
+            isLoading={processingPayment || keyLoading}
+          />
+          
+          <PricingCard
+            title="Custom Version"
+            subtitle="Enterprise solution with custom features"
+            price="Custom"
+            features={[
+              { text: "Unlimited VPAX file uploads", included: true },
+              { text: "Advanced analysis features", included: true },
+              { text: "Priority support", included: true },
+              { text: "Custom features", included: true },
+            ]}
+            buttonText="Contact Sales"
+            onButtonClick={handleContactSales}
+          />
+        </div>
       </main>
       <Footer />
     </div>
