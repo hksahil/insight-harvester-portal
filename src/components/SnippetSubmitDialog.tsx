@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,20 +15,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface SnippetSubmitDialogProps {
   trigger: React.ReactNode;
 }
 
 const SnippetSubmitDialog: React.FC<SnippetSubmitDialogProps> = ({ trigger }) => {
+  const navigate = useNavigate();
   const [authorName, setAuthorName] = useState('');
   const [category, setCategory] = useState('');
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  
+  // Check if user is authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setIsAuthenticated(!!session);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast.error('Please sign in to submit a snippet');
+      setOpen(false);
+      navigate('/auth?redirectTo=/');
+      return;
+    }
     
     if (!authorName || !category || !code) {
       toast.error('Please fill in all required fields');
@@ -62,8 +88,16 @@ const SnippetSubmitDialog: React.FC<SnippetSubmitDialogProps> = ({ trigger }) =>
     }
   };
   
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen && !isAuthenticated) {
+      navigate('/auth?redirectTo=/');
+      return;
+    }
+    setOpen(newOpen);
+  };
+  
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
