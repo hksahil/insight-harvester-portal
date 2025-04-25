@@ -2,6 +2,7 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -10,47 +11,30 @@ const Footer: React.FC = () => {
         {/* <Separator /> */}
         <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground" style={{ display: 'flex' }}>
            <>
-            <a
-              href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/terms"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/terms-conditions"
               className="hover:text-primary hover:underline"
             >
               Terms & Conditions
-            </a>
-            <a
-              href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
+            </Link>
+            <Link
+              to="/privacy-policy"
               className="hover:text-primary hover:underline"
             >
               Privacy Policy
-            </a>
-            <a
-              href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/refund"
-              target="_blank"
-              rel="noopener noreferrer"
+            </Link>
+            <Link
+              to="/refund-policy"
               className="hover:text-primary hover:underline"
             >
               Refund Policy
-            </a>
-            <a
-              href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/shipping"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary hover:underline"
-            >
-              Shipping Policy
-            </a>
-            <a
-              href="https://merchant.razorpay.com/policy/QLrLLKO3WzQq4w/contact_us"
-              target="_blank"
-              rel="noopener noreferrer"
+            </Link>
+            <Link
+              to="/contact-us"
               className="hover:text-primary hover:underline"
             >
               Contact Us
-            </a>
-
+            </Link>
           </>
           <div className="flex items-center justify-center h-12" style={{marginLeft:'auto'}}>
             <p className="text-sm text-muted-foreground flex items-center justify-center">

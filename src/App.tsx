@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,13 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Premium from "./pages/Premium";
 import NotFound from "./pages/NotFound";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import RefundPolicy from "./pages/RefundPolicy";
+import ContactUs from "./pages/ContactUs";
+import Learning from "./pages/Learning";
+import BlogPost from "./pages/BlogPost";
+import Pricing from "./pages/Pricing";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -56,6 +64,13 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/premium" element={<Premium />} />
+            <Route path="/terms-conditions" element={<TermsAndConditions />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/contact-us" element={<ContactUs />} />
+            <Route path="/learning" element={<Learning />} />
+            <Route path="/learning/:slug" element={<BlogPost />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
