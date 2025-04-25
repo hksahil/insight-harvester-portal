@@ -50,8 +50,8 @@ export async function incrementUserFileCount(userId: string, currentCount: numbe
     const { error } = await supabase
       .from('user_usage')
       .update({ 
-        processed_files_count: currentCount + 1,
-        updated_at: new Date().toISOString()
+        processed_files_count: currentCount + 1
+        // Removed updated_at which was causing errors as it doesn't exist in the table
       })
       .eq('id', userId);
     

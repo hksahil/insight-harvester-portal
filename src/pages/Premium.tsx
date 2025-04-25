@@ -45,33 +45,21 @@ const PremiumPage: React.FC = () => {
     setProcessingPayment(true);
     
     try {
-      // Redirect to Razorpay checkout
-      // Note: In a real implementation, this would integrate with Razorpay's API
-      // For now, we simulate the payment process
+      // Set up Razorpay payment flow
+      // In a real implementation, we would fetch the key from backend and redirect to Razorpay
+      
+      // Create a dummy payment session (will be replaced with actual Razorpay integration)
+      const paymentUrl = `https://checkout.razorpay.com/v1/checkout.js?key=${encodeURIComponent('rzp_test_dummy_key')}&amount=7900&currency=INR&name=PowerBI+Assistant+Premium`;
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Redirect to payment page
+      window.location.href = paymentUrl;
       
-      // After successful payment, update user status
-      const { error } = await supabase
-        .from('user_usage')
-        .upsert({
-          id: user.id,
-          is_premium: true
-        });
+      // Note: The actual user premium status update should happen after successful payment callback
+      // not here - we're simply redirecting to payment now
       
-      if (error) {
-        throw new Error('Failed to update premium status');
-      }
-      
-      toast.success('Payment successful! Welcome to premium!');
-      
-      // Redirect to dashboard or home page
-      navigate('/');
     } catch (error) {
       console.error('Payment error:', error);
       toast.error('Payment processing failed. Please try again.');
-    } finally {
       setProcessingPayment(false);
     }
   };
