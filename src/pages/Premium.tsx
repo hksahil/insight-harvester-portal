@@ -1,52 +1,42 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavigationBar from "@/components/NavigationBar";
 import Footer from "@/components/Footer";
-import { Check } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useUserUsage } from '@/hooks/useUserUsage';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import PricingCard from '@/components/PricingCard';
 
 const PREMIUM_AMOUNT = 100; // INR in paise, i.e. ₹499.00
 
-const Premium = () => {
+const Premium: React.FC = () => {
   const navigate = useNavigate();
   const { usage, loading, refetchUsage } = useUserUsage();
   const [razorpayKey, setRazorpayKey] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
   const [finalAmount, setFinalAmount] = useState(PREMIUM_AMOUNT);
   const [processingPayment, setProcessingPayment] = useState(false);
-  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+    const fetchRazorpayKey = async () => {
+      setKeyLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('get-razorpay-key');
+        if (error) {
+          console.error('Error fetching Razorpay key:', error);
+          return;
+        }
+        if (data?.key) {
+          setRazorpayKey(data.key);
+        }
+      } catch (err) {
+        console.error('Exception fetching Razorpay key:', err);
+      } finally {
+        setKeyLoading(false);
+      }
+    };
+    fetchRazorpayKey();
   }, []);
-
-  const fetchRazorpayKey = async () => {
-    setKeyLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('get-razorpay-key');
-      if (error) {
-        console.error('Error fetching Razorpay key:', error);
-        return;
-      }
-      if (data?.key) {
-        setRazorpayKey(data.key);
-      }
-    } catch (err) {
-      console.error('Exception fetching Razorpay key:', err);
-    } finally {
-      setKeyLoading(false);
-    }
-  };
 
   const handleApplyPromo = async (code: string) => {
     try {
@@ -109,26 +99,6 @@ const Premium = () => {
     }
   };
 
-  const handleFreePlan = () => {
-    if (user) {
-      navigate('/');
-    } else {
-      navigate('/auth');
-    }
-  };
-
-  const handlePaidPlan = async () => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    await handleUpgrade();
-  };
-
-  const handleCustomPlan = () => {
-    window.location.href = 'mailto:officialhksahil@gmail.com';
-  };
-
   const handleUpgrade = async () => {
     if (!razorpayKey) {
       toast.error("Payment system not available. Please try again later.");
@@ -176,6 +146,14 @@ const Premium = () => {
     }
   };
 
+  const handleContactSales = () => {
+    window.location.href = 'mailto:officialhksahil@gmail.com';
+  };
+
+  const handleUseFree = () => {
+    navigate('/auth');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
@@ -189,153 +167,55 @@ const Premium = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
       <main className="flex-grow container mx-auto px-4 py-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Friendly Pricing</h1>
-            <p className="text-lg text-muted-foreground">A new and better way to acquire, engage and support customers</p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <PricingCard
+            title="FREE"
+            subtitle="Essential tools for individuals and teams"
+            price="0"
+            features={[
+              { text: "Dashboard Access", included: true },
+              { text: "Customer Support", included: true },
+              { text: "Limited Campaigns", included: true },
+              { text: "Limited Influencers", included: true },
+              { text: "Email Promotion", included: true },
+              { text: "AI Processing", included: true },
+            ]}
+            buttonText="Use Free Version"
+            onButtonClick={handleUseFree}
+          />
           
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Free Plan */}
-            <div className="border rounded-xl p-8 shadow-sm">
-              <div className="mb-8">
-                <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-1">FREE</h2>
-                <p className="text-sm text-muted-foreground mb-6">Essential tools for individuals and teams</p>
-                
-                <div className="flex items-baseline">
-                  <span className="text-5xl font-bold">$0</span>
-                </div>
-              </div>
-              
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Dashboard Access</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Customer Support</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-muted-foreground mr-2 mt-0.5" />
-                  <span className="text-muted-foreground">Limited Campaigns</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-muted-foreground mr-2 mt-0.5" />
-                  <span className="text-muted-foreground">Limited Influencers</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-muted-foreground mr-2 mt-0.5" />
-                  <span className="text-muted-foreground">Email Promotion</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-muted-foreground mr-2 mt-0.5" />
-                  <span className="text-muted-foreground">AI Processing</span>
-                </div>
-              </div>
-              
-              <button 
-                onClick={handleFreePlan}
-                className="w-full py-2 px-4 rounded-md bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                Choose
-              </button>
-            </div>
-            
-            {/* Premium Plan */}
-            <div className="border rounded-xl p-8 shadow-sm border-primary/20 bg-primary/5">
-              <div className="mb-8">
-                <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-1">PREMIUM</h2>
-                <p className="text-sm text-muted-foreground mb-6">Essential tools for individuals and teams</p>
-                
-                <div className="flex items-baseline">
-                  <span className="text-5xl font-bold">$79</span>
-                  <span className="text-muted-foreground ml-2">/per month</span>
-                </div>
-              </div>
-              
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Dashboard Access</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Customer Support</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Unlimited Campaigns</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Unlimited Influencers</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Fraud Prevention</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>AI Processing</span>
-                </div>
-              </div>
-              
-              <button
-                onClick={handlePaidPlan}
-                className="w-full py-2 px-4 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
-                disabled={processingPayment || keyLoading}
-              >
-                {processingPayment || keyLoading ? "Processing..." : "Choose"}
-              </button>
-            </div>
-
-            {/* Custom Plan */}
-            <div className="border rounded-xl p-8 shadow-sm">
-              <div className="mb-8">
-                <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-1">CUSTOM</h2>
-                <p className="text-sm text-muted-foreground mb-6">Enterprise solution with custom features</p>
-                
-                <div className="flex items-baseline">
-                  <span className="text-5xl font-bold">Custom</span>
-                </div>
-              </div>
-              
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>All Premium Features</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Custom Integration</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Dedicated Support</span>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />
-                  <span>Custom Features</span>
-                </div>
-              </div>
-              
-              <button
-                onClick={handleCustomPlan}
-                className="w-full py-2 px-4 rounded-md bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                Contact Sales
-              </button>
-            </div>
-          </div>
+          <PricingCard
+            title="Premium"
+            subtitle={`You've used ${usage?.processed_files_count || 0} of 5 free uploads`}
+            price="499"
+            features={[
+              { text: "Unlimited VPAX file uploads", included: true },
+              { text: "Advanced analysis features", included: true },
+              { text: "Priority support", included: true },
+            ]}
+            buttonText={`Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
+            onButtonClick={handleUpgrade}
+            showPromoCode={true}
+            onApplyPromo={handleApplyPromo}
+            isLoading={processingPayment || keyLoading}
+          />
           
-          <p className="text-center text-sm text-muted-foreground mt-8">
-            <span className="inline-block bg-amber-100 text-amber-800 rounded-full px-2 py-0.5 mr-1">PRO</span>
-            30% commission for influencers and $99 USD monthly for brands
-          </p>
+          <PricingCard
+            title="Custom Version"
+            subtitle="Enterprise solution with custom features"
+            price="Custom"
+            features={[
+              { text: "Unlimited VPAX file uploads", included: true },
+              { text: "Advanced analysis features", included: true },
+              { text: "Priority support", included: true },
+              { text: "Custom features", included: true },
+            ]}
+            buttonText="Contact Sales"
+            onButtonClick={handleContactSales}
+          />
         </div>
       </main>
       <Footer />

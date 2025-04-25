@@ -9,8 +9,3 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
-
-// Add Razorpay to the global Window interface
-interface Window {
-  Razorpay: any;
-}
