@@ -36,14 +36,15 @@ const PricingPage: React.FC = () => {
     if (user) {
       navigate('/premium');
     } else {
-      navigate('/auth');
+      // Add redirectTo parameter to redirect to premium page after login
+      navigate('/auth?redirectTo=/premium');
     }
   };
   
   return (
     <div className="min-h-screen flex flex-col">
       <NavigationBar />
-      <main className="flex-grow container mx-auto px-4 py-16">
+      <main className="flex-grow container mx-auto px-4 py-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Friendly Pricing</h1>

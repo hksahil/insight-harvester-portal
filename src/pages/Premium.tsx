@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import Footer from "@/components/Footer";
@@ -50,6 +51,34 @@ const Premium: React.FC = () => {
     fetchRazorpayKey();
   }, []);
 
+  // Make sure user profile exists when accessing premium page
+  useEffect(() => {
+    const ensureUserProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        // Check if user profile exists
+        const { data, error } = await supabase
+          .from('user_usage')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (error || !data) {
+          // Create user profile if it doesn't exist
+          await supabase.from('user_usage').insert({
+            id: session.user.id,
+            processed_files_count: 0,
+            is_premium: false
+          });
+          console.log('Created new user_usage record');
+        }
+      }
+    };
+    
+    ensureUserProfile();
+  }, []);
+
   const handleApplyPromo = async () => {
     try {
       const { data, error } = await supabase.functions.invoke('verify-promo-code', {
@@ -100,6 +129,13 @@ const Premium: React.FC = () => {
       return;
     }
 
+    // Get current user session to ensure payment is linked to user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      toast.error("Please log in to complete the payment");
+      return;
+    }
+
     const options = {
       key: razorpayKey,
       amount: finalAmount,
@@ -107,12 +143,32 @@ const Premium: React.FC = () => {
       name: "Power BI Assistant",
       description: "Upgrade to Premium",
       image: "/favicon.ico",
-      handler: function (response: any) {
+      handler: async function (response: any) {
         console.log("Payment success:", response);
-        toast.success("Payment successful! Thank you for upgrading to Premium.");
-        setTimeout(() => window.location.reload(), 2000);
+        
+        // Update user to premium after successful payment
+        try {
+          const { error } = await supabase
+            .from('user_usage')
+            .update({ is_premium: true })
+            .eq('id', session.user.id);
+          
+          if (error) {
+            console.error("Failed to update premium status:", error);
+            toast.error("Payment successful but failed to activate premium. Please contact support.");
+            return;
+          }
+          
+          toast.success("Payment successful! Thank you for upgrading to Premium.");
+          setTimeout(() => window.location.reload(), 2000);
+        } catch (err) {
+          console.error("Error updating premium status:", err);
+          toast.error("Payment successful but failed to activate premium. Please contact support.");
+        }
       },
-      prefill: {},
+      prefill: {
+        email: session.user.email
+      },
       theme: { color: "#6366F1" },
       modal: {
         ondismiss: () => {
@@ -135,7 +191,7 @@ const Premium: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
         <NavigationBar />
-        <main className="flex-grow flex items-center justify-center px-4 py-16">
+        <main className="flex-grow flex items-center justify-center px-4 py-24">
           <Skeleton className="w-full max-w-md h-[400px]" />
         </main>
         <Footer />
@@ -147,7 +203,7 @@ const Premium: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
         <NavigationBar />
-        <main className="flex-grow flex items-center justify-center px-4 py-16">
+        <main className="flex-grow flex items-center justify-center px-4 py-24">
           <Card className="w-full max-w-md border border-border/50 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl font-bold text-center">
@@ -171,50 +227,64 @@ const Premium: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
-      <main className="flex-grow flex items-center justify-center px-4 py-16">
-        <Card className="w-full max-w-md border border-border/50 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">
-              Upgrade to Premium
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-4">
-                You've used {usage?.processed_files_count || 0} of 5 free uploads.<br />
-                Unlock unlimited VPAX file processing for just ₹499
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                <li>✅ Unlimited VPAX file uploads</li>
-                <li>✅ Advanced analysis features</li>
-                <li>✅ Priority support</li>
-              </ul>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter promo code"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={handleApplyPromo}
-                    disabled={!promoCode}
-                  >
-                    Apply
-                  </Button>
-                </div>
-                <Button 
-                  onClick={handleUpgrade} 
-                  className="w-full"
-                  size="lg"
-                  disabled={keyLoading}
-                >
-                  {keyLoading ? "Loading..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
-                </Button>
-              </div>
+      <main className="flex-grow flex items-center justify-center px-4 py-24">
+        <Card className="w-full max-w-4xl border border-border/50 shadow-lg overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {/* Left side - Image */}
+            <div className="hidden md:block bg-primary/5 relative overflow-hidden">
+              <img
+                src="https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/Sharable%20Snippets.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9TaGFyYWJsZSBTbmlwcGV0cy5wbmciLCJpYXQiOjE3NDU2MTI1NzYsImV4cCI6MTkwMzI5MjU3Nn0.JtHUqNJs6svUjK1CotbsoxMxp9x4swndSue2wL9UFAY"
+                alt="Premium illustration"
+                className="object-contain h-full w-full p-4"
+              />
             </div>
-          </CardContent>
+            
+            {/* Right side - Premium content */}
+            <div>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">
+                  Upgrade to Premium
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="text-center">
+                  <p className="text-muted-foreground mb-4">
+                    You've used {usage?.processed_files_count || 0} of 5 free uploads.<br />
+                    Unlock unlimited VPAX file processing for just ₹499
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-2 mb-6">
+                    <li>✅ Unlimited VPAX file uploads</li>
+                    <li>✅ Advanced analysis features</li>
+                    <li>✅ Priority support</li>
+                  </ul>
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter promo code"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                      />
+                      <Button 
+                        variant="outline" 
+                        onClick={handleApplyPromo}
+                        disabled={!promoCode}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                    <Button 
+                      onClick={handleUpgrade} 
+                      className="w-full"
+                      size="lg"
+                      disabled={keyLoading}
+                    >
+                      {keyLoading ? "Loading..." : `Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </div>
+          </div>
         </Card>
       </main>
       <Footer />
