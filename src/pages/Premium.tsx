@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-const PREMIUM_AMOUNT = 49900; // INR in paise, i.e. ₹499.00
+const PREMIUM_AMOUNT = 100; // INR in paise, i.e. ₹499.00
 
 const Premium: React.FC = () => {
   const { usage, loading } = useUserUsage();
