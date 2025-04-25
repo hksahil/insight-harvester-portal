@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import CodeDisplay from '@/components/CodeDisplay';
 import { toast } from 'sonner';
 import UseCaseHelper from './UseCaseHelper';
+import SnippetSubmitDialog from './SnippetSubmitDialog';
 
 interface SnippetCategory {
   id: string;
@@ -722,10 +723,6 @@ print("Data successfully uploaded to Snowflake!")`,
     setActiveCategory(categoryId);
   };
 
-  const handleSubmitSnippetClick = () => {
-    window.open('https://forms.gle/qoPR26vtPbJCbFM69', '_blank');
-  };
-  
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -741,17 +738,20 @@ print("Data successfully uploaded to Snowflake!")`,
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={handleSubmitSnippetClick}
-          >
-            <Plus className="h-4 w-4" />
-            Submit your snippet
-            <ExternalLink className="h-3.5 w-3.5 ml-1" />
-          </Button>
+          <SnippetSubmitDialog 
+            trigger={
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Submit your snippet
+              </Button>
+            } 
+          />
         </div>
       </div>
+      
       <UseCaseHelper type="snippets" />
       
       <div className="flex flex-wrap gap-2">
