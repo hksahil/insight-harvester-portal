@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,6 +48,10 @@ const NavigationBar: React.FC = () => {
     navigate('/blogs');
   };
 
+  const goToSnippets = () => {
+    navigate('/snippets');
+  };
+
   // Only show Premium button if user is logged in but not premium
   const shouldShowPremium = user && !usage?.is_premium;
 
@@ -67,6 +72,15 @@ const NavigationBar: React.FC = () => {
             Home
           </Button>
           
+          <Button 
+            onClick={goToSnippets}
+            variant="ghost"
+            className="flex items-center gap-2"
+            title="View DAX Snippets"
+          >
+            Snippets
+          </Button>
+
           <Button 
             onClick={() => setInfoDialogOpen(true)}
             variant="ghost"

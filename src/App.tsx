@@ -13,6 +13,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import ContactUs from "./pages/ContactUs";
 import BlogsPage from "./pages/BlogsPage";
 import BlogDetailedPage from "./pages/BlogDetailedPage";
+import SnippetsPage from "./pages/SnippetsPage";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -68,6 +69,7 @@ const App = () => {
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/blogs/:slug" element={<BlogDetailedPage />} />
+            <Route path="/snippets" element={<SnippetsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
