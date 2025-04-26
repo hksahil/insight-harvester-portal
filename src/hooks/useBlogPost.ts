@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { BlogPostDetail } from '@/types/blog';
+import { BlogPost } from '@/types/blog';
 import { blogPostsData } from '@/data/blogPosts';
 
 export function useBlogPost(slug: string | undefined) {
-  const [post, setPost] = useState<BlogPostDetail | null>(null);
+  const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -19,10 +19,6 @@ export function useBlogPost(slug: string | undefined) {
       try {
         setIsLoading(true);
         
-        // In the future, this would be an API call to your Hugo.io CMS
-        // const response = await fetch(`https://your-hugo-api-endpoint/posts/${slug}`);
-        // const data = await response.json();
-        
         // For now, we'll use the mock data
         const postData = blogPostsData[slug as keyof typeof blogPostsData];
         
@@ -30,7 +26,7 @@ export function useBlogPost(slug: string | undefined) {
           setError(new Error('Blog post not found'));
           setPost(null);
         } else {
-          setPost(postData as BlogPostDetail);
+          setPost(postData as BlogPost);
           setError(null);
         }
       } catch (err) {

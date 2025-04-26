@@ -61,10 +61,17 @@ const BlogPost: React.FC = () => {
             <span>{post.publishDate}</span>
           </div>
           
-          <div 
-            className="prose prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <div className="aspect-video w-full">
+            <iframe
+              src={`${post.linkedinPostUrl}/embed`}
+              height="100%"
+              width="100%"
+              frameBorder="0"
+              allowFullScreen
+              title={post.title}
+              className="w-full h-full"
+            ></iframe>
+          </div>
         </div>
       </main>
       <Footer />

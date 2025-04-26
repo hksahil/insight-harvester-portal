@@ -6,8 +6,7 @@ export interface BlogPost {
   slug: string;
   author: string;
   publishDate: string;
+  linkedinPostUrl: string;
 }
 
-export interface BlogPostDetail extends BlogPost {
-  content: string;
-}
+// Remove BlogPostDetail since we don't need content anymore
