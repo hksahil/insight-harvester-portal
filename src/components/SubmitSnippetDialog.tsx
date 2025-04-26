@@ -12,9 +12,15 @@ import { supabase } from '@/integrations/supabase/client';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
+// Ensure these match EXACTLY what's in the database
+const VALID_CATEGORIES = ['prompt', 'tmdl', 'dax', 'sql', 'python', 'powerquery'] as const;
+type CategoryType = typeof VALID_CATEGORIES[number];
+
 const snippetFormSchema = z.object({
   authorName: z.string().min(1, { message: 'Name is required' }),
-  category: z.string().min(1, { message: 'Category is required' }),
+  category: z.enum(VALID_CATEGORIES, { 
+    errorMap: () => ({ message: 'Please select a valid category' }) 
+  }),
   code: z.string().min(10, { message: 'Snippet must be at least 10 characters' })
 });
 
@@ -39,7 +45,7 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
     resolver: zodResolver(snippetFormSchema),
     defaultValues: {
       authorName: '',
-      category: '',
+      category: undefined as unknown as CategoryType,
       code: ''
     }
   });
@@ -51,15 +57,15 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
       setIsSubmitting(true);
       console.log('Submitting snippet:', data);
       
-      // Insert the snippet with proper fields - make sure we're not using an array
+      // Insert the snippet with proper fields
       const { error } = await supabase
         .from('user_snippets')
         .insert({
           author_name: data.authorName,
-          category: data.category,
+          category: data.category, // This should now be correctly validated
           code: data.code,
           status: 'pending',
-          user_id: null // Allowing anonymous submissions
+          user_id: null // Anonymous submissions
         });
 
       if (error) {
@@ -108,7 +114,10 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
