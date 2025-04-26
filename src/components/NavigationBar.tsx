@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, Info, HelpCircle, Calendar, BookOpen, DollarSign } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -39,16 +38,16 @@ const NavigationBar: React.FC = () => {
     navigate('/auth');
   };
 
-  // const goToPricing = () => {
-  //   navigate('/pricing');
-  // };
-
   const goToPricing = () => {
     navigate('/premium');
   };
 
   const goToLearning = () => {
     navigate('/learning');
+  };
+
+  const goToBlogs = () => {
+    navigate('/blogs');
   };
 
   return (
@@ -109,6 +108,15 @@ const NavigationBar: React.FC = () => {
             Upcoming Features
           </Button>
 
+          <Button 
+            onClick={goToBlogs}
+            variant="ghost"
+            className="flex items-center gap-2"
+            title="View blogs"
+          >
+            New Blogs Style
+          </Button>
+
           {user ? (
             <UserProfileButton />
           ) : (
@@ -124,7 +132,6 @@ const NavigationBar: React.FC = () => {
         </div>
       </div>
 
-      {/* Info and VPAX Dialog */}
       <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
@@ -134,7 +141,6 @@ const NavigationBar: React.FC = () => {
             </DialogClose>
           </DialogHeader>
           <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
-            {/* App Info Section */}
             <div>
               <h3 className="font-medium">Wha is Power BI Assistant</h3>
               <p className="text-sm text-muted-foreground">
@@ -153,7 +159,6 @@ const NavigationBar: React.FC = () => {
               </div>
             </div>
             
-            {/* VPAX Info Section */}
             <div>
               <h3 className="font-medium">What is a VPAX file?</h3>
               <p className="text-sm text-muted-foreground">
@@ -192,7 +197,6 @@ const NavigationBar: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Upcoming Features Dialog */}
       <Dialog open={upcomingDialogOpen} onOpenChange={setUpcomingDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>

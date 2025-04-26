@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,8 @@ import ContactUs from "./pages/ContactUs";
 import Learning from "./pages/Learning";
 import BlogPost from "./pages/BlogPost";
 import Pricing from "./pages/Pricing";
+import BlogsPage from "./pages/BlogsPage";
+import BlogDetailedPage from "./pages/BlogDetailedPage";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -71,6 +72,8 @@ const App = () => {
             <Route path="/learning" element={<Learning />} />
             <Route path="/learning/:slug" element={<BlogPost />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/blogs" element={<BlogsPage />} />
+            <Route path="/blogs/:slug" element={<BlogDetailedPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
