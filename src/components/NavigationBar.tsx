@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import { Home, Info, HelpCircle, Calendar, BookOpen, DollarSign } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
@@ -45,13 +43,12 @@ const NavigationBar: React.FC = () => {
     navigate('/premium');
   };
 
-  const goToLearning = () => {
-    navigate('/learning');
-  };
-
   const goToBlogs = () => {
     navigate('/blogs');
   };
+
+  // Only show Premium button if user is logged in but not premium
+  const shouldShowPremium = user && !usage?.is_premium;
 
   return (
     <header className="animate-slide-down glass fixed top-0 left-0 right-0 z-50 border-b border-border/40">
@@ -67,7 +64,6 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="Go back to homepage"
           >
-            {/* <Home className="h-4 w-4" /> */}
             Home
           </Button>
           
@@ -77,7 +73,6 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="Information about the app"
           >
-            {/* <Info className="h-4 w-4" /> */}
             FAQ
           </Button>
           
@@ -90,8 +85,7 @@ const NavigationBar: React.FC = () => {
             Learning
           </Button>
           
-          {/* Only show Premium button if user is not premium */}
-          {(!usage?.is_premium) && (
+          {shouldShowPremium && (
             <Button 
               onClick={goToPricing}
               variant="ghost"
@@ -108,7 +102,6 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="Upcoming features"
           >
-            {/* <Calendar className="h-4 w-4" /> */}
             Upcoming Features
           </Button>
 

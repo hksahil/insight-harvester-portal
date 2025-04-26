@@ -23,6 +23,18 @@ const Premium: React.FC = () => {
   const [keyLoading, setKeyLoading] = useState(false);
   const [finalAmount, setFinalAmount] = useState(PREMIUM_AMOUNT);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check if user is logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/auth');
+        return;
+      }
+      setUser(session.user);
+    });
+  }, [navigate]);
 
   useEffect(() => {
     // Redirect if user is already premium
@@ -181,8 +193,8 @@ const Premium: React.FC = () => {
     );
   }
 
-  // If user is already premium, don't render the page
-  if (usage?.is_premium) {
+  // If user is already premium or not logged in, don't render the page
+  if (!user || usage?.is_premium) {
     return null;
   }
 
@@ -229,7 +241,7 @@ const Premium: React.FC = () => {
           <PricingCard
             title="Enterprise"
             subtitle="Enterprise solution with custom features"
-            price=" Custom"
+            price="Custom"
             features={[
               { text: "Dashboard Access", included: true },
               { text: "Customer Support", included: true },

@@ -45,8 +45,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
           <span className="text-4xl font-bold">{price}</span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 flex-grow">
-        <ul className="space-y-3">
+      <CardContent className="flex flex-col flex-grow space-y-6">
+        <ul className="space-y-3 flex-grow">
           {features.map((feature, index) => (
             <li key={index} className="flex items-center gap-2">
               {feature.included ? (
@@ -54,14 +54,16 @@ const PricingCard: React.FC<PricingCardProps> = ({
               ) : (
                 <X className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
               )}
-              <span className={`text-sm ${feature.premiumOnly && title !== 'Premium' ? 'text-muted-foreground' : ''}`}>
+              <span 
+                className={`text-sm ${(!feature.included || (feature.premiumOnly && title !== 'Premium')) ? 'text-muted-foreground' : ''}`}
+              >
                 {feature.text}
               </span>
             </li>
           ))}
         </ul>
 
-        <div className="mt-auto pt-4">
+        <div className="mt-auto pt-6">
           {showPromoCode && (
             <div className="flex gap-2 mb-4">
               <Input
