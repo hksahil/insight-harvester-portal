@@ -94,8 +94,7 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="View pricing options"
           >
-            {/* <DollarSign className="h-4 w-4" /> */}
-            Pricing
+            Premium
           </Button>
           
           <Button 
@@ -107,8 +106,6 @@ const NavigationBar: React.FC = () => {
             {/* <Calendar className="h-4 w-4" /> */}
             Upcoming Features
           </Button>
-
-
 
           {user ? (
             <UserProfileButton />
