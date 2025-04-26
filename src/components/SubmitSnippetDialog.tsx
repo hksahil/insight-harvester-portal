@@ -49,8 +49,9 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
   const onSubmit = async (data: SnippetFormValues) => {
     try {
       setIsSubmitting(true);
+      console.log('Submitting snippet:', data);
       
-      // Insert the snippet with proper fields
+      // Insert the snippet with proper fields - make sure we're not using an array
       const { error } = await supabase
         .from('user_snippets')
         .insert({
