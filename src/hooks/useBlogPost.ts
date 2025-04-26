@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { BlogPost } from '@/types/blog';
-import { blogPostsData } from '@/data/blogPosts';
+import { MOCK_BLOGS } from '@/data/blogs';
 
 export function useBlogPost(slug: string | undefined) {
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -18,15 +18,13 @@ export function useBlogPost(slug: string | undefined) {
 
       try {
         setIsLoading(true);
-        
-        // For now, we'll use the mock data
-        const postData = blogPostsData[slug as keyof typeof blogPostsData];
+        const postData = MOCK_BLOGS.find(blog => blog.slug === slug);
         
         if (!postData) {
           setError(new Error('Blog post not found'));
           setPost(null);
         } else {
-          setPost(postData as BlogPost);
+          setPost(postData);
           setError(null);
         }
       } catch (err) {

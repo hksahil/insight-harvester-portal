@@ -11,8 +11,6 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import ContactUs from "./pages/ContactUs";
-import Learning from "./pages/Learning";
-import BlogPost from "./pages/BlogPost";
 import Pricing from "./pages/Pricing";
 import BlogsPage from "./pages/BlogsPage";
 import BlogDetailedPage from "./pages/BlogDetailedPage";
@@ -69,8 +67,6 @@ const App = () => {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/contact-us" element={<ContactUs />} />
-            <Route path="/learning" element={<Learning />} />
-            <Route path="/learning/:slug" element={<BlogPost />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/blogs/:slug" element={<BlogDetailedPage />} />
