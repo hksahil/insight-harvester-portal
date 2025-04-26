@@ -81,7 +81,7 @@ const Auth: React.FC = () => {
               {/* Left side - Image */}
               <div className="hidden md:block bg-primary/5 relative overflow-hidden">
                 <img
-                  src="/lovable-uploads/e0c89579-adfc-48be-a3b7-ac74c356167c.png"
+                  src="https://gsuoseezgicejjayrtce.supabase.co/storage/v1/object/sign/pbi-assistant-images/Login%202.svg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5XzkxNzNhMjBmLTAzN2QtNDJiYS1iNWJhLTcwMjYwNWEzY2JiMCJ9.eyJ1cmwiOiJwYmktYXNzaXN0YW50LWltYWdlcy9Mb2dpbiAyLnN2ZyIsImlhdCI6MTc0NTY0OTMxOCwiZXhwIjoxOTAzMzI5MzE4fQ.gwILKeTV2vbYhIwsNLWd75Ny_iio8QN4V2e9LYaXApU"
                   alt="Login illustration"
                   className="object-contain h-full w-full p-4"
                 />
