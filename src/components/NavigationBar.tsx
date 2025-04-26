@@ -39,8 +39,12 @@ const NavigationBar: React.FC = () => {
     navigate('/auth');
   };
 
+  // const goToPricing = () => {
+  //   navigate('/pricing');
+  // };
+
   const goToPricing = () => {
-    navigate('/pricing');
+    navigate('/premium');
   };
 
   const goToLearning = () => {
@@ -61,7 +65,7 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="Go back to homepage"
           >
-            <Home className="h-4 w-4" />
+            {/* <Home className="h-4 w-4" /> */}
             Home
           </Button>
           
@@ -71,8 +75,8 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="Information about the app"
           >
-            <Info className="h-4 w-4" />
-            Info & VPAX
+            {/* <Info className="h-4 w-4" /> */}
+            FAQ
           </Button>
           
           <Button 
@@ -81,7 +85,7 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="Learning resources and blogs"
           >
-            <BookOpen className="h-4 w-4" />
+            {/* <BookOpen className="h-4 w-4" /> */}
             Learning
           </Button>
           
@@ -91,7 +95,7 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="View pricing options"
           >
-            <DollarSign className="h-4 w-4" />
+            {/* <DollarSign className="h-4 w-4" /> */}
             Pricing
           </Button>
           
@@ -101,7 +105,7 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="Upcoming features"
           >
-            <Calendar className="h-4 w-4" />
+            {/* <Calendar className="h-4 w-4" /> */}
             Upcoming Features
           </Button>
 
@@ -124,7 +128,7 @@ const NavigationBar: React.FC = () => {
       <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
-            <DialogTitle>About Power BI Assistant & VPAX</DialogTitle>
+            {/* <DialogTitle>About Power BI Assistant & VPAX</DialogTitle> */}
             <DialogClose className="absolute right-4 top-4 opacity-70 ring-offset-background transition-opacity hover:opacity-100">
               <span className="sr-only">Close</span>
             </DialogClose>

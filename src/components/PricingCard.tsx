@@ -41,7 +41,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         <CardTitle className="text-xl font-bold">{title}</CardTitle>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
         <div className="pt-4">
-          <span className="text-4xl font-bold">₹{price}</span>
+          <span className="text-4xl font-bold">{price}</span>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">

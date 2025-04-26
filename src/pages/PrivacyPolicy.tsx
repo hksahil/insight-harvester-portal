@@ -7,7 +7,7 @@ const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <NavigationBar />
-      <main className="flex-grow container mx-auto px-4 py-16">
+      <main className="flex-grow container mx-auto px-4 py-32">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
           <p className="text-sm text-muted-foreground mb-6">Last updated on Apr 22nd 2025</p>

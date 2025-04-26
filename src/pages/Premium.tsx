@@ -169,12 +169,12 @@ const Premium: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
-      <main className="flex-grow container mx-auto px-4 py-16">
+      <main className="flex-grow container mx-auto pt-4" style={{paddingTop:'8rem'}}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <PricingCard
-            title="FREE"
+            title="Free"
             subtitle="Essential tools for individuals and teams"
-            price="0"
+            price="₹ 0"
             features={[
               { text: "Dashboard Access", included: true },
               { text: "Customer Support", included: true },
@@ -190,7 +190,7 @@ const Premium: React.FC = () => {
           <PricingCard
             title="Premium"
             subtitle={`You've used ${usage?.processed_files_count || 0} of 5 free uploads`}
-            price="499"
+            price="₹ 399"
             features={[
               { text: "Unlimited VPAX file uploads", included: true },
               { text: "Advanced analysis features", included: true },
@@ -204,9 +204,9 @@ const Premium: React.FC = () => {
           />
           
           <PricingCard
-            title="Custom Version"
+            title="Enterprise"
             subtitle="Enterprise solution with custom features"
-            price="Custom"
+            price=" Custom"
             features={[
               { text: "Unlimited VPAX file uploads", included: true },
               { text: "Advanced analysis features", included: true },

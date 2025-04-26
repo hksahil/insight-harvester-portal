@@ -34,7 +34,7 @@ const Learning: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <NavigationBar />
-      <main className="flex-grow container mx-auto px-4 py-16">
+      <main className="flex-grow container mx-auto px-4" style={{paddingTop:'8rem'}}>
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">Blogs*</h1>
           <p className="text-muted-foreground mb-8">A curated list of recent and not so recent blogs</p>
