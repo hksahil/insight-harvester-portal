@@ -24,9 +24,17 @@ export function SubmitSnippetDialog() {
   const [category, setCategory] = React.useState('prompt');
   const [authorName, setAuthorName] = React.useState('');
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!title || !code || !authorName) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
+    setIsSubmitting(true);
     
     try {
       const { error } = await supabase.from('user_snippets').insert({
@@ -43,9 +51,15 @@ export function SubmitSnippetDialog() {
       toast.success('Snippet submitted successfully!');
       setIsOpen(false);
       resetForm();
+      
+      // Notify the user that they may need to refresh to see changes
+      toast.info('Refresh the page to see your snippet in the list');
+      
     } catch (error) {
       console.error('Error submitting snippet:', error);
       toast.error('Failed to submit snippet. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,7 +131,12 @@ export function SubmitSnippetDialog() {
             />
           </div>
           <div className="flex justify-end">
-            <Button type="submit">Submit Snippet</Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Snippet'}
+            </Button>
           </div>
         </form>
       </DialogContent>

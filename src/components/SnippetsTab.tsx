@@ -25,6 +25,7 @@ const SnippetsTab: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [snippets, setSnippets] = useState<Snippet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const categories = [
     { id: 'all', name: 'All' },
@@ -42,17 +43,26 @@ const SnippetsTab: React.FC = () => {
   }, []);
 
   const fetchSnippets = async () => {
-    const { data, error } = await supabase
-      .from('user_snippets')
-      .select('*')
-      .order('submitted_date', { ascending: false });
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_snippets')
+        .select('*')
+        .order('submitted_date', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching snippets:', error);
-      return;
+      if (error) {
+        console.error('Error fetching snippets:', error);
+        toast.error('Failed to load snippets');
+      } else {
+        console.log('Fetched snippets:', data);
+        setSnippets(data || []);
+      }
+    } catch (e) {
+      console.error('Exception in fetchSnippets:', e);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
-
-    setSnippets(data || []);
   };
   
   const filteredSnippets = snippets.filter(snippet => {
@@ -100,49 +110,60 @@ const SnippetsTab: React.FC = () => {
         ))}
       </div>
       
-      <div className="space-y-8">
-        {filteredSnippets.length > 0 ? (
-          filteredSnippets.map(snippet => (
-            <div key={snippet.id} className="border border-border rounded-lg overflow-hidden bg-card">
-              <div className="p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-semibold">{snippet.title}</h3>
-                    <p className="text-muted-foreground text-sm">{snippet.description}</p>
+      {isLoading ? (
+        <div className="text-center p-8">
+          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading snippets...</p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {filteredSnippets.length > 0 ? (
+            filteredSnippets.map(snippet => (
+              <div key={snippet.id} className="border border-border rounded-lg overflow-hidden bg-card">
+                <div className="p-4 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-xl font-semibold">{snippet.title}</h3>
+                      <p className="text-muted-foreground text-sm">{snippet.description}</p>
+                    </div>
+                    <Badge className="uppercase">{snippet.category === 'tmdl' ? 'TMDL' : snippet.category}</Badge>
                   </div>
-                  <Badge className="uppercase">{snippet.category === 'tmdl' ? 'TMDL' : snippet.category}</Badge>
+                </div>
+                
+                <CodeDisplay code={snippet.code} language={snippet.language === 'prompt' ? 'markdown' : snippet.language} />
+                
+                <div className="p-4 border-t border-border flex justify-between items-center">
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        navigator.clipboard.writeText(snippet.code);
+                        toast.success('Copied to clipboard');
+                      }}
+                      className="gap-1.5"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                      Copy
+                    </Button>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Submitted by {snippet.author_name} on {new Date(snippet.submitted_date).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
-              
-              <CodeDisplay code={snippet.code} language={snippet.language === 'prompt' ? 'markdown' : snippet.language} />
-              
-              <div className="p-4 border-t border-border flex justify-between items-center">
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => {
-                      navigator.clipboard.writeText(snippet.code);
-                      toast.success('Copied to clipboard');
-                    }}
-                    className="gap-1.5"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                    Copy
-                  </Button>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Submitted by {snippet.author_name} on {new Date(snippet.submitted_date).toLocaleDateString()}
-                </div>
-              </div>
+            ))
+          ) : (
+            <div className="text-center p-8 border border-dashed border-border rounded-lg">
+              <p className="text-muted-foreground">
+                {searchQuery || activeCategory !== 'all' 
+                  ? 'No snippets found matching your criteria' 
+                  : 'No snippets have been submitted yet. Be the first to contribute!'}
+              </p>
             </div>
-          ))
-        ) : (
-          <div className="text-center p-8 border border-dashed border-border rounded-lg">
-            <p className="text-muted-foreground">No snippets found matching your criteria</p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
