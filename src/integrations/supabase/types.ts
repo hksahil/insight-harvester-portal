@@ -62,6 +62,7 @@ export type Database = {
           description: string | null
           id: string
           language: string
+          live_flag: boolean
           submitted_date: string
           title: string
         }
@@ -72,6 +73,7 @@ export type Database = {
           description?: string | null
           id?: string
           language: string
+          live_flag?: boolean
           submitted_date?: string
           title: string
         }
@@ -82,6 +84,7 @@ export type Database = {
           description?: string | null
           id?: string
           language?: string
+          live_flag?: boolean
           submitted_date?: string
           title?: string
         }

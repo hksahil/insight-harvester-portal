@@ -43,7 +43,8 @@ export function SubmitSnippetDialog() {
         code,
         language: category === 'prompt' ? 'markdown' : category,
         category,
-        author_name: authorName
+        author_name: authorName,
+        live_flag: false // Set live_flag to false by default
       });
 
       if (error) throw error;
@@ -52,8 +53,8 @@ export function SubmitSnippetDialog() {
       setIsOpen(false);
       resetForm();
       
-      // Notify the user that they may need to refresh to see changes
-      toast.info('Refresh the page to see your snippet in the list');
+      // Notify the user that their snippet is pending review
+      toast.info('Your snippet is pending review and will be displayed after approval');
       
     } catch (error) {
       console.error('Error submitting snippet:', error);
