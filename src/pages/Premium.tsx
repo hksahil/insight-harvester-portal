@@ -192,9 +192,12 @@ const Premium: React.FC = () => {
             subtitle={`You've used ${usage?.processed_files_count || 0} of 5 free uploads`}
             price="₹ 399"
             features={[
-              { text: "Unlimited VPAX file uploads", included: true },
-              { text: "Advanced analysis features", included: true },
-              { text: "Priority support", included: true },
+              { text: "Dashboard Access", included: true },
+              { text: "Customer Support", included: true },
+              { text: "Limited Campaigns", included: true },
+              { text: "Limited Influencers", included: true },
+              { text: "Email Promotion", included: true },
+              { text: "AI Processing", included: true },
             ]}
             buttonText={`Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
             onButtonClick={handleUpgrade}
@@ -208,10 +211,12 @@ const Premium: React.FC = () => {
             subtitle="Enterprise solution with custom features"
             price=" Custom"
             features={[
-              { text: "Unlimited VPAX file uploads", included: true },
-              { text: "Advanced analysis features", included: true },
-              { text: "Priority support", included: true },
-              { text: "Custom features", included: true },
+              { text: "Dashboard Access", included: true },
+              { text: "Customer Support", included: true },
+              { text: "Limited Campaigns", included: true },
+              { text: "Limited Influencers", included: true },
+              { text: "Email Promotion", included: true },
+              { text: "AI Processing", included: true },
             ]}
             buttonText="Contact Sales"
             onButtonClick={handleContactSales}

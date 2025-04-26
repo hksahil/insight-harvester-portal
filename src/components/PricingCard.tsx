@@ -53,7 +53,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
               ) : (
                 <span className="h-5 w-5 flex-shrink-0" />
               )}
-              <span className="text-sm text-muted-foreground">{feature.text}</span>
+              <span className="text-sm">{feature.text}</span>
             </li>
           ))}
         </ul>
