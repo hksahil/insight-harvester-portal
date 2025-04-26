@@ -78,13 +78,13 @@ const NavigationBar: React.FC = () => {
             FAQ
           </Button>
           
+
           <Button 
-            onClick={goToLearning}
+            onClick={goToBlogs}
             variant="ghost"
             className="flex items-center gap-2"
-            title="Learning resources and blogs"
+            title="View blogs"
           >
-            {/* <BookOpen className="h-4 w-4" /> */}
             Learning
           </Button>
           
@@ -108,14 +108,7 @@ const NavigationBar: React.FC = () => {
             Upcoming Features
           </Button>
 
-          <Button 
-            onClick={goToBlogs}
-            variant="ghost"
-            className="flex items-center gap-2"
-            title="View blogs"
-          >
-            New Blogs Style
-          </Button>
+
 
           {user ? (
             <UserProfileButton />

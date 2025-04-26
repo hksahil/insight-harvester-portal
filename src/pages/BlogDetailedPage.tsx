@@ -32,11 +32,11 @@ const BlogDetailedPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <NavigationBar />
-      <main className="flex-grow container mx-auto px-4 py-16">
+      <main className="flex-grow container mx-auto px-4 py-16" style={{paddingTop:'8em'}}>
         <div className="max-w-4xl mx-auto">
           <Button 
             variant="ghost" 
-            onClick={() => navigate('/learning')} 
+            onClick={() => navigate('/blogs')} 
             className="mb-6 flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />

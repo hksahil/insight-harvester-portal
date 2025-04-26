@@ -1,7 +1,5 @@
 
-// This file represents a temporary storage for blog posts
-// In a production environment, this data would come from Hugo.io or another CMS
-
+// delete
 export const blogPostsData = {
   'evolving-landscape-data-storage': {
     title: 'Evolving landscape of Data storage solutions',

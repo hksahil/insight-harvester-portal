@@ -1,11 +1,11 @@
-
+//current
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavigationBar from '@/components/NavigationBar';
 import Footer from '@/components/Footer';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { MOCK_BLOGS } from '@/data/blogs';
 import {
   Pagination,
@@ -60,9 +60,15 @@ const BlogsPage = () => {
                 className="hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => navigate(`/blogs/${blog.slug}`)}
               >
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-2">{blog.title}</h2>
-                  <p className="text-muted-foreground">{blog.excerpt}</p>
+                <CardContent className="p-4 flex justify-between items-center">
+                  <div className="flex items-start gap-4">
+                    <span className="text-2xl font-bold text-muted-foreground">{blog.id}</span>
+                    <div>
+                      <h2 className="font-medium text-lg">{blog.title}</h2>
+                      <p className="text-sm text-muted-foreground">{blog.subtitle}</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
                 </CardContent>
               </Card>
             ))}
