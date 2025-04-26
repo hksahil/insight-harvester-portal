@@ -2,7 +2,7 @@
 import React from 'react';
 import NavigationBar from "@/components/NavigationBar";
 import Footer from "@/components/Footer";
-import { SnippetsTab } from "@/components/SnippetsTab";
+import SnippetsTab from "@/components/SnippetsTab";
 
 const SnippetsPage: React.FC = () => {
   return (
