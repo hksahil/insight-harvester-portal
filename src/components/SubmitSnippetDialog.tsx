@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -9,12 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-interface SubmitSnippetFormData {
-  authorName: string;
-  category: string;
-  code: string;
-}
+const snippetFormSchema = z.object({
+  authorName: z.string().min(1, { message: 'Name is required' }),
+  category: z.string().min(1, { message: 'Category is required' }),
+  code: z.string().min(10, { message: 'Snippet must be at least 10 characters' })
+});
+
+type SnippetFormValues = z.infer<typeof snippetFormSchema>;
 
 interface SubmitSnippetDialogProps {
   open: boolean;
@@ -31,7 +35,8 @@ const categories = [
 ];
 
 export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogProps) {
-  const form = useForm<SubmitSnippetFormData>({
+  const form = useForm<SnippetFormValues>({
+    resolver: zodResolver(snippetFormSchema),
     defaultValues: {
       authorName: '',
       category: '',
@@ -39,20 +44,23 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
     }
   });
 
-  const onSubmit = async (data: SubmitSnippetFormData) => {
+  const onSubmit = async (data: SnippetFormValues) => {
     try {
-      const { error } = await supabase.from('user_snippets').insert({
-        author_name: data.authorName,
-        category: data.category,
-        code: data.code
-      });
+      const { error } = await supabase
+        .from('user_snippets')
+        .insert({
+          author_name: data.authorName,
+          category: data.category,
+          code: data.code,
+          user_id: null // Set as null to comply with the RLS policy that allows inserts with null user_id
+        });
 
       if (error) throw error;
 
       toast.success('Snippet submitted successfully!');
       form.reset();
       onOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting snippet:', error);
       toast.error('Failed to submit snippet. Please try again.');
     }
@@ -63,6 +71,9 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Submit a Snippet</DialogTitle>
+          <DialogDescription>
+            Share your useful code snippets with the community
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
