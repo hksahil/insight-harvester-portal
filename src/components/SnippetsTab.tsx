@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { Search, Copy, ExternalLink, Plus } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CodeDisplay from '@/components/CodeDisplay';
 import { toast } from 'sonner';
 import UseCaseHelper from './UseCaseHelper';
-import { SubmitSnippetDialog } from './SubmitSnippetDialog';
 
 interface SnippetCategory {
   id: string;
@@ -27,7 +25,6 @@ interface Snippet {
 const SnippetsTab: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   
   const categories: SnippetCategory[] = [
     { id: 'all', name: 'All' },
@@ -723,10 +720,6 @@ print("Data successfully uploaded to Snowflake!")`,
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
   };
-
-  const handleSubmitSnippetClick = () => {
-    setSubmitDialogOpen(true);
-  };
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -741,16 +734,6 @@ print("Data successfully uploaded to Snowflake!")`,
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={handleSubmitSnippetClick}
-          >
-            <Plus className="h-4 w-4" />
-            Submit your snippet
-          </Button>
         </div>
       </div>
       <UseCaseHelper type="snippets" />
@@ -811,11 +794,6 @@ print("Data successfully uploaded to Snowflake!")`,
           </div>
         )}
       </div>
-      
-      <SubmitSnippetDialog 
-        open={submitDialogOpen} 
-        onOpenChange={setSubmitDialogOpen}
-      />
     </div>
   );
 };
