@@ -43,21 +43,26 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
       code: ''
     }
   });
+  
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const onSubmit = async (data: SnippetFormValues) => {
     try {
-      // Updated to use the correct structure for inserting data
+      setIsSubmitting(true);
+      
+      // Insert the snippet with proper fields
       const { error } = await supabase
         .from('user_snippets')
-        .insert([{  // Note the array brackets here
+        .insert({
           author_name: data.authorName,
           category: data.category,
           code: data.code,
-          user_id: null // Set as null to comply with the RLS policy that allows inserts with null user_id
-        }]);
+          status: 'pending',
+          user_id: null // Allowing anonymous submissions
+        });
 
       if (error) {
-        console.error('Error details:', error);
+        console.error('Error submitting snippet:', error);
         throw error;
       }
 
@@ -65,8 +70,10 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
       form.reset();
       onOpenChange(false);
     } catch (error: any) {
-      console.error('Error submitting snippet:', error);
+      console.error('Error details:', error);
       toast.error('Failed to submit snippet. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -136,7 +143,12 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
               )}
             />
             <DialogFooter>
-              <Button type="submit">Submit Snippet</Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Snippet'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
