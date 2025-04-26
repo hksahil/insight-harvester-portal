@@ -128,7 +128,7 @@ const NavigationBar: React.FC = () => {
       <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
-            {/* <DialogTitle>About Power BI Assistant & VPAX</DialogTitle> */}
+            <DialogTitle>FAQ</DialogTitle>
             <DialogClose className="absolute right-4 top-4 opacity-70 ring-offset-background transition-opacity hover:opacity-100">
               <span className="sr-only">Close</span>
             </DialogClose>
@@ -136,7 +136,7 @@ const NavigationBar: React.FC = () => {
           <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
             {/* App Info Section */}
             <div>
-              <h3 className="text-lg font-semibold mb-2">About Power BI Assistant</h3>
+              <h3 className="font-medium">Wha is Power BI Assistant</h3>
               <p className="text-sm text-muted-foreground">
                 PowerBI Assistant tool is designed to help Power BI developers understand their model better, 
                 identify optimization opportunities, document their models & leverage AI to create new measures/find insights.
@@ -144,18 +144,18 @@ const NavigationBar: React.FC = () => {
               
               <div className="mt-4 space-y-2">
                 <h4 className="font-medium">How to use the app:</h4>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Upload a VPAX file using the file uploader on the homepage</li>
-                  <li>Browse through the different tabs to analyze your Power BI model</li>
-                  <li>Use filters and search to find specific information</li>
-                  <li>Export data for documentation purposes</li>
+                <ol className=" text-sm text-muted-foreground">
+                  <li>1. Upload a VPAX file using the file uploader on the homepage</li>
+                  <li>2. Browse through the different tabs to analyze your Power BI model</li>
+                  <li>3. Use filters and search to find specific information</li>
+                  <li>4. Export data for documentation purposes</li>
                 </ol>
               </div>
             </div>
             
             {/* VPAX Info Section */}
             <div>
-              <h3 className="text-lg font-semibold mb-2">What is a VPAX file?</h3>
+              <h3 className="font-medium">What is a VPAX file?</h3>
               <p className="text-sm text-muted-foreground">
                 A VPAX file is an export format of Power BI models that contains metadata about the model structure, relationships, measures, and more.
               </p>
@@ -172,32 +172,21 @@ const NavigationBar: React.FC = () => {
                   </a>
                 </p>
               </div>
-              
+
               <div className="mt-4 space-y-2">
-                <h4 className="font-medium">Frequently Asked Questions</h4>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium">Is my data secure?</p>
-                    <p className="text-sm text-muted-foreground">
-                      Yes, your VPAX file is processed entirely in your browser. No data is sent to any server.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-medium">What information can I find in the app?</p>
-                    <p className="text-sm text-muted-foreground">
-                      You can analyze model metadata, relationships, tables, columns, measures, and M expressions from your Power BI model.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-medium">How do I export data for documentation?</p>
-                    <p className="text-sm text-muted-foreground">
-                      Use the Documentation tab to export data in PDF or Excel format.
-                    </p>
-                  </div>
-                </div>
+                <h4 className="font-medium">Is my data secure?</h4>
+                <p className="text-sm text-muted-foreground">
+                Yes, your VPAX file is processed entirely in your browser. No data is sent to any server.
+                </p>
               </div>
+
+              <div className="mt-4 space-y-2">
+                <h4 className="font-medium">How do I export data for documentation?</h4>
+                <p className="text-sm text-muted-foreground">
+                Use the Documentation tab to export data in PDF or Excel format.
+                </p>
+              </div>
+
             </div>
           </div>
         </DialogContent>
