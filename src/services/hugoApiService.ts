@@ -1,5 +1,5 @@
 
-import { BlogPost, BlogPostDetail } from '@/types/blog';
+import { BlogPost } from '@/types/blog';
 
 // This service will handle the connection to Hugo.io or any other CMS
 // Right now it's a placeholder for the future implementation
@@ -19,7 +19,7 @@ export async function fetchAllPosts(): Promise<BlogPost[]> {
   // return await response.json();
 }
 
-export async function fetchPostBySlug(slug: string): Promise<BlogPostDetail> {
+export async function fetchPostBySlug(slug: string): Promise<BlogPost> {
   // This function will be implemented when Hugo.io is set up
   // For now, it just throws an error
   throw new Error('Hugo API not yet implemented');

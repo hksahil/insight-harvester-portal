@@ -5,12 +5,13 @@ import NavigationBar from '@/components/NavigationBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { MOCK_BLOGS } from '@/data/blogs';
 
 const BlogDetailedPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
-  // Find the blog post from mock data (you would typically fetch this from an API)
+  // Find the blog post from mock data
   const blog = MOCK_BLOGS.find(b => b.slug === slug);
   
   if (!blog) {

@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { MOCK_BLOGS } from '@/data/blogs';
 import {
   Pagination,
   PaginationContent,
@@ -14,25 +15,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
-// Mock data for blogs
-const MOCK_BLOGS = [
-  {
-    id: 1,
-    title: "Mastering Power BI Performance Optimization",
-    slug: "power-bi-performance",
-    excerpt: "Learn how to optimize your Power BI reports for maximum performance",
-    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7320067844656742400"
-  },
-  {
-    id: 2,
-    title: "Advanced DAX Patterns",
-    slug: "advanced-dax",
-    excerpt: "Deep dive into advanced DAX patterns and techniques",
-    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7319002449669738497"
-  },
-  // Add more mock blogs as needed
-];
 
 const ITEMS_PER_PAGE = 5;
 

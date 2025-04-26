@@ -7,6 +7,12 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import PricingCard from '@/components/PricingCard';
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 const PREMIUM_AMOUNT = 100; // INR in paise, i.e. ₹499.00
 
 const Premium: React.FC = () => {
