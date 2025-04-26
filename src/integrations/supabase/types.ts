@@ -54,6 +54,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_snippets: {
+        Row: {
+          author_name: string
+          category: string
+          code: string
+          description: string | null
+          id: string
+          language: string
+          submitted_date: string
+          title: string
+        }
+        Insert: {
+          author_name: string
+          category: string
+          code: string
+          description?: string | null
+          id?: string
+          language: string
+          submitted_date?: string
+          title: string
+        }
+        Update: {
+          author_name?: string
+          category?: string
+          code?: string
+          description?: string | null
+          id?: string
+          language?: string
+          submitted_date?: string
+          title?: string
+        }
+        Relationships: []
+      }
       user_usage: {
         Row: {
           id: string
