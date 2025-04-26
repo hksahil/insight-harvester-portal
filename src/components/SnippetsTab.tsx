@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import CodeDisplay from '@/components/CodeDisplay';
 import { toast } from 'sonner';
 import UseCaseHelper from './UseCaseHelper';
+import { SubmitSnippetDialog } from './SubmitSnippetDialog';
 
 interface SnippetCategory {
   id: string;
@@ -26,6 +27,7 @@ interface Snippet {
 const SnippetsTab: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   
   const categories: SnippetCategory[] = [
     { id: 'all', name: 'All' },
@@ -723,7 +725,7 @@ print("Data successfully uploaded to Snowflake!")`,
   };
 
   const handleSubmitSnippetClick = () => {
-    window.open('https://forms.gle/qoPR26vtPbJCbFM69', '_blank');
+    setSubmitDialogOpen(true);
   };
   
   return (
@@ -748,7 +750,6 @@ print("Data successfully uploaded to Snowflake!")`,
           >
             <Plus className="h-4 w-4" />
             Submit your snippet
-            <ExternalLink className="h-3.5 w-3.5 ml-1" />
           </Button>
         </div>
       </div>
@@ -810,6 +811,11 @@ print("Data successfully uploaded to Snowflake!")`,
           </div>
         )}
       </div>
+      
+      <SubmitSnippetDialog 
+        open={submitDialogOpen} 
+        onOpenChange={setSubmitDialogOpen}
+      />
     </div>
   );
 };
