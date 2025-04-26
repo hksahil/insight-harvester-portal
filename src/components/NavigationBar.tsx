@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, Info, HelpCircle, Calendar, BookOpen, DollarSign } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@
 import { Button } from '@/components/ui/button';
 import { User } from '@supabase/supabase-js';
 import { UserProfileButton } from './UserProfileButton';
+import { useUserUsage } from '@/hooks/useUserUsage';
 
 const NavigationBar: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ const NavigationBar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
+  const { usage } = useUserUsage();
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -78,7 +81,6 @@ const NavigationBar: React.FC = () => {
             FAQ
           </Button>
           
-
           <Button 
             onClick={goToBlogs}
             variant="ghost"
@@ -88,14 +90,17 @@ const NavigationBar: React.FC = () => {
             Learning
           </Button>
           
-          <Button 
-            onClick={goToPricing}
-            variant="ghost"
-            className="flex items-center gap-2"
-            title="View pricing options"
-          >
-            Premium
-          </Button>
+          {/* Only show Premium button if user is not premium */}
+          {(!usage?.is_premium) && (
+            <Button 
+              onClick={goToPricing}
+              variant="ghost"
+              className="flex items-center gap-2"
+              title="View pricing options"
+            >
+              Premium
+            </Button>
+          )}
           
           <Button 
             onClick={() => setUpcomingDialogOpen(true)}

@@ -46,16 +46,20 @@ export function SubmitSnippetDialog({ open, onOpenChange }: SubmitSnippetDialogP
 
   const onSubmit = async (data: SnippetFormValues) => {
     try {
+      // Updated to use the correct structure for inserting data
       const { error } = await supabase
         .from('user_snippets')
-        .insert({
+        .insert([{  // Note the array brackets here
           author_name: data.authorName,
           category: data.category,
           code: data.code,
           user_id: null // Set as null to comply with the RLS policy that allows inserts with null user_id
-        });
+        }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
 
       toast.success('Snippet submitted successfully!');
       form.reset();

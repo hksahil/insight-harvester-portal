@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavigationBar from "@/components/NavigationBar";
@@ -22,6 +23,14 @@ const Premium: React.FC = () => {
   const [keyLoading, setKeyLoading] = useState(false);
   const [finalAmount, setFinalAmount] = useState(PREMIUM_AMOUNT);
   const [processingPayment, setProcessingPayment] = useState(false);
+
+  useEffect(() => {
+    // Redirect if user is already premium
+    if (usage?.is_premium) {
+      navigate('/');
+      toast.info('You already have premium access');
+    }
+  }, [usage, navigate]);
 
   useEffect(() => {
     const fetchRazorpayKey = async () => {
@@ -172,6 +181,11 @@ const Premium: React.FC = () => {
     );
   }
 
+  // If user is already premium, don't render the page
+  if (usage?.is_premium) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       <NavigationBar />
@@ -186,8 +200,8 @@ const Premium: React.FC = () => {
               { text: "Customer Support", included: true },
               { text: "Limited Campaigns", included: true },
               { text: "Limited Influencers", included: true },
-              { text: "Email Promotion", included: true },
-              { text: "AI Processing", included: true },
+              { text: "Email Promotion", included: false, premiumOnly: true },
+              { text: "AI Processing", included: false, premiumOnly: true },
             ]}
             buttonText="Use Free Version"
             onButtonClick={handleUseFree}
@@ -221,8 +235,8 @@ const Premium: React.FC = () => {
               { text: "Customer Support", included: true },
               { text: "Limited Campaigns", included: true },
               { text: "Limited Influencers", included: true },
-              { text: "Email Promotion", included: true },
-              { text: "AI Processing", included: true },
+              { text: "Email Promotion", included: false, premiumOnly: true },
+              { text: "AI Processing", included: false, premiumOnly: true },
             ]}
             buttonText="Contact Sales"
             onButtonClick={handleContactSales}
