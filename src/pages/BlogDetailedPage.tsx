@@ -11,7 +11,6 @@ const BlogDetailedPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
-  // Find the blog post from mock data
   const blog = MOCK_BLOGS.find(b => b.slug === slug);
   
   if (!blog) {
@@ -37,14 +36,15 @@ const BlogDetailedPage = () => {
         <div className="max-w-4xl mx-auto">
           <Button 
             variant="ghost" 
-            onClick={() => navigate('/blogs')} 
+            onClick={() => navigate('/learning')} 
             className="mb-6 flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to blogs
           </Button>
           
-          <h1 className="text-3xl font-bold mb-8">{blog.title}</h1>
+          <h1 className="text-3xl font-bold mb-4">{blog.title}</h1>
+          <p className="text-lg text-muted-foreground mb-8">{blog.subtitle}</p>
           
           <div className="aspect-video w-full">
             <iframe
