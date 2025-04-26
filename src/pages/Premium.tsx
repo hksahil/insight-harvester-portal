@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavigationBar from "@/components/NavigationBar";
@@ -154,7 +153,7 @@ const Premium: React.FC = () => {
         
         if (success) {
           toast.success("Payment successful! Your account has been upgraded to Premium.");
-          setTimeout(() => window.location.reload(), 1500);
+          navigate('/');
         } else {
           toast.error("Payment was received but we couldn't activate your premium status. Please contact support.");
         }
@@ -193,7 +192,6 @@ const Premium: React.FC = () => {
     );
   }
 
-  // If user is already premium or not logged in, don't render the page
   if (!user || usage?.is_premium) {
     return null;
   }
