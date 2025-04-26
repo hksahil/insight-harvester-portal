@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Copy } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CodeDisplay from '@/components/CodeDisplay';
 import { toast } from 'sonner';
