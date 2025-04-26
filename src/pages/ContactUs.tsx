@@ -2,7 +2,7 @@
 import React from 'react';
 import NavigationBar from '@/components/NavigationBar';
 import Footer from '@/components/Footer';
-import { Mail } from 'lucide-react';
+import { Mail, Linkedin } from 'lucide-react';
 
 const ContactUs: React.FC = () => {
   return (
@@ -14,15 +14,32 @@ const ContactUs: React.FC = () => {
           <p className="text-sm text-muted-foreground mb-6">Last updated on Apr 22nd 2025</p>
           
           <div className="prose prose-sm max-w-none">
-            <p>You may contact us using the information below:</p>
+            <p>If you have questions or need assistance, please contact us at:</p>
             
-            <div className="mt-8 p-6 border rounded-lg shadow-sm flex items-center">
-              <Mail className="h-6 w-6 mr-3 text-primary" />
-              <div>
-                <p className="font-medium">E-Mail ID:</p>
-                <a href="mailto:OFFICIALHKSAHIL@GMAIL.COM" className="text-primary hover:underline">
-                  OFFICIALHKSAHIL@GMAIL.COM
-                </a>
+            <div className="space-y-4 mt-8">
+              <div className="p-6 border rounded-lg shadow-sm flex items-center">
+                <Mail className="h-6 w-6 mr-3 text-primary" />
+                <div>
+                  <p className="font-medium">Email:</p>
+                  <a href="mailto:officialhksahil@gmail.com" className="text-primary hover:underline">
+                    officialhksahil@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              <div className="p-6 border rounded-lg shadow-sm flex items-center">
+                <Linkedin className="h-6 w-6 mr-3 text-primary" />
+                <div>
+                  <p className="font-medium">LinkedIn:</p>
+                  <a 
+                    href="https://www.linkedin.com/in/offiicialhksahil/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    linkedin.com/in/offiicialhksahil
+                  </a>
+                </div>
               </div>
             </div>
           </div>

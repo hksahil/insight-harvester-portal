@@ -12,16 +12,34 @@ const TermsAndConditions: React.FC = () => {
           <h1 className="text-3xl font-bold mb-6">Terms & Conditions</h1>
           <p className="text-sm text-muted-foreground mb-6">Last updated on Apr 22nd 2025</p>
           
-          <div className="prose prose-sm max-w-none">
-            <p>
-              For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean SAHIL CHOUDHARY, whose registered/operational office is House no 44. "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
-            </p>
-            
-            <h2 className="text-xl font-bold mt-8 mb-4">Your use of the website and/or purchase from us are governed by following Terms and Conditions:</h2>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>The content of the pages of this website is subject to change without notice.</li>
-              <li>Neither we nor any third parties provide any warranty or guarantee as to the accuracy, timeliness, performance, completeness or suitability of the information and materials found or offered on this website for any particular purpose. You acknowledge that such information and materials may contain inaccuracies or errors and we expressly exclude liability for any such inaccuracies or errors to the fullest extent permitted by law.</li>
-            </ul>
+          <div className="prose prose-sm max-w-none space-y-6">
+            <div>
+              <h2 className="text-xl font-bold mb-4">1. Use of the Site</h2>
+              <ul className="list-disc pl-6">
+                <li>You may view, download, and print content for your personal, non-commercial use.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-4">2. User Accounts</h2>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Some features may require registration.</li>
+                <li>You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-4">3. Intellectual Property</h2>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>All content on the Site—text, graphics, logos, images, and software—is our property or licensed to us.</li>
+                <li>Unauthorized use of any content may violate copyright, trademark, and other laws.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-4">4. Changes to Terms</h2>
+              <p>We may update these Terms at any time. We'll post the revised version with a new "Last Updated" date. Continued use constitutes acceptance.</p>
+            </div>
           </div>
         </div>
       </main>

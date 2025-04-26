@@ -12,33 +12,51 @@ const PrivacyPolicy: React.FC = () => {
           <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
           <p className="text-sm text-muted-foreground mb-6">Last updated on Apr 22nd 2025</p>
           
-          <div className="prose prose-sm max-w-none">
-            <p>
-              This privacy policy sets out how SAHIL CHOUDHARY uses and protects any information that you give SAHIL CHOUDHARY when you visit their website and/or agree to purchase from them.
-            </p>
-            
-            <h2 className="text-xl font-bold mt-8 mb-4">We may collect the following information:</h2>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Name</li>
-            </ul>
-            
-            <h2 className="text-xl font-bold mt-8 mb-4">What we do with the information we gather</h2>
-            <p>
-              We require this information to understand your needs and provide you with a better service, and in particular for the following reasons:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 mt-4">
-              <li>Internal record keeping.</li>
-              <li>We may use the information to improve our products and services.</li>
-            </ul>
-            
-            <p className="mt-6">
-              We are committed to ensuring that your information is secure. In order to prevent unauthorised access or disclosure we have put in suitable measures.
-            </p>
-            
-            <h2 className="text-xl font-bold mt-8 mb-4">How we use cookies</h2>
-            <p>
-              A cookie is a small file which asks permission to be placed on your computer's hard drive. Once you agree, the file is added and the cookie helps analyze web traffic or lets you know when you visit a particular site. Cookies allow web applications to respond to you as an individual. The web application can tailor its operations to your needs, likes and dislikes by gathering and remembering information about your preferences.
-            </p>
+          <div className="prose prose-sm max-w-none space-y-6">
+            <div>
+              <h2 className="text-xl font-bold mb-4">1. Information We Collect</h2>
+              
+              <div className="ml-4 space-y-4">
+                <div>
+                  <h3 className="font-bold">a. Personal Information You Provide</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Name</li>
+                    <li>Email address</li>
+                    <li>Payment information (processed by our secure payment gateway)</li>
+                    <li>Account credentials (username, password)</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-bold">b. Automatically Collected Information</h3>
+                  <ul className="list-disc pl-6">
+                    <li>Pages viewed and time spent on pages</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-bold">c. Cookies & Tracking Technologies</h3>
+                  <ul className="list-disc pl-6">
+                    <li>Analytics tools (e.g., Google Analytics)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-4">2. How We Use Your Information</h2>
+              <ul className="list-disc pl-6 space-y-2">
+                <li><strong>Order Fulfillment:</strong> Process and fulfill your orders, send order confirmations, and provide customer support.</li>
+                <li><strong>Account Management:</strong> Create, maintain, and secure your account.</li>
+                <li><strong>Marketing & Communications:</strong> Send promotional materials, newsletters, and updates (you can opt out at any time).</li>
+                <li><strong>Legal Obligations:</strong> Comply with applicable laws, regulations, and enforce our Terms of Service.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-4">3. Data Security</h2>
+              <p>We implement reasonable administrative, technical, and physical safeguards to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure. We cannot guarantee absolute security.</p>
+            </div>
           </div>
         </div>
       </main>
