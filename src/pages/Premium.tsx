@@ -206,12 +206,12 @@ const Premium: React.FC = () => {
             subtitle="Essential tools for individuals and teams"
             price="₹ 0"
             features={[
-              { text: "Dashboard Access", included: true },
-              { text: "Customer Support", included: true },
-              { text: "Limited Campaigns", included: true },
-              { text: "Limited Influencers", included: true },
-              { text: "Email Promotion", included: false, premiumOnly: true },
-              { text: "AI Processing", included: false, premiumOnly: true },
+              { text: "Snippet Library Access", included: true },
+              { text: "Blogs Access", included: true },
+              { text: "Unlimited file uploads", included: true },
+              { text: "Discord Community Access", included: false },
+              { text: "Preview Feature Early Accesss", included: false, premiumOnly: true },
+              { text: "Custom Hosting & Deployment", included: false, premiumOnly: true },
             ]}
             buttonText="Use Free Version"
             onButtonClick={handleUseFree}
@@ -222,13 +222,13 @@ const Premium: React.FC = () => {
             subtitle={`You've used ${usage?.processed_files_count || 0} of 5 free uploads`}
             price="₹ 399"
             features={[
-              { text: "Dashboard Access", included: true },
-              { text: "Customer Support", included: true },
-              { text: "Limited Campaigns", included: true },
-              { text: "Limited Influencers", included: true },
-              { text: "Email Promotion", included: true },
-              { text: "AI Processing", included: true },
-            ]}
+              { text: "Snippet Library Access", included: true },
+              { text: "Blogs Access", included: true },
+              { text: "Unlimited file uploads", included: true },
+              { text: "Discord Community Access", included: false },
+              { text: "Preview Feature Early Accesss", included: false, premiumOnly: true },
+              { text: "Custom Hosting & Deployment", included: false, premiumOnly: true },
+             ]}
             buttonText={`Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
             onButtonClick={handleUpgrade}
             showPromoCode={true}
@@ -241,12 +241,12 @@ const Premium: React.FC = () => {
             subtitle="Enterprise solution with custom features"
             price="Custom"
             features={[
-              { text: "Dashboard Access", included: true },
-              { text: "Customer Support", included: true },
-              { text: "Limited Campaigns", included: true },
-              { text: "Limited Influencers", included: true },
-              { text: "Email Promotion", included: false, premiumOnly: true },
-              { text: "AI Processing", included: false, premiumOnly: true },
+              { text: "Snippet Library Access", included: true },
+              { text: "Blogs Access", included: true },
+              { text: "Unlimited file uploads", included: true },
+              { text: "Discord Community Access", included: false },
+              { text: "Preview Feature Early Accesss", included: false, premiumOnly: true },
+              { text: "Custom Hosting & Deployment", included: false, premiumOnly: true },
             ]}
             buttonText="Contact Sales"
             onButtonClick={handleContactSales}
