@@ -162,5 +162,257 @@ export const MOCK_BLOGS = [
       tag: "PBI limitations",
       excerpt: "Lack of scalable solution to move reports and models across workspaces",
       embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7320067844656742400"
-    }
+    },
+      {
+        id: 19,
+        title: "What's difference between Postgres vs SQL",
+        subtitle: "An overview of Postgres and SQL differences",
+        slug: "postgres-vs-sql",
+        tag: "Database internals",
+        excerpt: "Comparing Postgres features and capabilities against SQL standards",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7222673078659506177"
+      },
+      {
+        id: 20,
+        title: "Microsoft Licensing",
+        subtitle: "Understanding Microsoft's licensing models",
+        slug: "msft-licensing",
+        tag: "PowerBI",
+        excerpt: "Overview of Microsoft's licensing options and their implications for users",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7195693038214533120"
+      },
+      {
+        id: 21,
+        title: "PowerBI Licensing",
+        subtitle: "Breaking down Power BI licensing tiers",
+        slug: "pbi-licensing",
+        tag: "PowerBI",
+        excerpt: "Breaking down Power BI licensing tiers and costs",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7196391490506391552"
+      },
+      {
+        id: 22,
+        title: "Report Rationalisation Framework",
+        subtitle: "Framework for IT asset rationalization",
+        slug: "rationalisation-framework",
+        tag: "Thought leadership",
+        excerpt: "Introducing a structured framework for rationalizing IT assets",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7238083062113165312"
+      },
+      {
+        id: 23,
+        title: "What exactly is Onelake",
+        subtitle: "Introducing Microsoft's unified OneLake solution",
+        slug: "onelake",
+        tag: "Data engineering",
+        excerpt: "Exploring Microsoft's OneLake platform for unified data storage",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7266071137309061120"
+      },
+      {
+        id: 24,
+        title: "Why Relational DBs are slow",
+        subtitle: "Examining performance bottlenecks in relational databases",
+        slug: "why-relational-dbs-are-slow",
+        tag: "Database internals",
+        excerpt: "Analyzing factors that impact relational database performance",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7173790079742664705"
+      },
+      {
+        id: 25,
+        title: "Understanding hidden Vendor Lockins",
+        subtitle: "Risks of vendor lock-in in IT ecosystems",
+        slug: "vendor-lockins",
+        tag: "Thought leadership",
+        excerpt: "Discussing risks and considerations of vendor lock-in in IT",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7174330978465640448"
+      },
+      {
+        id: 26,
+        title: "Analyst Roadmap",
+        subtitle: "Key milestones for aspiring data analysts",
+        slug: "analyst-roadmap",
+        tag: "Thought leadership",
+        excerpt: "A roadmap outlining key skills and milestones for analysts",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7220655285969772544"
+      },
+      {
+        id: 27,
+        title: "User Adoption of dashboards",
+        subtitle: "Driving user adoption of analytics platforms",
+        slug: "user-adoption",
+        tag: "Thought leadership",
+        excerpt: "Strategies to drive user adoption of analytics tools",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7212177537253220354"
+      },
+      {
+        id: 28,
+        title: "Self Serve Analytics",
+        subtitle: "Empowering users with self-service analytics",
+        slug: "self-serve-analytics",
+        tag: "Thought leadership",
+        excerpt: "Benefits and challenges of self-service analytics",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7211936535217127425"
+      },
+      {
+        id: 29,
+        title: "Snowflake vs Databricks",
+        subtitle: "Comparing Snowflake and Databricks platforms",
+        slug: "snowflake-vs-databricks",
+        tag: "Data engineering",
+        excerpt: "Comparing Snowflake and Databricks for data processing and analytics",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7210921498750980097"
+      },
+      {
+        id: 30,
+        title: "Why SSMS isn't dead",
+        subtitle: "Advocating SQL Server Management Studio's relevance",
+        slug: "ssms-isnt-dead",
+        tag: "Database internals",
+        excerpt: "Advocating for continued use of SQL Server Management Studio",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7209860805121490945"
+      },
+      {
+        id: 31,
+        title: "Why SSAS isn't dead",
+        subtitle: "Highlighting SQL Server Analysis Services' strengths",
+        slug: "ssas-isnt-dead",
+        tag: "Database internals",
+        excerpt: "Highlighting the relevance of SQL Server Analysis Services",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7207469601272520704"
+      },
+      {
+        id: 32,
+        title: "What exactly are OLAP Cubes",
+        subtitle: "The enduring value of OLAP cubes in BI",
+        slug: "olap-cubes",
+        tag: "Database internals",
+        excerpt: "Discussing the role and benefits of OLAP cubes in BI",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7207126516730667009"
+      },
+      {
+        id: 33,
+        title: "Brief History of Databases",
+        subtitle: "Tracing the evolution of database technologies",
+        slug: "db-history",
+        tag: "Database internals",
+        excerpt: "Tracing the evolution of databases over time",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7149991954364141568"
+      },
+      {
+        id: 34,
+        title: "Why Companies choose Open Source",
+        subtitle: "Benefits of embracing open-source software",
+        slug: "why-open-source",
+        tag: "Thought leadership",
+        excerpt: "Exploring reasons to embrace open-source software",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7149787765616820225"
+      },
+      {
+        id: 35,
+        title: "INT(10) is a lie",
+        subtitle: "Clarifying misconceptions about INT(10) in SQL",
+        slug: "int10-is-a-lie",
+        tag: "Database internals",
+        excerpt: "Debunking misconceptions about INT(10) in SQL",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7129302421406703616"
+      },
+      {
+        id: 36,
+        title: "Automating Modelling tasks in PowerBI",
+        subtitle: "Enhancing BI model development with Tabular Editor",
+        slug: "tabular-editor",
+        tag: "PowerBI",
+        excerpt: "Showcasing features of Tabular Editor for model development",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7293559074812542976"
+      },
+      {
+        id: 37,
+        title: "Advance Visuals in Analytics",
+        subtitle: "Unlocking advanced analytics in Tableau",
+        slug: "tableau-advance",
+        tag: "Thought leadership",
+        excerpt: "Highlighting advanced capabilities of Tableau for analytics",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7150199326797877248"
+      },
+      {
+        id: 38,
+        title: "Float vs Decimal",
+        subtitle: "Comparing data types: float vs decimal",
+        slug: "float-vs-decimal",
+        tag: "Database internals",
+        excerpt: "Contrasting float and decimal data types and their use cases",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7146852764856295424"
+      },
+      {
+        id: 39,
+        title: "Understanding the floating points",
+        subtitle: "Understanding floating point number intricacies",
+        slug: "floats",
+        tag: "Database internals",
+        excerpt: "In-depth look at floating point numbers and their precision issues",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7146846893141090304"
+      },
+      {
+        id: 40,
+        title: "Estimating Database Size",
+        subtitle: "Techniques for estimating database storage size",
+        slug: "estimating-db-size",
+        tag: "Database internals",
+        excerpt: "Methods for estimating database size requirements",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7138746228124684288"
+      },
+      {
+        id: 41,
+        title: "BI Systems sv Programming Systems",
+        subtitle: "Contrasting BI systems and programming systems",
+        slug: "bi-systems-vs-programming-systems",
+        tag: "Thought leadership",
+        excerpt: "Comparing business intelligence systems with programming systems",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7131600861079777280"
+      },
+      {
+        id: 42,
+        title: "Database Scaling strategies",
+        subtitle: "Strategies for database scalability",
+        slug: "scaling-dbs",
+        tag: "Database internals",
+        excerpt: "Approaches to scaling databases for performance and reliability",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7111239678099402752"
+      },
+      {
+        id: 43,
+        title: "dbt tool cheatsheet",
+        subtitle: "Essential dbt commands and shortcuts",
+        slug: "dbt-cheatsheet",
+        tag: "Data engineering",
+        excerpt: "A handy cheatsheet for dbt commands and best practices",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7198332620642906114"
+      },
+      {
+        id: 44,
+        title: "Why companies are shifting from ETL to ELT",
+        subtitle: "Transitioning from ETL to ELT workflows",
+        slug: "etl-to-elt",
+        tag: "Data engineering",
+        excerpt: "Examining the shift from ETL to ELT in data workflows",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7189611309527719936"
+      },
+      {
+        id: 45,
+        title: "Why's dbt tool poping",
+        subtitle: "Exploring dbt's surge in popularity",
+        slug: "whys-dbt-poping",
+        tag: "Data engineering",
+        excerpt: "Exploring reasons behind dbt's growing popularity",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7186993581025366017"
+      },
+      {
+        id: 46,
+        title: "Implementing Data governance",
+        subtitle: "Implementing effective data governance practices",
+        slug: "data-governance",
+        tag: "Thought leadership",
+        excerpt: "Best practices for data governance in organizations",
+        embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7222427400091885568"
+      }    
 ];
