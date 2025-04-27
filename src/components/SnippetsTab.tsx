@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Copy } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -35,7 +34,8 @@ const SnippetsTab: React.FC = () => {
     { id: 'sql', name: 'SQL' },
     { id: 'python', name: 'Python' },
     { id: 'powerquery', name: 'PowerQuery' },
-    { id: 'powershell', name: 'PowerShell' }
+    { id: 'powershell', name: 'PowerShell' },
+    { id: 'excel', name: 'Excel' }
   ];
 
   useEffect(() => {

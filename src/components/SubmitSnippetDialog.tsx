@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
 const categories = [{
   id: 'prompt',
   name: 'Prompt'
@@ -26,7 +27,11 @@ const categories = [{
 }, {
   id: 'powershell',
   name: 'PowerShell'
+}, {
+  id: 'excel',
+  name: 'Excel'
 }];
+
 export function SubmitSnippetDialog() {
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -35,6 +40,7 @@ export function SubmitSnippetDialog() {
   const [authorName, setAuthorName] = React.useState('');
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !code || !authorName) {
@@ -52,14 +58,13 @@ export function SubmitSnippetDialog() {
         language: category === 'prompt' ? 'markdown' : category,
         category,
         author_name: authorName,
-        live_flag: false // Set live_flag to false by default
+        live_flag: false
       });
       if (error) throw error;
       toast.success('Snippet submitted successfully!');
       setIsOpen(false);
       resetForm();
 
-      // Notify the user that their snippet is pending review
       toast.info('Your snippet is pending review and will be displayed after approval');
     } catch (error) {
       console.error('Error submitting snippet:', error);
@@ -68,6 +73,7 @@ export function SubmitSnippetDialog() {
       setIsSubmitting(false);
     }
   };
+
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -75,6 +81,7 @@ export function SubmitSnippetDialog() {
     setCategory('prompt');
     setAuthorName('');
   };
+
   return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="ml-4 bg-gray-300 hover:bg-gray-200 text-gray-950">+ Submit your snippet</Button>
