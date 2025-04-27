@@ -202,7 +202,7 @@ const Premium: React.FC = () => {
       <main className="flex-grow container mx-auto pt-4" style={{paddingTop:'8rem'}}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <PricingCard
-            title="Free"
+            title="Free Community Edition"
             subtitle="Essential tools for individuals and teams"
             price="₹ 0"
             features={[
@@ -211,14 +211,13 @@ const Premium: React.FC = () => {
               { text: "Unlimited file uploads", included: true },
               { text: "Discord Community Access", included: false },
               { text: "Preview Feature Early Accesss", included: false, premiumOnly: true },
-              { text: "Custom Hosting & Deployment", included: false, premiumOnly: true },
             ]}
             buttonText="Use Free Version"
             onButtonClick={handleUseFree}
           />
           
           <PricingCard
-            title="Premium"
+            title="Premium Edition"
             subtitle={`You've used ${usage?.processed_files_count || 0} of 5 free uploads`}
             price="₹ 399"
             features={[
@@ -227,7 +226,6 @@ const Premium: React.FC = () => {
               { text: "Unlimited file uploads", included: true },
               { text: "Discord Community Access", included: true },
               { text: "Preview Feature Early Accesss", included: true, premiumOnly: true },
-              { text: "Custom Hosting & Deployment", included: false, premiumOnly: true },
              ]}
             buttonText={`Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
             onButtonClick={handleUpgrade}
@@ -237,8 +235,8 @@ const Premium: React.FC = () => {
           />
           
           <PricingCard
-            title="Enterprise"
-            subtitle="Enterprise solution with custom features"
+            title="Enterprise Edition"
+            subtitle="Enterprise solution with custom deployment & features"
             price="Custom"
             features={[
               { text: "Snippet Library Access", included: true },
@@ -246,7 +244,6 @@ const Premium: React.FC = () => {
               { text: "Unlimited file uploads", included: true },
               { text: "Discord Community Access", included: true },
               { text: "Preview Feature Early Accesss", included: true, premiumOnly: true },
-              { text: "Custom Hosting & Deployment", included: true, premiumOnly: true },
             ]}
             buttonText="Contact Sales"
             onButtonClick={handleContactSales}
