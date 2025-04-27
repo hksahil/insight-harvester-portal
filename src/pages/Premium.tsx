@@ -225,8 +225,8 @@ const Premium: React.FC = () => {
               { text: "Snippet Library Access", included: true },
               { text: "Blogs Access", included: true },
               { text: "Unlimited file uploads", included: true },
-              { text: "Discord Community Access", included: false },
-              { text: "Preview Feature Early Accesss", included: false, premiumOnly: true },
+              { text: "Discord Community Access", included: true },
+              { text: "Preview Feature Early Accesss", included: true, premiumOnly: true },
               { text: "Custom Hosting & Deployment", included: false, premiumOnly: true },
              ]}
             buttonText={`Upgrade Now - ₹${(finalAmount / 100).toFixed(2)}`}
@@ -244,9 +244,9 @@ const Premium: React.FC = () => {
               { text: "Snippet Library Access", included: true },
               { text: "Blogs Access", included: true },
               { text: "Unlimited file uploads", included: true },
-              { text: "Discord Community Access", included: false },
-              { text: "Preview Feature Early Accesss", included: false, premiumOnly: true },
-              { text: "Custom Hosting & Deployment", included: false, premiumOnly: true },
+              { text: "Discord Community Access", included: true },
+              { text: "Preview Feature Early Accesss", included: true, premiumOnly: true },
+              { text: "Custom Hosting & Deployment", included: true, premiumOnly: true },
             ]}
             buttonText="Contact Sales"
             onButtonClick={handleContactSales}
