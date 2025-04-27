@@ -56,8 +56,8 @@ const BlogsPage = () => {
       <NavigationBar />
       <main className="flex-grow container mx-auto px-4" style={{ paddingTop: '8rem' }}>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Latest Blogs</h1>
-          <p className="text-muted-foreground mb-8">Discover insights about Power BI and data analytics</p>
+          <h1 className="text-3xl font-bold mb-2">Blogs</h1>
+          <p className="text-muted-foreground mb-8">Find the No BS, niche articles around the data domain which will help you build expertise</p>
           
           <div className="mb-4">
             <Input 
