@@ -87,7 +87,7 @@ const features = [
 const PricingComparison = () => {
   return (
     <div className="py-12 px-2 md:px-8">
-      <h2 className="text-3xl md:text-4xl font-semibold mb-8 md:mb-12 text-center">Compare Editions</h2>
+      <h2 className="text-3xl md:text-4xl font-semibold mb-8 md:mb-12 text-center">Comparison with existing players</h2>
       <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>

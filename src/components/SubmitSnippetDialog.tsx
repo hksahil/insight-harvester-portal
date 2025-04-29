@@ -78,7 +78,7 @@ export function SubmitSnippetDialog() {
   };
   return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="ml-4 bg-gray-300 hover:bg-gray-200 text-gray-600">+ Submit your snippet</Button>
+        <Button className="ml-4 bg-gray-300 hover:bg-gray-200 text-gray-00" style={{background:'#F1F5F9'}}>+ Submit your snippet</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
