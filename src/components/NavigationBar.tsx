@@ -78,7 +78,7 @@ const NavigationBar: React.FC = () => {
             className="flex items-center gap-2"
             title="View DAX Snippets"
           >
-            Snippets
+            Snippets Library
           </Button>
 
           <Button 
