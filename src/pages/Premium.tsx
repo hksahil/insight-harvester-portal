@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-const PREMIUM_AMOUNT = 100; // INR in paise, i.e. ₹499.00
+const PREMIUM_AMOUNT = 99900; // INR in paise, i.e. ₹499.00
 
 const Premium: React.FC = () => {
   const navigate = useNavigate();
@@ -219,7 +219,7 @@ const Premium: React.FC = () => {
           <PricingCard
             title="Premium"
             subtitle={`You've used ${usage?.processed_files_count || 0} of 5 free uploads`}
-            price="₹ 399"
+            price="₹ 999"
             features={[
               { text: "Snippet Library Access", included: true },
               { text: "Blogs Access", included: true },
