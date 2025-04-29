@@ -6,7 +6,7 @@ import { FileQuestion } from "lucide-react";
 const NotFound = () => {
   const location = useLocation();
 
-  useEffect(() => {
+  useEffect(() => { 
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
