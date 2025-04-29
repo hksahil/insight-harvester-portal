@@ -10,7 +10,7 @@ const SnippetsPage: React.FC = () => {
       <NavigationBar />
       <main className="flex-grow container mx-auto px-4" style={{ paddingTop: '8rem' }}>
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">DAX Snippets Library</h1>
+          <h1 className="text-3xl font-bold mb-8">Snippets Library</h1>
           <SnippetsTab />
         </div>
       </main>
