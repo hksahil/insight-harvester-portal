@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import NavigationBar from '@/components/NavigationBar';
 import Footer from '@/components/Footer';
 import { Separator } from '@/components/ui/separator';
+import { ensureUserProfile, getUserUsage } from '@/services/directSupabaseQuery';
 
 type AuthFormData = {
   email: string;
@@ -31,22 +32,34 @@ const Auth: React.FC = () => {
   const handleAuth = async (data: AuthFormData) => {
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: authData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password
         });
 
         if (error) throw error;
         
+        // Ensure profile and usage records exist after login
+        if (authData.user) {
+          await ensureUserProfile(authData.user.id, authData.user.email);
+          await getUserUsage(authData.user.id);
+        }
+        
         toast.success('Logged in successfully');
         navigate('/');
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: authData, error } = await supabase.auth.signUp({
           email: data.email,
           password: data.password
         });
 
         if (error) throw error;
+        
+        // Ensure profile and usage records exist after signup
+        if (authData.user) {
+          await ensureUserProfile(authData.user.id, authData.user.email);
+          await getUserUsage(authData.user.id);
+        }
         
         toast.success('Account created successfully. Please check your email to confirm.');
         navigate('/');

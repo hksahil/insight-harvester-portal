@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { getUserUsage, incrementUserFileCount } from '@/services/directSupabaseQuery';
+import { getUserUsage, incrementUserFileCount, ensureUserProfile } from '@/services/directSupabaseQuery';
 
 interface UserUsage {
   processed_files_count: number;
@@ -23,6 +23,12 @@ export function useUserUsage() {
     }
 
     try {
+      // Ensure profile exists first
+      if (session.user.email) {
+        await ensureUserProfile(session.user.id, session.user.email);
+      }
+      
+      // Then get/create user usage
       const data = await getUserUsage(session.user.id);
       return data as UserUsage;
     } catch (error) {

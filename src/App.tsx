@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import SnippetsPage from "./pages/SnippetsPage";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { ensureUserProfile, getUserUsage } from "./services/directSupabaseQuery";
 
 const queryClient = new QueryClient();
 
@@ -27,14 +29,29 @@ const App = () => {
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user ?? null);
+      const currentUser = data.session?.user ?? null;
+      setUser(currentUser);
+      
+      // If user is logged in, ensure their profile and usage records exist
+      if (currentUser) {
+        await ensureUserProfile(currentUser.id, currentUser.email || '');
+        await getUserUsage(currentUser.id); // This will create the record if it doesn't exist
+      }
+      
       setLoading(false);
     };
 
     checkUser();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      // Handle user sign in by ensuring records exist
+      if (currentUser && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+        await ensureUserProfile(currentUser.id, currentUser.email || '');
+        await getUserUsage(currentUser.id);
+      }
     });
 
     return () => {
