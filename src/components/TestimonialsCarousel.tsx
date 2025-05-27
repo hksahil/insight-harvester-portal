@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Carousel,
@@ -32,13 +33,13 @@ const testimonials = [
 ];
 
 const TestimonialsCarousel = () => {
-  const autoplayPlugin = React.useMemo(() => 
+  const autoplayPlugin = React.useRef(
     Autoplay({
       delay: 1500,
       stopOnInteraction: false,
       stopOnMouseEnter: true,
-    }), 
-  []);
+    })
+  );
 
   return (
     <div className="py-24 px-4 bg-muted/20">
@@ -52,7 +53,7 @@ const TestimonialsCarousel = () => {
             align: "start",
             loop: true,
           }}
-          plugins={[autoplayPlugin]}
+          plugins={[autoplayPlugin.current]}
           className="w-full"
         >
           <CarouselContent>
