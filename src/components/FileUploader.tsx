@@ -6,14 +6,16 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserUsage } from '@/hooks/useUserUsage';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 interface FileUploaderProps {
-  onFileUpload: (file: File) => void;
+  onFileUpload: (file: File, fileType: 'vpax' | 'pbix') => void;
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<'vpax' | 'pbix' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { usage, loading, incrementFileCount, isLimitReached } = useUserUsage();
@@ -28,7 +30,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
       return;
     }
 
-    // Check if user has reached the limit
     if (usage && !usage.is_premium && (usage.processed_files_count >= 5)) {
       toast.error('You have reached the limit of 5 free file uploads. Please upgrade to premium.');
       navigate('/premium');
@@ -37,14 +38,21 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
 
     if (files.length > 0) {
       const file = files[0];
+      let detectedFileType: 'vpax' | 'pbix' | null = null;
+      
       if (file.name.endsWith('.vpax')) {
+        detectedFileType = 'vpax';
+      } else if (file.name.endsWith('.pbix')) {
+        detectedFileType = 'pbix';
+      }
+      
+      if (detectedFileType) {
         setFileName(file.name);
+        setFileType(detectedFileType);
         
         try {
-          // Process file first
-          onFileUpload(file);
+          onFileUpload(file, detectedFileType);
           
-          // Increment count only AFTER successful processing
           const success = await incrementFileCount();
           if (!success) {
             toast.error('Failed to update file count');
@@ -55,8 +63,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
           toast.error('Error processing file: ' + (error instanceof Error ? error.message : 'Unknown error'));
         }
       } else {
-        setError('Please upload a .vpax file');
-        toast.error('Please upload a .vpax file');
+        setError('Please upload a .vpax or .pbix file');
+        toast.error('Please upload a .vpax or .pbix file');
       }
     }
   };
@@ -136,7 +144,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
         
         <div className="space-y-2">
           <h3 className="text-lg font-medium">
-            {error ? 'Invalid File Type' : fileName ? 'File ready for processing' : 'Upload VPAX File'}
+            {error ? 'Invalid File Type' : fileName ? 'File ready for processing' : 'Upload Power BI File'}
           </h3>
           
           {error ? (
@@ -144,23 +152,48 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
               {error}
             </p>
           ) : fileName ? (
-            <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-              {fileName}
-            </p>
+            <div className="text-center space-y-1">
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                {fileName}
+              </p>
+              <p className="text-xs text-primary font-medium">
+                File Type: {fileType?.toUpperCase()}
+              </p>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
               {usage && !usage.is_premium ? 
                 `${5 - (usage.processed_files_count || 0)} free uploads remaining` : 
-                'Drag and drop your .vpax file here, or click to browse'}
+                'Drag and drop your .vpax or .pbix file here, or click to browse'}
             </p>
           )}
         </div>
+
+        {/* File type selection cards */}
+        {!fileName && !error && (
+          <div className="grid grid-cols-2 gap-4 mt-6 w-full max-w-md">
+            <Card className="p-4 text-center hover:bg-primary/5 transition-colors">
+              <div className="space-y-2">
+                <div className="text-2xl">📊</div>
+                <h4 className="font-medium text-sm">VPAX Files</h4>
+                <p className="text-xs text-muted-foreground">Power BI metadata export</p>
+              </div>
+            </Card>
+            <Card className="p-4 text-center hover:bg-primary/5 transition-colors">
+              <div className="space-y-2">
+                <div className="text-2xl">📈</div>
+                <h4 className="font-medium text-sm">PBIX Files</h4>
+                <p className="text-xs text-muted-foreground">Power BI report files</p>
+              </div>
+            </Card>
+          </div>
+        )}
         
         <label className={`btn ${error ? 'bg-destructive hover:bg-destructive/90' : 'btn-primary'} px-4 py-2 cursor-pointer`}>
           {error ? 'Try again' : fileName ? 'Choose another file' : 'Browse Files'}
           <input 
             type="file" 
-            accept=".vpax" 
+            accept=".vpax,.pbix" 
             className="hidden" 
             onChange={handleFileInput}
           />

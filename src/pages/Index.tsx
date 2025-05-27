@@ -82,16 +82,26 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, fileType: 'vpax' | 'pbix') => {
     setIsDataProcessing(true);
     
     try {
-      const data = await processVpaxFile(file);
+      let data: ProcessedData;
+      
+      if (fileType === 'vpax') {
+        // Use existing VPAX processing
+        data = await processVpaxFile(file);
+      } else {
+        // Use new PBIX processing
+        const { processPbixFile } = await import('@/services/PbixProcessor');
+        data = await processPbixFile(file);
+      }
+      
       setProcessedData(data);
       setIsFileUploaded(true);
-      toast.success('File processed successfully');
+      toast.success(`${fileType.toUpperCase()} file processed successfully`);
     } catch (error) {
-      toast.error(`Error processing file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Error processing ${fileType.toUpperCase()} file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsDataProcessing(false);
     }
