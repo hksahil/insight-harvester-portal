@@ -1,4 +1,10 @@
 {
+  // This is a comment
+  API Service is rendered on render.com under https://insight-harvester-portal.onrender.com/upload
+  File is passed as POST as form-data with key as file, type as File, Value as pbix file
+}
+
+{
   "columns": [
     {
       "ColumnName": "string",
