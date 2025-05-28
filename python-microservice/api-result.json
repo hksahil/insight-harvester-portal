@@ -1,0 +1,55 @@
+{
+  "columns": [
+    {
+      "ColumnName": "string",
+      "Expression": "string | null",
+      "PandasDataType": "string | null",
+      "TableName": "string"
+    }
+  ],
+  "measures": [
+    {
+      "Description": "string | null",
+      "DisplayFolder": "string | null",
+      "Expression": "string",
+      "Name": "string",
+      "TableName": "string"
+    }
+  ],
+  "metadata": [
+    {
+      "Name": "string",
+      "Value": "string"
+    }
+  ],
+  "model_size": "string",
+  "number_of_tables": "integer",
+  "power_query": [
+    {
+      "Expression": "string",
+      "TableName": "string"
+    }
+  ],
+  "relationships": [
+    {
+      "Cardinality": "string",
+      "CrossFilteringBehavior": "string",
+      "FromColumnName": "string",
+      "FromKeyCount": "integer | null",
+      "FromTableName": "string",
+      "IsActive": "integer",
+      "RelyOnReferentialIntegrity": "integer",
+      "ToColumnName": "string | null",
+      "ToKeyCount": "integer | null",
+      "ToTableName": "string | null"
+    }
+  ],
+  "table_data": {
+    "TableName": [
+      {
+        "Column1": "value",
+        "Column2": "value"
+      }
+    ]
+  }
+}
