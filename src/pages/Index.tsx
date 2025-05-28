@@ -68,6 +68,7 @@ const Index = () => {
   const [isDataProcessing, setIsDataProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [currentFileType, setCurrentFileType] = useState<'vpax' | 'pbix' | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,16 +83,26 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, fileType: 'vpax' | 'pbix') => {
     setIsDataProcessing(true);
+    setCurrentFileType(fileType);
     
     try {
-      const data = await processVpaxFile(file);
+      let data: ProcessedData;
+      
+      if (fileType === 'vpax') {
+        data = await processVpaxFile(file);
+      } else {
+        // Import the PBIX processor dynamically
+        const { processPbixFile } = await import('@/services/PbixProcessor');
+        data = await processPbixFile(file);
+      }
+      
       setProcessedData(data);
       setIsFileUploaded(true);
-      toast.success('File processed successfully');
+      toast.success(`${fileType.toUpperCase()} file processed successfully`);
     } catch (error) {
-      toast.error(`Error processing file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Error processing ${fileType.toUpperCase()} file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsDataProcessing(false);
     }
@@ -99,6 +110,7 @@ const Index = () => {
 
   const loadSampleData = async () => {
     setIsDataProcessing(true);
+    setCurrentFileType('vpax'); // Sample data is VPAX format
     
     try {
       const sampleData: ProcessedData = {
