@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Carousel,
@@ -6,7 +7,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import Autoplay from 'embla-carousel-autoplay';
 
 const testimonials = [
   {
@@ -32,14 +32,6 @@ const testimonials = [
 ];
 
 const TestimonialsCarousel = () => {
-  const autoplayPlugin = React.useMemo(() => 
-    Autoplay({
-      delay: 1500,
-      stopOnInteraction: false,
-      stopOnMouseEnter: true,
-    }), 
-  []);
-
   return (
     <div className="py-24 px-4 bg-muted/20">
       <h2 className="text-4xl font-semibold mb-12 text-center">
@@ -52,7 +44,6 @@ const TestimonialsCarousel = () => {
             align: "start",
             loop: true,
           }}
-          plugins={[autoplayPlugin]}
           className="w-full"
         >
           <CarouselContent>
