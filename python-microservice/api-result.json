@@ -4,7 +4,7 @@
   File is passed as POST as form-data with key as file, type as File, Value as pbix file
 }
 
-{
+{ 
   "columns": [
     {
       "ColumnName": "string",
