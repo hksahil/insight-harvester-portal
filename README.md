@@ -1,4 +1,4 @@
-## Project info
+## PowerBI Assistant
 
 ## How can I edit this code?
 
