@@ -51,25 +51,65 @@ export interface PbixApiResponse {
 }
 
 export const processPbixFile = async (file: File): Promise<ProcessedData> => {
-  const formData = new FormData();
-  formData.append('file', file);
+  try {
+    console.log('Starting PBIX file processing...', file.name);
+    
+    const formData = new FormData();
+    formData.append('file', file);
 
-  const response = await fetch('https://insight-harvester-portal.onrender.com/upload', {
-    method: 'POST',
-    body: formData,
-  });
+    console.log('Making request to PBIX API...');
+    
+    const response = await fetch('https://insight-harvester-portal.onrender.com/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Don't set Content-Type, let the browser set it with boundary for FormData
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to process PBIX file: ${response.statusText}`);
+    console.log('API Response status:', response.status);
+    console.log('API Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`Failed to process PBIX file: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const pbixData: PbixApiResponse = await response.json();
+    console.log('Received PBIX data:', pbixData);
+    
+    // Transform PBIX data to match ProcessedData interface
+    const transformedData = transformPbixToProcessedData(pbixData);
+    console.log('Transformed data:', transformedData);
+    
+    return transformedData;
+  } catch (error) {
+    console.error('Error in processPbixFile:', error);
+    
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to the PBIX processing service. Please check your internet connection and try again.');
+    }
+    
+    if (error instanceof Error) {
+      throw error;
+    }
+    
+    throw new Error('Unknown error occurred while processing PBIX file');
   }
-
-  const pbixData: PbixApiResponse = await response.json();
-  
-  // Transform PBIX data to match ProcessedData interface
-  return transformPbixToProcessedData(pbixData);
 };
 
 const transformPbixToProcessedData = (pbixData: PbixApiResponse): ProcessedData => {
+  console.log('Transforming PBIX data to ProcessedData format...');
+  
+  // Ensure we have valid data structure
+  const columns = pbixData.columns || [];
+  const measures = pbixData.measures || [];
+  const metadata = pbixData.metadata || [];
+  const relationships = pbixData.relationships || [];
+  const powerQuery = pbixData.power_query || [];
+  const tableData = pbixData.table_data || {};
+
   // Create model info from metadata
   const modelInfo = {
     Attribute: [
@@ -79,31 +119,33 @@ const transformPbixToProcessedData = (pbixData: PbixApiResponse): ProcessedData 
       "Total Columns",
       "Total Measures",
       "Total Relationships",
-      ...pbixData.metadata.map(m => m.Name)
+      ...metadata.map(m => m.Name)
     ],
     Value: [
       "Power BI Model",
-      pbixData.model_size,
-      pbixData.number_of_tables,
-      pbixData.columns.length,
-      pbixData.measures.length,
-      pbixData.relationships.length,
-      ...pbixData.metadata.map(m => m.Value)
+      pbixData.model_size || "Unknown",
+      (pbixData.number_of_tables || Object.keys(tableData).length).toString(),
+      columns.length.toString(),
+      measures.length.toString(),
+      relationships.length.toString(),
+      ...metadata.map(m => m.Value)
     ]
   };
 
   // Transform table data
-  const tableNames = Object.keys(pbixData.table_data);
-  const tableData = tableNames.map(tableName => {
-    const tableRows = pbixData.table_data[tableName] || [];
+  const tableNames = Object.keys(tableData);
+  const transformedTableData = tableNames.map(tableName => {
+    const tableRows = tableData[tableName] || [];
+    const estimatedSize = Math.floor(Math.random() * 1000000) + 10000;
+    
     return {
       "Table Name": tableName,
       "Mode": "Import", // Default mode
       "Partitions": 1,
       "Rows": tableRows.length,
-      "Total Table Size": Math.floor(Math.random() * 1000000) + 10000, // Estimated
-      "Columns Size": Math.floor(Math.random() * 800000) + 8000,
-      "Relationships Size": Math.floor(Math.random() * 200000) + 2000,
+      "Total Table Size": estimatedSize,
+      "Columns Size": Math.floor(estimatedSize * 0.8),
+      "Relationships Size": Math.floor(estimatedSize * 0.2),
       "PctOfTotalSize": "5.00%",
       "Is Hidden": false,
       "Latest Partition Modified": new Date().toISOString().split('T')[0],
@@ -112,7 +154,7 @@ const transformPbixToProcessedData = (pbixData: PbixApiResponse): ProcessedData 
   });
 
   // Transform column data
-  const columnData = pbixData.columns.map(col => ({
+  const columnData = columns.map(col => ({
     TableName: col.TableName,
     ColumnName: col.ColumnName,
     FullColumnName: `${col.TableName}[${col.ColumnName}]`,
@@ -129,7 +171,7 @@ const transformPbixToProcessedData = (pbixData: PbixApiResponse): ProcessedData 
   }));
 
   // Transform measure data
-  const measureData = pbixData.measures.map(measure => ({
+  const measureData = measures.map(measure => ({
     MeasureName: measure.Name,
     TableName: measure.TableName,
     FullMeasureName: `${measure.TableName}[${measure.Name}]`,
@@ -141,13 +183,13 @@ const transformPbixToProcessedData = (pbixData: PbixApiResponse): ProcessedData 
   }));
 
   // Transform expression data (Power Query)
-  const expressionData = pbixData.power_query.map(pq => ({
+  const expressionData = powerQuery.map(pq => ({
     "Table Name": pq.TableName,
     "Expression": pq.Expression
   }));
 
   // Transform relationships
-  const relationships = pbixData.relationships.map(rel => {
+  const transformedRelationships = relationships.map(rel => {
     const fromCardinality = rel.Cardinality.includes("Many") ? "Many" : "One";
     const toCardinality = rel.Cardinality.includes("Many") ? "Many" : "One";
     
@@ -173,12 +215,15 @@ const transformPbixToProcessedData = (pbixData: PbixApiResponse): ProcessedData 
     };
   });
 
-  return {
+  const result = {
     modelInfo,
-    tableData,
+    tableData: transformedTableData,
     columnData,
     measureData,
     expressionData,
-    relationships
+    relationships: transformedRelationships
   };
+  
+  console.log('PBIX transformation completed successfully');
+  return result;
 };
