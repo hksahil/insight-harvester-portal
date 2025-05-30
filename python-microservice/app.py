@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pandas as pd
 from pbixray.core import PBIXRay
 import traceback
@@ -11,6 +12,7 @@ def sizeof_fmt(num, suffix="B"):
     return f"{num:.1f}Yi{suffix}"
 
 app = Flask(__name__)
+CORS(app)  # 👈 Allow all origins (Access-Control-Allow-Origin: *)
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -37,7 +39,7 @@ def upload_file():
                     schema_df[col] = None
             merged_table = pd.concat([schema_df, calculated_df], ignore_index=True)
 
-            # Handle potentially unreadable tables
+            # Handle table data extraction
             table_data = {}
             for table in model.tables:
                 try:
@@ -61,7 +63,10 @@ def upload_file():
 
         except Exception as e:
             traceback.print_exc()
-            return jsonify({"error": "Failed to process PBIX", "details": str(e)}), 500
+            return jsonify({
+                "error": "Failed to process PBIX due to server issue",
+                "details": str(e)
+            }), 500
 
     return jsonify({"error": "Invalid file type"}), 400
 
