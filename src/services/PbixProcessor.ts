@@ -62,6 +62,7 @@ export const processPbixFile = async (file: File): Promise<ProcessedData> => {
     const response = await fetch('https://insight-harvester-portal.onrender.com/upload', {
       method: 'POST',
       body: formData,
+      mode: 'cors', // Explicitly set CORS mode
       headers: {
         // Don't set Content-Type, let the browser set it with boundary for FormData
       },
@@ -86,6 +87,11 @@ export const processPbixFile = async (file: File): Promise<ProcessedData> => {
     return transformedData;
   } catch (error) {
     console.error('Error in processPbixFile:', error);
+    
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      // Check if it's a CORS error
+      throw new Error('CORS Error: The PBIX processing service is not configured to accept requests from this domain. Please contact support or try again later.');
+    }
     
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to the PBIX processing service. Please check your internet connection and try again.');
