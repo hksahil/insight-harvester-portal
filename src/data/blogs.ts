@@ -415,7 +415,6 @@ export const MOCK_BLOGS = [
         excerpt: "Best practices for data governance in organizations",
         embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7222427400091885568"
       },
-    [
   {
     id: 47,
     title: "Custom sorting so complicated in PowerBI",
@@ -551,4 +550,4 @@ export const MOCK_BLOGS = [
     excerpt: "Advanced Reporting & Modelling Features Missing",
     embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7329391546917670912"
   }
-];
+]
