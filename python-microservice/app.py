@@ -39,13 +39,13 @@ def upload_file():
                     schema_df[col] = None
             merged_table = pd.concat([schema_df, calculated_df], ignore_index=True)
 
-            # Handle table data extraction
-            # table_data = {}
-            # for table in model.tables:
-            #     try:
-            #         table_data[table] = model.get_table(table).to_dict(orient="records")
-            #     except Exception as e:
-            #         table_data[table] = [{"error": f"Could not parse table '{table}': {str(e)}"}]
+            Handle table data extraction
+            table_data = {}
+            for table in model.tables:
+                try:
+                    table_data[table] = model.get_table(table).to_dict(orient="records")
+                except Exception as e:
+                    table_data[table] = [{"error": f"Could not parse table '{table}': {str(e)}"}]
 
             response = {
                 "metadata": model.metadata.to_dict(orient="records") if model.metadata is not None else [],
@@ -56,7 +56,7 @@ def upload_file():
                 "relationships": model.relationships.to_dict(orient="records") if model.relationships is not None else [],
                 "power_query": model.power_query.to_dict(orient="records") if model.power_query is not None else [],
                 "measures": model.dax_measures.to_dict(orient="records") if model.dax_measures is not None else [],
-                # "table_data": table_data,
+                "table_data": table_data,
             }
 
             return jsonify(response), 200
