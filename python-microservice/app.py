@@ -39,7 +39,7 @@ def upload_file():
                     schema_df[col] = None
             merged_table = pd.concat([schema_df, calculated_df], ignore_index=True)
 
-            Handle table data extraction
+            #Handle table data extraction
             table_data = {}
             for table in model.tables:
                 try:
