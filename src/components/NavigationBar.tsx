@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +13,7 @@ const NavigationBar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
+  const [pbixAnalyserDialogOpen, setPbixAnalyserDialogOpen] = useState(false);
   const { usage } = useUserUsage();
 
   useEffect(() => {
@@ -82,6 +82,15 @@ const NavigationBar: React.FC = () => {
           </Button>
 
           <Button 
+            onClick={() => setPbixAnalyserDialogOpen(true)}
+            variant="ghost"
+            className="flex items-center gap-2"
+            title="Open PBIX Analyser"
+          >
+            PBIX Analyser
+          </Button>
+
+          <Button 
             onClick={() => setInfoDialogOpen(true)}
             variant="ghost"
             className="flex items-center gap-2"
@@ -133,6 +142,25 @@ const NavigationBar: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* PBIX Analyser Dialog */}
+      <Dialog open={pbixAnalyserDialogOpen} onOpenChange={setPbixAnalyserDialogOpen}>
+        <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh] h-[80vh] p-0">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle>PBIX Analyser</DialogTitle>
+            <DialogClose className="absolute right-4 top-4 opacity-70 ring-offset-background transition-opacity hover:opacity-100">
+              <span className="sr-only">Close</span>
+            </DialogClose>
+          </DialogHeader>
+          <div className="flex-1 p-6 pt-0">
+            <iframe 
+              src="https://pbi-scrapper.onrender.com/"
+              className="w-full h-full border-0 rounded-lg"
+              title="PBIX Analyser"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
         <DialogContent className="sm:max-w-[700px]">
