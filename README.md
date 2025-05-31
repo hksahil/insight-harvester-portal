@@ -33,3 +33,7 @@ npm run dev
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
+
+**More**
+- Python microservice is abandoned as it used to get the json responses back from API hosted on render.com but,response was too big and wasn't fitting in free tier
+- Python embedding is used now, the streamlit app is hosted on https://pbi-scrapper.onrender.com and rendered into the iframe in react app [ CORS/CSS templating is handled in config gile of streamlit app ]
