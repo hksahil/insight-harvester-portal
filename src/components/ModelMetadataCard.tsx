@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarDays, Database, Table, FileBox, Layers, Grid, BarChart3, GitFork } from 'lucide-react';
 
@@ -9,6 +10,24 @@ interface ModelMetadataProps {
 }
 
 const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
+  // Filter out unwanted PBI-specific attributes
+  const filteredMetadata = React.useMemo(() => {
+    const attributesToHide = [
+      'PBIDesktopVersion',
+      '__PBI_TimeIntelligenceEnabled',
+      'PBI_QueryOrder'
+    ];
+
+    const filteredIndices = metadata.Attribute
+      .map((attr, index) => ({ attr, index }))
+      .filter(({ attr }) => !attributesToHide.includes(attr));
+
+    return {
+      Attribute: filteredIndices.map(({ attr }) => attr),
+      Value: filteredIndices.map(({ index }) => metadata.Value[index])
+    };
+  }, [metadata]);
+
   const getIconForAttribute = (attribute: string) => {
     switch(attribute) {
       case 'Model Name':
@@ -61,7 +80,7 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
 
   return (
     <div className="animate-zoom-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 p-2">
-      {metadata.Attribute.map((attr, index) => (
+      {filteredMetadata.Attribute.map((attr, index) => (
         <div 
           key={attr} 
           className="glass card-shine p-6 rounded-xl border border-border/50 shadow-sm transition-all hover:shadow-md hover:border-primary/20"
@@ -72,7 +91,7 @@ const ModelMetadataCard: React.FC<ModelMetadataProps> = ({ metadata }) => {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">{attr}</p>
-              <p className="mt-1 text-xl font-semibold">{formatValue(metadata.Value[index], attr)}</p>
+              <p className="mt-1 text-xl font-semibold">{formatValue(filteredMetadata.Value[index], attr)}</p>
             </div>
           </div>
         </div>
