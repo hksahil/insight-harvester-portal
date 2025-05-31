@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -74,15 +75,6 @@ const NavigationBar: React.FC = () => {
           >
             Home
           </Button>
-          
-          <Button 
-            onClick={goToSnippets}
-            variant="ghost"
-            className="flex items-center gap-2"
-            title="View DAX Snippets"
-          >
-            Snippets Library
-          </Button>
 
           <Button 
             onClick={goToPbixAnalyser}
@@ -91,6 +83,15 @@ const NavigationBar: React.FC = () => {
             title="Open PBIX Analyser"
           >
             PBIX Analyser
+          </Button>
+          
+          <Button 
+            onClick={goToSnippets}
+            variant="ghost"
+            className="flex items-center gap-2"
+            title="View DAX Snippets"
+          >
+            Snippets Library
           </Button>
 
           <Button 

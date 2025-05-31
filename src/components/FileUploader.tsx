@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle, LockIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -38,35 +37,29 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
 
     if (files.length > 0) {
       const file = files[0];
-      let detectedFileType: 'vpax' | 'pbix' | null = null;
       
+      // Only accept VPAX files
       if (file.name.endsWith('.vpax')) {
-        detectedFileType = 'vpax';
-      } else if (file.name.endsWith('.pbix')) {
-        detectedFileType = 'pbix';
-      }
-      
-      if (detectedFileType) {
         setFileName(file.name);
-        setFileType(detectedFileType);
+        setFileType('vpax');
         
         try {
           // Process file first
-          onFileUpload(file, detectedFileType);
+          onFileUpload(file, 'vpax');
           
           // Increment count only AFTER successful processing
           const success = await incrementFileCount();
           if (!success) {
             toast.error('Failed to update file count');
           } else {
-            toast.success(`${detectedFileType.toUpperCase()} file uploaded and processed successfully`);
+            toast.success('VPAX file uploaded and processed successfully');
           }
         } catch (error) {
           toast.error('Error processing file: ' + (error instanceof Error ? error.message : 'Unknown error'));
         }
       } else {
-        setError('Please upload a .vpax or .pbix file');
-        toast.error('Please upload a .vpax or .pbix file');
+        setError('Please upload a .vpax file only');
+        toast.error('Please upload a .vpax file only');
       }
     }
   };
@@ -146,7 +139,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
         
         <div className="space-y-2">
           <h3 className="text-lg font-medium">
-            {error ? 'Invalid File Type' : fileName ? 'File ready for processing' : 'Upload Power BI File'}
+            {error ? 'Invalid File Type' : fileName ? 'File ready for processing' : 'Upload VPAX File'}
           </h3>
           
           {error ? (
@@ -155,13 +148,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
             </p>
           ) : fileName ? (
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-              {fileName} {fileType && `(${fileType.toUpperCase()})`}
+              {fileName} (VPAX)
             </p>
           ) : (
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
               {usage && !usage.is_premium ? 
                 `${5 - (usage.processed_files_count || 0)} free uploads remaining` : 
-                'Drag and drop your .vpax or .pbix file here, or click to browse'}
+                'Drag and drop your .vpax file here, or click to browse'}
             </p>
           )}
         </div>
@@ -170,7 +163,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload }) => {
           {error ? 'Try again' : fileName ? 'Choose another file' : 'Browse Files'}
           <input 
             type="file" 
-            accept=".vpax,.pbix" 
+            accept=".vpax" 
             className="hidden" 
             onChange={handleFileInput}
           />
