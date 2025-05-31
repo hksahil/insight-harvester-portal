@@ -19,7 +19,7 @@ const PbixAnalyser = () => {
           
           <div className="w-full h-[calc(100vh-12rem)] border border-border rounded-lg overflow-hidden">
             <iframe 
-              src="https://pbi-scrapper.onrender.com/"
+              src="https://pbi-assistant.streamlit.app?embed=true"
               className="w-full h-full border-0"
               title="PBIX Analyser"
             />
