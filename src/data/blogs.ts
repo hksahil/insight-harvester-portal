@@ -414,5 +414,141 @@ export const MOCK_BLOGS = [
         tag: "Thought leadership",
         excerpt: "Best practices for data governance in organizations",
         embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7222427400091885568"
-      }    
+      },
+    [
+  {
+    id: 47,
+    title: "Custom sorting so complicated in PowerBI",
+    subtitle: "Day [19/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "Custom-sorting so complicated in PowerBI",
+    tag: "PBI limitations",
+    excerpt: "Why to click on ten things just to sort my column",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7323943135347146752"
+  },
+  {
+    id: 48,
+    title: "Hidden Cost of Power BI",
+    subtitle: "Limitation post about hidden cost",
+    slug: "hidden-cost-of-power-bi",
+    tag: "PowerBI",
+    excerpt: "Licensing, scalability, and workspace costs aren't transparent.",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7324501606085877761"
+  },
+  {
+    id: 49,
+    title: "no feature for doing an ad hoc calculation in PowerBI",
+    subtitle: "Subtitle",
+    slug: "post-title",
+    tag: "Tag",
+    excerpt: "Excerpt summary.",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7324482151981232128"
+  },
+  {
+    id: 50,
+    title: "Excel Limitation in Power BI",
+    subtitle: "Power BI limitation while exporting to Excel",
+    slug: "excel-export-limitation-power-bi",
+    tag: "Excel limitations",
+    excerpt: "Export doesn't respect format or hierarchy from Power BI.",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7325154760813092866"
+  },
+  {
+    id: 51,
+    title: "Language Jargon in PowerBI",
+    subtitle: "Day [21/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "Language Jargon in PowerBI",
+    tag: "PBI limitations",
+    excerpt: "Language Jargon in PowerBI",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7324513140006621184"
+  },
+  {
+    id: 52,
+    title: "External Tools in PBI workflows",
+    subtitle: "Discussing external tools usage in PBI",
+    slug: "External Tools in PBI workflows",
+    tag: "PowerBI",
+    excerpt: "External tools can't be used in Power BI Service, only Desktop.",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7325458745243631616"
+  },
+  {
+    id: 53,
+    title: "PowerBI's Excel connectivity is bad",
+    subtitle: "Day [22/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "PowerBI's Excel connectivity is bad",
+    tag: "PBI limitations",
+    excerpt: "PowerBI's Excel connectivity is bad",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7324516486683787264"
+  },
+  {
+    id: 54,
+    title: "Less control over the formatting & customization",
+    subtitle: "Day [23/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "Less control over the formatting & customization",
+    tag: "PBI limitations",
+    excerpt: "Less control over the formatting & customization",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7324540059108474880"
+  },
+  {
+    id: 55,
+    title: "Complicated to configure parameters in PowerBI",
+    subtitle: "Day [24/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "Complicated to configure parameters in PowerBI",
+    tag: "PBI limitations",
+    excerpt: "Complicated to configure parameters in PowerBI",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7327603369680785408"
+  },
+  {
+    id: 56,
+    title: "Limited interactivity options available in PowerBI",
+    subtitle: "Day [25/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "Limited interactivity options available in PowerBI",
+    tag: "PBI limitations",
+    excerpt: "Limited interactivity options available in PowerBI",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7324738257533984769"
+  },
+  {
+    id: 57,
+    title: "Why don’t table and matrix totals add up correctly?",
+    subtitle: "Day [26/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "Why don’t table and matrix totals add up correctly?",
+    tag: "PBI limitations",
+    excerpt: "Why don’t table and matrix totals add up correctly?",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7328352503480098816"
+  },
+  {
+    id: 58,
+    title: "Limited control over number formatting",
+    subtitle: "Day [27/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "limited control over number formatting",
+    tag: "PBI limitations",
+    excerpt: "limited control over number formatting",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7328653787609346049"
+  },
+  {
+    id: 59,
+    title: "User-actions are impossible in PBI",
+    subtitle: "Day [28/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "User-actions are impossible in PBI",
+    tag: "PBI limitations",
+    excerpt: "User-actions are impossible in PBI",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7324705616696856576"
+  },
+  {
+    id: 60,
+    title: "PBI sucks in transactional reporting",
+    subtitle: "Day [29/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "PBI sucks in transactional reporting",
+    tag: "PBI limitations",
+    excerpt: "PBI sucks in transactional reporting",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7329140078935449601"
+  },
+  {
+    id: 61,
+    title: "Advanced Reporting & Modelling Features Missing",
+    subtitle: "Day [30/30] of highlighting Power BI product limitations to Microsoft",
+    slug: "Advanced Reporting & Modelling Features Missing",
+    tag: "PBI limitations",
+    excerpt: "Advanced Reporting & Modelling Features Missing",
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7329391546917670912"
+  }
 ];
