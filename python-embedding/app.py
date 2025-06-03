@@ -36,17 +36,17 @@ def app():
 
         # Tables Stats
         st.subheader("Table Analysis")
-        aggrid_table(model.statistics)
+        st.dataframe(model.statistics)
 
         # Relationships
         if model.relationships.size:
             st.subheader("Relationships Analysis")
-            aggrid_table(model.relationships)
+            st.dataframe(model.relationships)
 
         # Power Query
         if model.power_query.size:
             st.subheader("PowerQuery Analysis")
-            aggrid_table(model.power_query)
+            st.dataframe(model.power_query)
 
         # Merge Schema + DAX Columns
         st.subheader("Columns Analysis")
@@ -61,7 +61,7 @@ def app():
                 schema_df[col] = None
 
         merged_table = pd.concat([schema_df, calculated_df], ignore_index=True)
-        aggrid_table(merged_table)
+        st.dataframe(merged_table)
 
         # DAX Measures
         if model.dax_measures.size:
