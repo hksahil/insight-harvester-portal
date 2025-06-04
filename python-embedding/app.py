@@ -66,7 +66,7 @@ def app():
         # DAX Measures
         if model.dax_measures.size:
             st.subheader("DAX Measures")
-            aggrid_table(model.dax_measures)
+            st.dataframe(model.dax_measures)
 
         # Table Preview with Error Handling
         st.subheader("Table Viewer")
