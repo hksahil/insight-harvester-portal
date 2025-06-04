@@ -88,7 +88,7 @@ def app():
                     table_df = model.get_table(table_name_input)
                     st.write(f"Preview of table: `{table_name_input}`")
                     #aggrid_table(table_df)
-                    aggrid_table(table_df)
+                    st.dataframe(table_df)
                 except ValueError as e:
                     st.error(f"⚠️ Could not retrieve the table due to error:\n\n{e}")
                 except Exception as e:
