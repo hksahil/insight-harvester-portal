@@ -69,30 +69,30 @@ def app():
             st.dataframe(model.dax_measures)
 
         # Table Preview with Error Handling
-        st.subheader("Table Viewer")
+        # st.subheader("Table Viewer")
 
-        valid_tables = []
-        for table in model.tables:
-            try:
-                _ = model.get_table(table)
-                valid_tables.append(table)
-            except:
-                continue
+        # valid_tables = []
+        # for table in model.tables:
+        #     try:
+        #         _ = model.get_table(table)
+        #         valid_tables.append(table)
+        #     except:
+        #         continue
 
-        if not valid_tables:
-            st.warning("⚠️ No tables could be previewed from this PBIX file.")
-        else:
-            table_name_input = st.selectbox("Choose a table to preview its content", valid_tables)
-            if st.button("📤 Get the data"):
-                try:
-                    table_df = model.get_table(table_name_input)
-                    st.write(f"Preview of table: `{table_name_input}`")
-                    #aggrid_table(table_df)
-                    st.dataframe(table_df)
-                except ValueError as e:
-                    st.error(f"⚠️ Could not retrieve the table due to error:\n\n{e}")
-                except Exception as e:
-                    st.error(f"❌ Unexpected error while loading table:\n\n{e}")
+        # if not valid_tables:
+        #     st.warning("⚠️ No tables could be previewed from this PBIX file.")
+        # else:
+        #     table_name_input = st.selectbox("Choose a table to preview its content", valid_tables)
+        #     if st.button("📤 Get the data"):
+        #         try:
+        #             table_df = model.get_table(table_name_input)
+        #             st.write(f"Preview of table: `{table_name_input}`")
+        #             #aggrid_table(table_df)
+        #             st.dataframe(table_df)
+        #         except ValueError as e:
+        #             st.error(f"⚠️ Could not retrieve the table due to error:\n\n{e}")
+        #         except Exception as e:
+        #             st.error(f"❌ Unexpected error while loading table:\n\n{e}")
     else:
         st.info("Upload a PBIX file to get started.")
 
