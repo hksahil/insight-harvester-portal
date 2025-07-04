@@ -86,10 +86,10 @@ const Index = () => {
   const handleFileUpload = async (file: File, fileType: 'vpax' | 'pbix') => {
     setIsDataProcessing(true);
     setCurrentFileType(fileType);
-    
+
     try {
       let data: ProcessedData;
-      
+
       if (fileType === 'vpax') {
         data = await processVpaxFile(file);
       } else {
@@ -97,7 +97,7 @@ const Index = () => {
         const { processPbixFile } = await import('@/services/PbixProcessor');
         data = await processPbixFile(file);
       }
-      
+
       setProcessedData(data);
       setIsFileUploaded(true);
       toast.success(`${fileType.toUpperCase()} file processed successfully`);
@@ -111,20 +111,20 @@ const Index = () => {
   const loadSampleData = async () => {
     setIsDataProcessing(true);
     setCurrentFileType('vpax'); // Sample data is VPAX format
-    
+
     try {
       const sampleData: ProcessedData = {
         modelInfo: {
           Attribute: [
-            "Model Name", "Date Modified", "Total Size of Model", 
-            "Number of Tables", "Number of Partitions", 
-            "Max Row Count of Biggest Table", "Total Columns", "Total Measures", 
+            "Model Name", "Date Modified", "Total Size of Model",
+            "Number of Tables", "Number of Partitions",
+            "Max Row Count of Biggest Table", "Total Columns", "Total Measures",
             "Total Relationships"
           ],
           Value: [
-            "Adventure Works", "2023-06-15", "1.2 GB", 
-            15, 20, 
-            1500000, 120, 45, 
+            "Adventure Works", "2023-06-15", "1.2 GB",
+            15, 20,
+            1500000, 120, 45,
             35
           ]
         },
@@ -133,7 +133,7 @@ const Index = () => {
           const columnsSize = Math.floor(tableSize * 0.8);
           const relationshipsSize = tableSize - columnsSize;
           return {
-            "Table Name": `Table_${i+1}`,
+            "Table Name": `Table_${i + 1}`,
             "Mode": i % 2 === 0 ? "DirectQuery" : "Import",
             "Partitions": Math.floor(Math.random() * 3) + 1,
             "Rows": Math.floor(Math.random() * 1000000) + 1000,
@@ -149,15 +149,15 @@ const Index = () => {
         columnData: Array(120).fill(0).map((_, i) => {
           const totalSize = Math.floor(Math.random() * 500000) + 1000;
           return {
-            TableName: `Table_${Math.floor(i/8) + 1}`,
-            ColumnName: `Column_${i+1}`,
-            FullColumnName: `Table_${Math.floor(i/8) + 1}[Column_${i+1}]`,
+            TableName: `Table_${Math.floor(i / 8) + 1}`,
+            ColumnName: `Column_${i + 1}`,
+            FullColumnName: `Table_${Math.floor(i / 8) + 1}[Column_${i + 1}]`,
             DataType: ["String", "Integer", "Decimal", "DateTime", "Boolean"][i % 5],
             ColumnType: ["Data", "Calculated", "Key"][i % 3],
             IsHidden: i % 7 === 0,
             Encoding: "UTF-8",
             DisplayFolder: i % 4 === 0 ? "Metrics" : i % 3 === 0 ? "Dimensions" : "",
-            Description: `Description for column ${i+1}`,
+            Description: `Description for column ${i + 1}`,
             IsKey: i % 10 === 0,
             DataSize: Math.floor(Math.random() * 400000) + 1000,
             TotalSize: totalSize,
@@ -165,18 +165,18 @@ const Index = () => {
           };
         }),
         measureData: Array(45).fill(0).map((_, i) => ({
-          MeasureName: `Measure_${i+1}`,
-          TableName: `Table_${Math.floor(i/3) + 1}`,
-          FullMeasureName: `Table_${Math.floor(i/3) + 1}[Measure_${i+1}]`,
-          MeasureExpression: `SUM(Table_${Math.floor(i/3) + 1}[Column_${i+1}])`,
+          MeasureName: `Measure_${i + 1}`,
+          TableName: `Table_${Math.floor(i / 3) + 1}`,
+          FullMeasureName: `Table_${Math.floor(i / 3) + 1}[Measure_${i + 1}]`,
+          MeasureExpression: `SUM(Table_${Math.floor(i / 3) + 1}[Column_${i + 1}])`,
           DisplayFolder: i % 3 === 0 ? "KPIs" : i % 2 === 0 ? "Metrics" : "Analysis",
-          Description: `Calculates the ${i+1}th metric`,
+          Description: `Calculates the ${i + 1}th metric`,
           DataType: ["Currency", "Number", "Percentage", "Text"][i % 4],
           FormatString: i % 4 === 0 ? "$#,0.00" : i % 4 === 1 ? "#,0" : i % 4 === 2 ? "0.00%" : "@"
         })),
         expressionData: Array(15).fill(0).map((_, i) => ({
-          "Table Name": `Table_${i+1}`,
-          "Expression": `let\n  Source = Sql.Database(\"server\", \"database\"),\n  dbo_Table${i+1} = Source{[Schema=\"dbo\",Item=\"Table${i+1}\"]}[Data],\n  #\"Filtered Rows\" = Table.SelectRows(dbo_Table${i+1}, each [Column1] <> null)\nin\n  #\"Filtered Rows\"`
+          "Table Name": `Table_${i + 1}`,
+          "Expression": `let\n  Source = Sql.Database(\"server\", \"database\"),\n  dbo_Table${i + 1} = Source{[Schema=\"dbo\",Item=\"Table${i + 1}\"]}[Data],\n  #\"Filtered Rows\" = Table.SelectRows(dbo_Table${i + 1}, each [Column1] <> null)\nin\n  #\"Filtered Rows\"`
         })),
         relationships: Array(35).fill(0).map((_, i) => {
           const fromTable = `Table_${Math.floor(Math.random() * 5) + 1}`;
@@ -185,7 +185,7 @@ const Index = () => {
           const toCardinality = Math.random() > 0.5 ? "Many" : "One";
           const fromColumn = `Column_${Math.floor(Math.random() * 20) + 1}`;
           const toColumn = `Column_${Math.floor(Math.random() * 20) + 1}`;
-          
+
           return {
             FromTableName: fromTable,
             FromFullColumnName: `${fromTable}[${fromColumn}]`,
@@ -221,7 +221,7 @@ const Index = () => {
 
   const getTabs = () => {
     if (!processedData) return [];
-    
+
     return [
       {
         id: 'model-metadata',
@@ -246,10 +246,10 @@ const Index = () => {
         content: (
           <div className="space-y-6">
             <UseCaseHelper type="tables" />
-            <DataTab 
-              data={processedData.tableData} 
-              title="Tables Metadata" 
-              filterColumns={["Mode", "Is Hidden"]} 
+            <DataTab
+              data={processedData.tableData}
+              title="Tables Metadata"
+              filterColumns={["Mode", "Is Hidden"]}
             />
           </div>
         ),
@@ -260,10 +260,10 @@ const Index = () => {
         content: (
           <div className="space-y-6">
             <UseCaseHelper type="columns" />
-            <DataTab 
-              data={processedData.columnData} 
-              title="Columns Metadata" 
-              filterColumns={["TableName", "DataType", "IsHidden"]} 
+            <DataTab
+              data={processedData.columnData}
+              title="Columns Metadata"
+              filterColumns={["TableName", "DataType", "IsHidden"]}
               searchColumn="ColumnName"
               enableColumnSelection={true}
             />
@@ -276,10 +276,10 @@ const Index = () => {
         content: (
           <div className="space-y-6">
             <UseCaseHelper type="measures" />
-            <DataTab 
-              data={processedData.measureData} 
-              title="Measures Metadata" 
-              filterColumns={["TableName", "DataType"]} 
+            <DataTab
+              data={processedData.measureData}
+              title="Measures Metadata"
+              filterColumns={["TableName", "DataType"]}
               searchColumn="MeasureExpression"
               enableColumnSelection={true}
             />
@@ -291,7 +291,7 @@ const Index = () => {
         label: 'Impact Analysis',
         content: (
           <div className="space-y-6">
-            <MeasureVisualizer 
+            <MeasureVisualizer
               measureData={processedData.measureData}
               columnData={processedData.columnData}
             />
@@ -357,7 +357,7 @@ const Index = () => {
         id: 'ask-gpt',
         label: 'Ask GPT',
         content: (
-          <AskGPT 
+          <AskGPT
             tableData={processedData.tableData}
             columnData={processedData.columnData}
           />
@@ -367,12 +367,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen pb-16 bg-gradient-to-b from-background to-muted/20" style={{paddingBottom:'0px'}}>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 overflow-scroll">
       <NavigationBar />
-      
+
       <main className="container mx-auto pt-24 px-4 sm:px-6">
         {!isFileUploaded ? (
-          <div>
+          <div className='flex flex-col gap-16'>
             <div className="animate-fade-in max-w-3xl mx-auto text-center space-y-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-foreground/20 blur-3xl opacity-70 -z-10 rounded-full"></div>
@@ -384,13 +384,13 @@ const Index = () => {
                 One click solution to benchmark your model, perform impact & performance analysis, mantain documentations, leverage AI capabilities & much more.
               </p>
             </div>
-            
-            <div className="mt-8 flex flex-col items-center justify-center gap-6">
-              <div className="flex gap-4 items-center">
+
+            <div className="flex flex-col items-center justify-center gap-6">
+              <div className="flex items-center">
                 {!user && (
-                  <>
+                  <div className='flex lg:flex-row flex-col gap-3'>
                     <SampleData onLoadSample={loadSampleData} />
-                    <Button 
+                    <Button
                       variant="default"
                       size="lg"
                       className="flex items-center gap-2"
@@ -400,15 +400,15 @@ const Index = () => {
                       <LogIn className="h-4 w-4" />
                       Try on your PowerBI Models
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
               {user && (
                 <FileUploader onFileUpload={handleFileUpload} />
               )}
             </div>
-            
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
                 <div className="flex flex-col items-center text-center space-y-4">
                   <div className="p-3 bg-primary/10 rounded-full">
@@ -420,7 +420,7 @@ const Index = () => {
                   </p>
                 </div>
               </Card>
-              
+
               <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
                 <div className="flex flex-col items-center text-center space-y-4">
                   <div className="p-3 bg-primary/10 rounded-full">
@@ -432,7 +432,7 @@ const Index = () => {
                   </p>
                 </div>
               </Card>
-              
+
               <Card className="p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
                 <div className="flex flex-col items-center text-center space-y-4">
                   <div className="p-3 bg-primary/10 rounded-full">
@@ -491,7 +491,7 @@ const Index = () => {
             <TabsContainer tabs={getTabs()} />
           </div>
         )}
-        
+
         {isDataProcessing && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="space-y-4 text-center">
@@ -501,7 +501,7 @@ const Index = () => {
           </div>
         )}
       </main>
-      
+
       <Footer />
     </div>
   );

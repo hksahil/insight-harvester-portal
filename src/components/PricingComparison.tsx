@@ -86,16 +86,16 @@ const features = [
 
 const PricingComparison = () => {
   return (
-    <div className="py-12 px-2 md:px-8">
-      <h2 className="text-3xl md:text-4xl font-semibold mb-8 md:mb-12 text-center">Comparison with existing players</h2>
+    <div className="px-2 md:px-8">
+      <h2 className="text-3xl md:text-4xl font-semibold mb-8 md:mb-12 md:text-center text-left">Comparison with existing players</h2>
       <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[32%]"></TableHead>
               {products.map((product) => (
-                <TableHead 
-                  key={product.key} 
+                <TableHead
+                  key={product.key}
                   className={`text-center text-base font-bold ${product.key === 'assistant' ? 'bg-sky-50' : ''}`}
                 >
                   {product.label}
@@ -110,8 +110,8 @@ const PricingComparison = () => {
                 {products.map((product) => {
                   const value = feature[product.key];
                   return (
-                    <TableCell 
-                      className={`text-center ${product.key === 'assistant' ? 'bg-sky-50' : ''}`} 
+                    <TableCell
+                      className={`text-center ${product.key === 'assistant' ? 'bg-sky-50' : ''}`}
                       key={product.key}
                     >
                       {value ? (
