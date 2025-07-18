@@ -17,10 +17,10 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ tabs }) => {
     <div className="animate-fade-in w-full space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="border-b border-border">
-          <TabsList className="h-auto bg-transparent p-0 w-full justify-start">
+          <TabsList className="h-auto bg-transparent p-0 w-full justify-start overflow-scroll scroll-hidden">
             {tabs.map((tab) => (
-              <TabsTrigger 
-                key={tab.id} 
+              <TabsTrigger
+                key={tab.id}
                 value={tab.id}
                 className="px-4 py-2 text-sm font-medium relative transition-all whitespace-nowrap data-[state=active]:shadow-none data-[state=active]:bg-transparent"
               >
@@ -32,11 +32,11 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ tabs }) => {
             ))}
           </TabsList>
         </div>
-        
+
         <div className="min-h-[300px] pt-4">
           {tabs.map((tab) => (
-            <TabsContent 
-              key={tab.id} 
+            <TabsContent
+              key={tab.id}
               value={tab.id}
               className="animate-zoom-in"
             >

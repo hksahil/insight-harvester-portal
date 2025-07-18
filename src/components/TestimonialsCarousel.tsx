@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Carousel,
@@ -33,12 +32,11 @@ const testimonials = [
 
 const TestimonialsCarousel = () => {
   return (
-    <div className="py-24 px-4 bg-muted/20">
-      <h2 className="text-4xl font-semibold mb-12 text-center">
+    <div className="px-4 bg-muted/20">
+      <h2 className="text-4xl font-semibold mb-12 md:text-center text-left">
         Why the BI community love Power BI Assistant
       </h2>
-      
-      <div className="max-w-7xl mx-auto relative">
+      <div className="relative max-w-xl md:max-w-7xl w-full px-7 md:px-0 mx-auto">
         <Carousel
           opts={{
             align: "start",
@@ -49,7 +47,7 @@ const TestimonialsCarousel = () => {
           <CarouselContent>
             {testimonials.map((testimonial, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="h-full p-6">
+                <div className="h-full md:p-6">
                   <div className="bg-background/50 backdrop-blur-sm rounded-lg p-8 h-full border shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md">
                     <blockquote className="text-lg mb-6 text-muted-foreground">
                       "{testimonial.quote}"
@@ -63,8 +61,12 @@ const TestimonialsCarousel = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
+          {/* <div className="pointer-events-auto"> */}
+          <CarouselPrevious />
+          {/* </div> */}
+          {/* <div className="pointer-events-auto"> */}
+          <CarouselNext />
+          {/* </div> */}
         </Carousel>
       </div>
     </div>
